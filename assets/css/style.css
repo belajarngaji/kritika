@@ -1,4 +1,4 @@
-/* === Global Style === */
+/* === Global Reset === */
 * {
   margin: 0;
   padding: 0;
@@ -7,38 +7,40 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f9fafb;
+  background-color: #f5f7fa; /* lembut, netral */
   color: #1f2937;
   line-height: 1.6;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 }
 
 /* === Navbar === */
 header {
-  background: #111827;
-  padding: 1rem;
+  background-color: #111827; /* gelap tapi soft */
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .navbar {
-  max-width: 760px;
+  max-width: 1100px;
   margin: auto;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   flex-wrap: wrap;
 }
 
 .logo {
   color: #f9fafb;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
 }
 
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 1rem;
+  gap: 1.2rem;
   flex-wrap: wrap;
 }
 
@@ -49,218 +51,90 @@ header {
   transition: color 0.3s ease;
 }
 
-.nav-links a:hover,
-.nav-links a.active {
-  color: #f9fafb;
-}
-
-/* === Konten === */
-.content {
-  max-width: 760px;
-  width: 100%;
-  margin: 1rem auto 2rem;
-  padding: 0 1rem;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.lesson {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  word-wrap: break-word;
-}
-
-.lesson h1, h2, h3 {
-  margin: 1rem 0 0.5rem;
-  font-weight: 600;
-}
-
-.lesson p {
-  margin-bottom: 1rem;
-  color: #374151;
-  word-wrap: break-word;
-}
-
-.lesson code {
-  background: #f3f4f6;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 0.9rem;
-  word-break: break-word;
-}
-
-.lesson pre {
-  background: #1f2937;
-  color: #f9fafb;
-  padding: 0.75rem;
-  border-radius: 6px;
-  overflow-x: auto;
-  margin: 1rem 0;
-  font-size: 0.9rem;
-}
-
-/* === AI Area === */
-.ai-actions {
-  margin: 1rem 0;
-}
-
-.ai-output {
-  background: #f3f4f6;
-  border-radius: 8px;
-  padding: 1rem;
-  min-height: 80px;
-  margin-bottom: 1.5rem;
-  white-space: pre-wrap;
-  font-size: 1rem;
-  word-wrap: break-word;
-}
-
-.ai-output pre {
-  background: #111827;
-  color: #f9fafb;
-  padding: 0.75rem;
-  border-radius: 6px;
-  overflow-x: auto;
-}
-
-/* === Navigasi Bab === */
-.lesson-nav {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  flex-wrap: wrap;
-}
-
-/* === Tombol === */
-.btn, .btn-outline {
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  font-weight: 600;
-  transition: all 0.3s;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.btn {
-  background: #2563eb;
+.nav-links a:hover {
   color: #fff;
 }
 
-.btn:hover:not(:disabled) {
-  background: #1d4ed8;
+/* === Hero Section === */
+.hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  background: linear-gradient(135deg, #eef2ff 0%, #e0f2fe 100%);
 }
 
-.btn:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
+.hero-content {
+  max-width: 700px;
+  text-align: center;
+}
+
+.hero h2 {
+  font-size: 2.2rem;
+  color: #1e3a8a;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  color: #374151;
+  margin-bottom: 2rem;
+}
+
+/* === Buttons === */
+.btn, .btn-outline {
+  padding: 0.65rem 1.4rem;
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn {
+  background-color: #2563eb; /* biru nyaman */
+  color: #fff;
+}
+
+.btn:hover {
+  background-color: #1d4ed8;
 }
 
 .btn-outline {
   border: 2px solid #2563eb;
   color: #2563eb;
+  background-color: transparent;
 }
 
 .btn-outline:hover {
-  background: #2563eb;
+  background-color: #2563eb;
   color: #fff;
 }
 
 /* === Footer === */
 footer {
-  background: #111827;
+  background-color: #111827;
   color: #d1d5db;
   text-align: center;
-  padding: 1rem;
-  font-size: 0.85rem;
+  padding: 1.2rem;
+  font-size: 0.9rem;
+  margin-top: auto;
 }
 
 /* === Responsiveness === */
-@media (max-width: 480px) {
-  .section-header h2 {
-    font-size: 1.4rem;
+@media (max-width: 768px) {
+  .hero h2 {
+    font-size: 1.8rem;
   }
-
-  .lesson {
-    padding: 0.8rem;
+  .hero p {
+    font-size: 1rem;
   }
-
-  .ai-output {
-    padding: 0.6rem;
-    font-size: 0.95rem;
+  .navbar {
+    flex-direction: column;
+    gap: 0.5rem;
   }
-
-  .btn, .btn-outline {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.85rem;
+  .hero {
+    padding: 3rem 1rem;
   }
-}
-
-/* === Jawaban & Koreksi === */
-.answer-section {
-  margin: 1.5rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-width: 100%;
-}
-
-.answer-section h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.answer-section textarea {
-  width: 100%;
-  max-width: 100%;
-  height: 120px;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
-  resize: vertical;
-  line-height: 1.4;
-}
-
-#btnCheck {
-  align-self: flex-start;
-  padding: 0.6rem 1rem;
-  font-weight: 600;
-  border-radius: 6px;
-  background-color: #2563eb;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  margin-top: 0.5rem;
-}
-
-#btnCheck:hover:not(:disabled) {
-  background-color: #1d4ed8;
-}
-
-#btnCheck:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
-}
-
-#aiCorrection {
-  margin-top: 1rem;
-  background-color: #f3f4f6;
-  padding: 1rem;
-  border-radius: 8px;
-  min-height: 80px;
-  white-space: pre-wrap;
-  font-size: 0.95rem;
-  line-height: 1.4;
 }
