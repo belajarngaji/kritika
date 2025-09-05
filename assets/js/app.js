@@ -5,9 +5,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 // Konfigurasi Supabase
 const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
-const SUPABASE_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
-
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ===============================
@@ -23,16 +21,14 @@ async function getMaterials() {
     console.error('❌ Error fetch materials:', error);
     return [];
   }
-  console.log('✅ Data materials:', data);
   return data;
 }
 
 // ===============================
-// CONFIG AI (via FastAPI Proxy)
+// GENERATE PERTANYAAN VIA FASTAPI
 // ===============================
 const API_URL = 'https://hmmz-bot01.vercel.app/chat';
 
-// Generate pertanyaan kritis
 async function generateCriticalQuestion(materialText) {
   try {
     const response = await fetch(API_URL, {
@@ -40,9 +36,9 @@ async function generateCriticalQuestion(materialText) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: `Buatkan 3 pertanyaan kritis dari teks berikut:\n${materialText}`,
-        mode: 'qa',
-        session_id: 'jurumiya-bab1',
-      }),
+        mode: "qa",
+        session_id: "jurumiya-bab1"
+      })
     });
 
     if (!response.ok) {
@@ -52,9 +48,8 @@ async function generateCriticalQuestion(materialText) {
     }
 
     const result = await response.json();
-    console.log('✅ Full response AI:', result);
-
     return result.reply || null;
+
   } catch (err) {
     console.error('❌ Error generate AI question:', err);
     return null;
@@ -69,34 +64,31 @@ async function init() {
   const btnGenerate = document.getElementById('btnGenerate');
   const aiOutput = document.getElementById('aiOutput');
 
-  btnGenerate.disabled = true;
-  btnGenerate.textContent = 'Loading...';
-
   // Ambil materi Bab 1
   const materials = await getMaterials();
-  const materi = materials.find((m) => m.slug === 'jurumiya-bab1');
+  const materi = materials.find(m => m.slug === 'jurumiya-bab1');
 
   if (materi) {
-    // ✅ render pakai marked biar bold/list/code terbaca
-    materiContent.innerHTML = window.marked.parse(materi.content);
-    btnGenerate.disabled = false;
-    btnGenerate.textContent = 'Generate Pertanyaan Kritis';
+    materiContent.innerHTML = marked.parse(materi.content);
   } else {
-    materiContent.innerHTML = '<p>❌ Materi belum tersedia.</p>';
-    btnGenerate.disabled = true;
-    btnGenerate.textContent = 'Tidak Ada Materi';
+    materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
   }
 
   // Event: generate pertanyaan kritis
   btnGenerate.addEventListener('click', async () => {
     if (!materi) return;
+    btnGenerate.disabled = true;
+    btnGenerate.textContent = 'Loading...';
+    aiOutput.innerHTML = '';
 
-    aiOutput.innerHTML = '<p><em>Loading AI...</em></p>';
     const questions = await generateCriticalQuestion(materi.content);
 
     aiOutput.innerHTML = questions
-      ? window.marked.parse(questions) // ✅ parse markdown output
-      : '<p>❌ AI gagal generate pertanyaan.</p>';
+      ? marked.parse(questions)
+      : '<p>AI gagal generate pertanyaan.</p>';
+
+    btnGenerate.disabled = false;
+    btnGenerate.textContent = 'Generate Pertanyaan Kritis';
   });
 }
 
