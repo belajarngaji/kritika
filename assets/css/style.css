@@ -17,7 +17,7 @@ body {
 
 /* === Navbar === */
 header {
-  background-color: #111827;
+  background-color: #111827; /* gelap tapi soft */
   padding: 1rem 2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -51,68 +51,35 @@ header {
   transition: color 0.3s ease;
 }
 
-.nav-links a:hover,
-.nav-links a.active {
+.nav-links a:hover {
   color: #fff;
 }
 
-/* === Konten Utama === */
-.content {
-  max-width: 1100px;
-  width: 100%;
-  margin: 1rem auto 2rem;
-  padding: 0 1rem;
+/* === Hero Section === */
+.hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  background: linear-gradient(135deg, #eef2ff 0%, #e0f2fe 100%);
 }
 
-.section-header {
+.hero-content {
+  max-width: 700px;
   text-align: center;
-  margin-bottom: 2rem;
 }
 
-.section-header h2 {
-  font-size: 2rem;
+.hero h2 {
+  font-size: 2.2rem;
   color: #1e3a8a;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-.section-header p {
+.hero p {
   font-size: 1.1rem;
   color: #374151;
-}
-
-/* === Card Grid === */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-.card {
-  background-color: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1.5rem;
-  text-decoration: none;
-  color: #1f2937;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.card h3 {
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #1e3a8a;
-}
-
-.card p {
-  font-size: 1rem;
-  color: #4b5563;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
 }
 
 /* === Buttons === */
@@ -126,7 +93,7 @@ header {
 }
 
 .btn {
-  background-color: #2563eb;
+  background-color: #2563eb; /* biru nyaman */
   color: #fff;
 }
 
@@ -157,20 +124,17 @@ footer {
 
 /* === Responsiveness === */
 @media (max-width: 768px) {
-  .section-header h2 {
-    font-size: 1.7rem;
+  .hero h2 {
+    font-size: 1.8rem;
   }
-  .section-header p {
+  .hero p {
     font-size: 1rem;
   }
-  .card-grid {
-    gap: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
   .navbar {
     flex-direction: column;
     gap: 0.5rem;
+  }
+  .hero {
+    padding: 3rem 1rem;
   }
 }
