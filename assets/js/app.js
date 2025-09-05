@@ -38,13 +38,13 @@ async function generateCriticalQuestion(materialText) {
     const response = await fetch(OPENROUTER_API_URL, {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'Authorization': `Bearer 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`,
-        'HTTP-Referer': 'https://belajarngaji.github.io',
+        'Referer': 'https://belajarngaji.github.io', // ✅ gunakan Referer
         'X-Title': 'Kritika'
       },
       body: JSON.stringify({
-        model: 'openai/gpt-oss-120b',
+        model: 'openai/gpt-oss-120b', // ✅ lebih stabil
         messages: [
           {
             role: 'user',
@@ -55,7 +55,15 @@ async function generateCriticalQuestion(materialText) {
       })
     });
 
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error(`❌ HTTP Error ${response.status}:`, errText);
+      return null;
+    }
+
     const result = await response.json();
+    console.log('✅ Full response AI:', result);
+
     if (result.choices && result.choices.length > 0) {
       return result.choices[0].message.content;
     }
