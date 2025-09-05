@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jurumiya - Bab 1 | Kritika</title>
   <!-- CSS Global -->
-  <link rel="stylesheet" href="https://belajarngaji.github.io/kritika/assets/css/style.css">
+  <link rel="stylesheet" href="/kritika/assets/css/style.css">
   <!-- Font Modern -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -55,7 +55,75 @@
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
 
-  <!-- JS MODULE -->
-  <script type="module" src="https://belajarngaji.github.io/kritika/assets/js/app.js"></script>
+  <!-- JS LANGSUNG DI FILE -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // ===============================
+    // CONFIG SUPABASE
+    // ===============================
+    const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
+    const SUPABASE_KEY = 'YOUR_SUPABASE_KEY'; // isi dengan anon key kamu
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ===============================
+    // FETCH MATERIALS
+    // ===============================
+    async function getMaterials() {
+      const { data, error } = await supabase.from('materials').select('*').order('id');
+      return error ? [] : data;
+    }
+
+    // ===============================
+    // CONFIG AI (OpenRouter)
+    // ===============================
+    const OPENROUTER_API_KEY = 'YOUR_OPENROUTER_KEY';
+    const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+
+    async function generateCriticalQuestion(materialText) {
+      try {
+        const res = await fetch(OPENROUTER_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENROUTER_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'openai/gpt-oss-120b',
+            messages: [{ role: 'user', content: `Buatkan 3 pertanyaan kritis dari teks berikut:\n${materialText}` }],
+            max_tokens: 200
+          })
+        });
+        const json = await res.json();
+        return (json.choices && json.choices.length > 0) ? json.choices[0].message.content : null;
+      } catch {
+        return null;
+      }
+    }
+
+    // ===============================
+    // RENDER KE HALAMAN
+    // ===============================
+    document.addEventListener('DOMContentLoaded', async () => {
+      const materials = await getMaterials();
+      const materi = materials.find(m => m.slug === 'jurumiya-bab1');
+      const materiContent = document.getElementById('materiContent');
+
+      if (materi) {
+        materiContent.innerHTML = materi.content;
+      } else {
+        materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
+      }
+
+      const btnGenerate = document.getElementById('btnGenerate');
+      const aiOutput = document.getElementById('aiOutput');
+      btnGenerate.addEventListener('click', async () => {
+        if (!materi) return;
+        aiOutput.innerHTML = '<p>Loading AI...</p>';
+        const questions = await generateCriticalQuestion(materi.content);
+        aiOutput.innerHTML = questions ? `<p>${questions}</p>` : '<p>AI gagal generate pertanyaan.</p>';
+      });
+    });
+  </script>
 </body>
 </html>
