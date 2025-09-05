@@ -87,3 +87,90 @@ window.App = {
   getReflections,
   saveReflection
 };
+
+// ===============================
+// CONFIG AI (OpenRouter)
+// ===============================
+const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+
+// ===============================
+// GENERATE PERTANYAAN KRITIS DARI TEKS MATERI
+// ===============================
+async function generateCriticalQuestion(materialText) {
+  try {
+    const response = await fetch(OPENROUTER_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',  // bisa disesuaikan
+        messages: [
+          {
+            role: 'user',
+            content: `Buatkan 3 pertanyaan kritis dari teks berikut:\n${materialText}`
+          }
+        ],
+        max_tokens: 200
+      })
+    });
+
+    const result = await response.json();
+    // Hasil bisa berupa text atau array tergantung response OpenRouter
+    if (result.choices && result.choices.length > 0) {
+      return result.choices[0].message.content;
+    } else {
+      console.error('AI response kosong:', result);
+      return null;
+    }
+  } catch (err) {
+    console.error('Error generate AI question:', err);
+    return null;
+  }
+}
+
+// ===============================
+// ANALISIS REFLEKSI USER
+// ===============================
+async function analyzeReflection(reflectionText) {
+  try {
+    const response = await fetch(OPENROUTER_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: `Analisis refleksi berikut dan berikan insight tambahan:\n${reflectionText}`
+          }
+        ],
+        max_tokens: 200
+      })
+    });
+
+    const result = await response.json();
+    if (result.choices && result.choices.length > 0) {
+      return result.choices[0].message.content;
+    } else {
+      console.error('AI response kosong:', result);
+      return null;
+    }
+  } catch (err) {
+    console.error('Error analyze reflection:', err);
+    return null;
+  }
+}
+
+// ===============================
+// EXPORT FUNCTION AI
+// ===============================
+window.AppAI = {
+  generateCriticalQuestion,
+  analyzeReflection
+};
