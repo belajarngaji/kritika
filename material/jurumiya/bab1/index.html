@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jurumiya - Bab 1 | Kritika</title>
+  <meta name="description" content="Belajar kritis dengan materi Jurumiya Bab 1. Kembangkan kemampuan berpikir analitis melalui pertanyaan dan refleksi.">
 
   <!-- CSS Lokal -->
   <link rel="stylesheet" href="../../../assets/css/style.css">
@@ -30,6 +31,7 @@
 
   <!-- MAIN CONTENT -->
   <main class="content">
+
     <!-- Judul Bab -->
     <section class="section-header">
       <h2>Jurumiya - Bab 1</h2>
@@ -37,9 +39,7 @@
     </section>
 
     <!-- Materi -->
-    <article class="lesson" id="materiContent">
-      <p>Loading materi...</p>
-    </article>
+    <article class="lesson" id="materiContent"></article>
 
     <!-- Tombol Generate Pertanyaan AI -->
     <div class="ai-actions">
@@ -47,27 +47,24 @@
     </div>
 
     <!-- Output Pertanyaan AI -->
-    <div id="aiOutput" class="ai-output">
-      <p>Pertanyaan akan muncul di sini setelah generate.</p>
-    </div>
+    <div id="aiOutput" class="ai-output" aria-live="polite"></div>
 
     <!-- Kolom Jawaban -->
     <div class="answer-section">
       <h3>Jawaban Anda</h3>
-      <textarea id="userAnswer" placeholder="Tulis jawaban Anda di sini..." rows="4"></textarea>
+      <textarea id="userAnswer" rows="4"></textarea>
       <button id="btnCheck" class="btn">Cek Jawaban</button>
     </div>
 
     <!-- Kolom Koreksi AI -->
-    <div id="aiCorrection" class="ai-output">
-      <p>Koreksi akan ditampilkan di sini setelah dicek.</p>
-    </div>
+    <div id="aiCorrection" class="ai-output" aria-live="polite"></div>
 
     <!-- Navigasi Bab -->
     <div class="lesson-nav">
       <a href="../index.html" class="btn-outline">← Kembali ke Daftar Bab</a>
       <a href="../bab2/index.html" class="btn">Lanjut ke Bab 2 →</a>
     </div>
+
   </main>
 
   <!-- FOOTER -->
