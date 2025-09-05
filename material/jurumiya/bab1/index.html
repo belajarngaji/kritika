@@ -30,6 +30,7 @@
 
   <!-- MAIN CONTENT -->
   <main class="content">
+    <!-- Header Materi -->
     <section class="section-header">
       <h2>Jurumiya - Bab 1</h2>
       <p>Pengenalan awal Jurumiya untuk memahami dasar-dasar.</p>
@@ -40,18 +41,20 @@
       <p>Loading materi...</p>
     </article>
 
-    <!-- Tombol AI untuk generate pertanyaan -->
+    <!-- Generate Pertanyaan AI -->
     <div class="ai-actions">
       <button id="btnGenerate" class="btn">Generate Pertanyaan Kritis</button>
     </div>
 
     <!-- Output Pertanyaan AI -->
-    <div id="aiOutput" class="ai-output"></div>
+    <div id="aiOutput" class="ai-output">
+      <p>Pertanyaan akan muncul di sini setelah generate.</p>
+    </div>
 
-    <!-- Kolom Jawaban User -->
+    <!-- Kolom Jawaban -->
     <div class="answer-section">
       <h3>Jawaban Anda</h3>
-      <textarea id="userAnswer" placeholder="Tulis jawaban Anda di sini..." rows="4"></textarea>
+      <textarea id="userAnswer" placeholder="Tulis jawaban Anda di sini..."></textarea>
       <button id="btnCheck" class="btn">Cek Jawaban</button>
     </div>
 
