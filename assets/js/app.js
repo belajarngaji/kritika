@@ -40,7 +40,7 @@ async function checkAnswer(answer, materi) {
       body: JSON.stringify({ answer, context: materi, mode: "check" })
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json(); // {score: 0.5|1, feedback: "..."}
+    return await res.json();
   } catch(err) { console.error('❌ Error AI koreksi:', err); return null; }
 }
 
@@ -53,13 +53,9 @@ async function init() {
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
 
-  if (materi) {
-    materiContent.innerHTML = materi.content; 
-  } else {
-    materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
-  }
+  materiContent.innerHTML = materi ? materi.content : '<p>Materi belum tersedia.</p>';
 
-  // Buat kolom jawaban & koreksi hanya jika belum ada
+  // Pastikan kolom jawaban & koreksi HANYA ada satu
   let answerSection = document.querySelector('.answer-section');
   let aiCorrection = document.getElementById('aiCorrection');
 
@@ -82,7 +78,7 @@ async function init() {
     answerSection.after(aiCorrection);
   }
 
-  // Event generate pertanyaan
+  // Generate pertanyaan
   if (!btnGenerate.dataset.listenerAdded) {
     btnGenerate.addEventListener('click', async () => {
       if (!materi) return;
@@ -99,7 +95,7 @@ async function init() {
     btnGenerate.dataset.listenerAdded = 'true';
   }
 
-  // Event cek jawaban
+  // Cek jawaban
   const btnCheck = document.getElementById('btnCheck');
   const userAnswer = document.getElementById('userAnswer');
 
@@ -110,11 +106,9 @@ async function init() {
       aiCorrection.innerHTML = '<p>Memeriksa jawaban...</p>';
 
       const result = await checkAnswer(answerText, materi.content);
-      if (result) {
-        aiCorrection.innerHTML = `<p>Skor: ${result.score}</p><p>Feedback: ${result.feedback}</p>`;
-      } else {
-        aiCorrection.innerHTML = '<p>AI gagal memeriksa jawaban.</p>';
-      }
+      aiCorrection.innerHTML = result 
+        ? `<p>Skor: ${result.score}</p><p>Feedback: ${result.feedback}</p>` 
+        : '<p>AI gagal memeriksa jawaban.</p>';
     });
     btnCheck.dataset.listenerAdded = 'true';
   }
