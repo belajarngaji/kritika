@@ -1,224 +1,233 @@
-/* =========================
-   Variabel & Reset
-========================= */
-:root{
-  --bg: #f9fafb;
-  --text: #1f2937;
-  --muted: #374151;
-  --card: #ffffff;
-  --border: #e5e7eb;
-  --brand: #2563eb;
-  --brand-dark:#1d4ed8;
-  --header:#111827;
+/* === Global Style === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.65;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f9fafb;
+  color: #1f2937;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-/* =========================
-   Header / Navbar
-========================= */
-header{background:var(--header)}
-.navbar{
-  width:clamp(320px, 92vw, 1100px);
-  margin:0 auto;
-  padding:1rem 0.5rem;
-  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+/* === Navbar === */
+header {
+  background: #111827;
+  padding: 1rem 1rem; /* padding dikurangi untuk mobile */
 }
-.logo{color:#f9fafb;font-size:1.5rem;font-weight:700}
-.nav-links{list-style:none;display:flex;gap:1rem;flex-wrap:wrap}
-.nav-links a{
-  text-decoration:none;
-  color:#d1d5db;
-  font-weight:500;
-  transition:color .2s ease;
+
+.navbar {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+
+.logo {
+  color: #f9fafb;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1rem; /* dikurangi sedikit untuk mobile */
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #d1d5db;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
 .nav-links a:hover,
-.nav-links a.active{color:#fff}
-
-/* =========================
-   Konten Utama
-========================= */
-.content{
-  width:clamp(320px, 92vw, 760px);
-  margin:1.25rem auto 2rem;
-  padding:0 0.25rem;
-}
-.section-header{text-align:center;margin:0 0 1.25rem}
-.section-header h2{font-size:1.6rem;font-weight:700;color:#111827;margin-bottom:.35rem}
-.section-header p{color:var(--muted)}
-
-/* =========================
-   Tombol
-========================= */
-.btn,.btn-outline{
-  padding:.7rem 1.2rem;
-  border-radius:10px;
-  font-weight:600;
-  text-decoration:none;
-  transition:all .2s ease;
-  cursor:pointer;display:inline-flex;align-items:center;gap:.5rem
-}
-.btn{background:var(--brand);color:#fff;border:1px solid transparent}
-.btn:hover:not(:disabled){background:var(--brand-dark)}
-.btn:disabled{background:#9ca3af;cursor:not-allowed}
-.btn-outline{
-  color:var(--brand);
-  border:2px solid var(--brand);
-  background:transparent
-}
-.btn-outline:hover{background:var(--brand);color:#fff}
-
-/* =========================
-   Kartu (daftar bab)
-========================= */
-.card-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:1rem;
-}
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:1.2rem;
-  color:var(--text);
-  text-decoration:none;
-  box-shadow:0 2px 6px rgba(0,0,0,.05);
-  transition:transform .15s ease, box-shadow .15s ease;
-}
-.card:hover{transform:translateY(-4px);box-shadow:0 6px 14px rgba(0,0,0,.08)}
-
-/* =========================
-   Halaman Lesson
-========================= */
-.lesson{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:1.25rem;
-  margin-bottom:1rem;
-  box-shadow:0 2px 6px rgba(0,0,0,.05);
-  overflow-wrap:anywhere;
+.nav-links a.active {
+  color: #f9fafb;
 }
 
-/* Tipografi materi (Markdown) */
-.lesson h1,.lesson h2,.lesson h3{
-  margin:1rem 0 .5rem;
-  font-weight:700;color:#111827;line-height:1.25
-}
-.lesson h1{font-size:1.6rem}
-.lesson h2{font-size:1.35rem}
-.lesson h3{font-size:1.15rem}
-.lesson p{margin:.75rem 0;color:var(--muted)}
-.lesson ul,.lesson ol{margin:.5rem 0 .75rem 1.25rem}
-.lesson li{margin:.25rem 0}
-.lesson a{color:var(--brand);text-underline-offset:2px}
-.lesson a:hover{color:var(--brand-dark)}
-.lesson blockquote{
-  border-left:4px solid var(--brand);
-  background:#eff6ff;
-  padding:.6rem .8rem;
-  border-radius:8px;
-  margin:.75rem 0;color:#0f172a
+/* === Halaman Konten === */
+.content {
+  max-width: 760px; /* batas maksimal untuk desktop */
+  width: 100%;      /* full lebar di mobile */
+  margin: 1.25rem auto 2rem;
+  padding: 0 1rem;  /* padding kiri-kanan agar mobile friendly */
 }
 
-/* Kode inline & blok (tema terang → tidak “blok hitam”) */
-.lesson code{
-  background:#f3f4f6;
-  padding:.15rem .35rem;
-  border-radius:6px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-  font-size:.92em;
-}
-.lesson pre{
-  background:#f3f4f6;     /* ← terang */
-  color:#111827;          /* ← teks gelap */
-  border:1px solid var(--border);
-  padding:1rem;
-  border-radius:10px;
-  overflow-x:auto;
-  margin:1rem 0;
-}
-.lesson pre code{
-  background:transparent;
-  padding:0;border:0;font-size:.92em
+.section-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
-/* Tabel & Gambar di materi */
-.lesson table{width:100%;border-collapse:collapse;margin:1rem 0;border:1px solid var(--border)}
-.lesson th,.lesson td{padding:.6rem;border:1px solid var(--border);text-align:left}
-.lesson thead th{background:#f8fafc;font-weight:700}
-.lesson img{max-width:100%;height:auto;border-radius:8px;display:block;margin:.5rem auto}
-
-/* =========================
-   Bagian AI
-========================= */
-.ai-actions{margin:1rem 0}
-.ai-output{
-  background:#f3f4f6;
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:1rem;
-  min-height:80px;
-  margin-bottom:1.25rem;
-  white-space:pre-wrap;
-  font-size:1rem;
-}
-.ai-output h3,.ai-output h4{margin-top:.75rem}
-.ai-output ul,.ai-output ol{margin:.5rem 0 .5rem 1.25rem}
-.ai-output pre{
-  background:#0b1220;
-  color:#f8fafc;
-  border-radius:8px;
-  padding:.8rem;
-  overflow-x:auto
+.section-header h2 {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
 }
 
-/* =========================
-   Navigasi Lesson
-========================= */
-.lesson-nav{
-  display:flex;
-  justify-content:space-between;
-  gap:.75rem;
-  margin-top:1.25rem;
-  flex-wrap:wrap;
+.lesson {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  word-wrap: break-word;
 }
 
-/* =========================
-   Footer
-========================= */
-footer{
-  margin-top:auto;
-  background:var(--header);
-  color:#d1d5db;
-  text-align:center;
-  padding:1rem;
-  font-size:.9rem;
+/* Markdown support */
+.lesson h1,
+.lesson h2,
+.lesson h3 {
+  margin: 1rem 0 0.5rem;
+  font-weight: 600;
 }
 
-/* =========================
-   Responsif
-========================= */
-@media (max-width: 768px){
-  .navbar{padding:.9rem 0}
-  .nav-links{gap:.75rem}
-  .content{margin:1rem auto 1.5rem}
-  .lesson{padding:1rem}
-  .lesson-nav .btn,.lesson-nav .btn-outline{flex:1;justify-content:center}
+.lesson p {
+  margin-bottom: 1rem;
+  color: #374151;
+  word-wrap: break-word; /* memastikan teks panjang tidak keluar */
 }
 
-@media (min-width: 1024px){
-  .section-header h2{font-size:1.9rem}
-  .hero h2{font-size:2.4rem}
+.lesson ul,
+.lesson ol {
+  margin: 1rem 0 1rem 1.25rem;
+  padding-left: 1rem;
+}
+
+.lesson code {
+  background: #f3f4f6;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.lesson pre {
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+/* === AI Area === */
+.ai-actions {
+  margin: 1rem 0;
+}
+
+.ai-output {
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 1rem;
+  min-height: 80px;
+  margin-bottom: 1.5rem;
+  white-space: pre-wrap;
+  font-size: 1rem;
+  word-wrap: break-word;
+}
+
+.ai-output h3,
+.ai-output h4 {
+  margin-top: 1rem;
+}
+
+.ai-output ul,
+.ai-output ol {
+  margin: 0.5rem 0 0.5rem 1.5rem;
+}
+
+.ai-output pre {
+  background: #111827;
+  color: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.9rem;
+}
+
+/* === Lesson Navigation === */
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* === Buttons === */
+.btn,
+.btn-outline {
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn {
+  background: #2563eb;
+  color: #fff;
+}
+
+.btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  border: 2px solid #2563eb;
+  color: #2563eb;
+}
+
+.btn-outline:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* === Footer === */
+footer {
+  background: #111827;
+  color: #d1d5db;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.85rem;
+}
+
+/* === Responsiveness === */
+@media (max-width: 480px) {
+  .section-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .lesson {
+    padding: 1rem;
+  }
+
+  .ai-output {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .btn,
+  .btn-outline {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+  }
 }
