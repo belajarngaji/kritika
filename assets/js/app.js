@@ -29,7 +29,7 @@ async function getMaterials() {
 // ===============================
 // CONFIG AI (OpenRouter)
 // ===============================
-const OPENROUTER_API_KEY = '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';
+const OPENROUTER_API_KEY = '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';
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Generate pertanyaan kritis
