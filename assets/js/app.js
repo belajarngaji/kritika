@@ -22,36 +22,25 @@ async function getMaterials() {
     console.error('❌ Error fetch materials:', error);
     return [];
   }
-  console.log('✅ Data materials:', data); // debug
+  console.log('✅ Data materials:', data);
   return data;
 }
 
 // ===============================
-// CONFIG AI (OpenRouter)
+// CONFIG AI (via FastAPI Proxy)
 // ===============================
-const OPENROUTER_API_KEY = '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';
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const API_URL = 'https://hmmz-bot01.vercel.app/chat';
 
 // Generate pertanyaan kritis
 async function generateCriticalQuestion(materialText) {
   try {
-    const response = await fetch(OPENROUTER_API_URL, {
+    const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'Referer': 'https://belajarngaji.github.io', // ✅ gunakan Referer
-        'X-Title': 'Kritika'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'openai/gpt-oss-120b', // ✅ lebih stabil
-        messages: [
-          {
-            role: 'user',
-            content: `Buatkan 3 pertanyaan kritis dari teks berikut:\n${materialText}`
-          }
-        ],
-        max_tokens: 200
+        message: `Buatkan 3 pertanyaan kritis dari teks berikut:\n${materialText}`,
+        mode: "qa",
+        session_id: "jurumiya-bab1"
       })
     });
 
@@ -64,10 +53,7 @@ async function generateCriticalQuestion(materialText) {
     const result = await response.json();
     console.log('✅ Full response AI:', result);
 
-    if (result.choices && result.choices.length > 0) {
-      return result.choices[0].message.content;
-    }
-    return null;
+    return result.reply || null;
   } catch (err) {
     console.error('❌ Error generate AI question:', err);
     return null;
@@ -75,7 +61,7 @@ async function generateCriticalQuestion(materialText) {
 }
 
 // ===============================
-// INIT LANGSUNG
+// INIT
 // ===============================
 async function init() {
   const materiContent = document.getElementById('materiContent');
@@ -103,5 +89,5 @@ async function init() {
   });
 }
 
-// Jalankan langsung
+// Jalankan
 init();
