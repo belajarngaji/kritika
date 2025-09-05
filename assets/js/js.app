@@ -1,8 +1,8 @@
 // ===============================
 // CONFIG SUPABASE
 // ===============================
-const SUPABASE_URL = "https://jpxtbdawajjyrvqrgijd.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE";
+const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
 const supabase = supabaseCreateClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Fungsi helper untuk membuat client Supabase
@@ -91,8 +91,8 @@ window.App = {
 // ===============================
 // CONFIG AI (OpenRouter)
 // ===============================
-const OPENROUTER_API_KEY = "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";
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const OPENROUTER_API_KEY = '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';
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // ===============================
 // GENERATE PERTANYAAN KRITIS DARI TEKS MATERI
