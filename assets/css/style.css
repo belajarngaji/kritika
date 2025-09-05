@@ -1,9 +1,4 @@
-/* === Global Style === */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   font-family: 'Inter', sans-serif;
@@ -13,225 +8,41 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  overflow-x: hidden; /* mencegah scroll horizontal */
 }
 
-/* === Navbar === */
-header {
-  background: #111827;
-  padding: 1rem;
-}
+header { background: #111827; padding: 1rem; }
+.navbar { max-width: 760px; margin: auto; display: flex; justify-content: space-between; flex-wrap: wrap; }
+.logo { color: #f9fafb; font-size: 1.5rem; font-weight: 700; }
+.nav-links { list-style: none; display: flex; gap: 1rem; flex-wrap: wrap; }
+.nav-links a { text-decoration: none; color: #d1d5db; font-weight: 500; transition: color 0.3s ease; }
+.nav-links a:hover, .nav-links a.active { color: #f9fafb; }
 
-.navbar {
-  max-width: 1100px;
-  margin: auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-}
+.content { max-width: 760px; width: 100%; margin: 1rem auto 2rem; padding: 0 1rem; }
+.section-header { text-align: center; margin-bottom: 1.5rem; }
+.lesson { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05); word-wrap: break-word; }
+.lesson h1,h2,h3 { margin: 1rem 0 0.5rem; font-weight: 600; }
+.lesson p { margin-bottom: 1rem; color: #374151; word-wrap: break-word; }
+.lesson code { background: #f3f4f6; padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; font-size: 0.9rem; word-break: break-word; }
+.lesson pre { background: #1f2937; color: #f9fafb; padding: 0.75rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
 
-.logo {
-  color: #f9fafb;
-  font-size: 1.5rem;
-  font-weight: 700;
-}
+.ai-actions { margin: 1rem 0; }
+.ai-output { background: #f3f4f6; border-radius: 8px; padding: 1rem; min-height: 80px; margin-bottom: 1.5rem; white-space: pre-wrap; font-size: 1rem; word-wrap: break-word; }
+.ai-output pre { background: #111827; color: #f9fafb; padding: 0.75rem; border-radius: 6px; overflow-x: auto; }
 
-.nav-links {
-  list-style: none;
-  display: flex;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-}
+.lesson-nav { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
 
-.nav-links a {
-  text-decoration: none;
-  color: #d1d5db;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
+.btn, .btn-outline { padding: 0.6rem 1rem; border-radius: 6px; font-weight: 600; transition: all 0.3s; cursor: pointer; font-size: 0.9rem; }
+.btn { background: #2563eb; color: #fff; }
+.btn:hover:not(:disabled) { background: #1d4ed8; }
+.btn:disabled { background: #9ca3af; cursor: not-allowed; }
+.btn-outline { border: 2px solid #2563eb; color: #2563eb; }
+.btn-outline:hover { background: #2563eb; color: #fff; }
 
-.nav-links a:hover,
-.nav-links a.active {
-  color: #f9fafb;
-}
+footer { background: #111827; color: #d1d5db; text-align: center; padding: 1rem; font-size: 0.85rem; }
 
-/* === Halaman Konten === */
-.content {
-  max-width: 760px;   /* maksimal untuk desktop */
-  width: 100%;        /* full width untuk mobile */
-  margin: 1rem auto 2rem;
-  padding: 0 1rem;    /* padding kiri-kanan untuk mobile */
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.section-header h2 {
-  font-size: 1.6rem;
-  margin-bottom: 0.5rem;
-  word-wrap: break-word;
-}
-
-/* === Lesson / Materi === */
-.lesson {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.lesson h1, .lesson h2, .lesson h3, .lesson h4, .lesson h5, .lesson h6 {
-  margin: 1rem 0 0.5rem;
-  font-weight: 600;
-  word-wrap: break-word;
-}
-
-.lesson p, .lesson li, .lesson td, .lesson th {
-  margin-bottom: 1rem;
-  color: #374151;
-  word-wrap: break-word;
-}
-
-.lesson ul,
-.lesson ol {
-  margin: 1rem 0 1rem 1.25rem;
-  padding-left: 1rem;
-}
-
-.lesson code {
-  background: #f3f4f6;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 0.9rem;
-  word-break: break-word;
-}
-
-.lesson pre {
-  background: #1f2937;
-  color: #f9fafb;
-  padding: 0.75rem;
-  border-radius: 6px;
-  overflow-x: auto;
-  margin: 1rem 0;
-  font-size: 0.9rem;
-  word-wrap: break-word;
-}
-
-/* === AI Area === */
-.ai-actions {
-  margin: 1rem 0;
-}
-
-.ai-output {
-  background: #f3f4f6;
-  border-radius: 8px;
-  padding: 1rem;
-  min-height: 80px;
-  margin-bottom: 1.5rem;
-  white-space: pre-wrap;
-  font-size: 1rem;
-  word-wrap: break-word;
-}
-
-.ai-output h3,
-.ai-output h4 {
-  margin-top: 1rem;
-}
-
-.ai-output ul,
-.ai-output ol {
-  margin: 0.5rem 0 0.5rem 1.5rem;
-}
-
-.ai-output pre {
-  background: #111827;
-  color: #f9fafb;
-  padding: 0.75rem;
-  border-radius: 6px;
-  overflow-x: auto;
-  font-size: 0.9rem;
-}
-
-/* === Lesson Navigation === */
-.lesson-nav {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  flex-wrap: wrap;
-}
-
-/* === Buttons === */
-.btn,
-.btn-outline {
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.btn {
-  background: #2563eb;
-  color: #fff;
-}
-
-.btn:hover:not(:disabled) {
-  background: #1d4ed8;
-}
-
-.btn:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
-
-.btn-outline {
-  border: 2px solid #2563eb;
-  color: #2563eb;
-}
-
-.btn-outline:hover {
-  background: #2563eb;
-  color: #fff;
-}
-
-/* === Footer === */
-footer {
-  background: #111827;
-  color: #d1d5db;
-  text-align: center;
-  padding: 1rem;
-  font-size: 0.85rem;
-}
-
-/* === Responsiveness === */
-@media (max-width: 480px) {
-  .section-header h2 {
-    font-size: 1.4rem;
-  }
-
-  .lesson {
-    padding: 1rem;
-  }
-
-  .ai-output {
-    padding: 0.75rem;
-    font-size: 0.95rem;
-  }
-
-  .btn,
-  .btn-outline {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.85rem;
-  }
+@media (max-width:480px) {
+  .section-header h2 { font-size: 1.4rem; }
+  .lesson { padding: 0.8rem; }
+  .ai-output { padding: 0.6rem; font-size: 0.95rem; }
+  .btn, .btn-outline { padding: 0.5rem 0.8rem; font-size: 0.85rem; }
 }
