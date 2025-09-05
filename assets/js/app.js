@@ -22,6 +22,7 @@ async function getMaterials() {
     console.error('❌ Error fetch materials:', error);
     return [];
   }
+  console.log('✅ Data materials:', data); // debug
   return data;
 }
 
@@ -64,9 +65,9 @@ async function generateCriticalQuestion(materialText) {
 }
 
 // ===============================
-// DOM READY
+// INIT LANGSUNG
 // ===============================
-document.addEventListener('DOMContentLoaded', async () => {
+async function init() {
   const materiContent = document.getElementById('materiContent');
   const btnGenerate = document.getElementById('btnGenerate');
   const aiOutput = document.getElementById('aiOutput');
@@ -88,4 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const questions = await generateCriticalQuestion(materi.content);
     aiOutput.innerHTML = questions ? `<p>${questions}</p>` : '<p>AI gagal generate pertanyaan.</p>';
   });
-});
+}
+
+// Jalankan langsung
+init();
