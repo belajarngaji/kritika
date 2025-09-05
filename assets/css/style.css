@@ -1,4 +1,5 @@
-/* === Global Reset === */
+/* ================================================ */
+/* === GLOBAL RESET === */
 * {
   margin: 0;
   padding: 0;
@@ -15,7 +16,9 @@ body {
   flex-direction: column;
 }
 
-/* === Navbar === */
+/* ================================================ */
+/* === NAVBAR === */
+/* Digunakan di semua halaman (utama, materi, bab) */
 header {
   background-color: #111827;
   padding: 1rem 2rem;
@@ -56,7 +59,51 @@ header {
   color: #fff;
 }
 
-/* === Konten Utama === */
+/* ================================================ */
+/* === HALAMAN UTAMA === */
+/* /kritika/index.html */
+.hero {
+  background-color: #e0e7ff; /* lembut biru */
+  padding: 4rem 1rem;
+  text-align: center;
+  border-radius: 12px;
+  margin: 2rem 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.hero-content h2 {
+  font-size: 2.2rem;
+  color: #1e3a8a; /* biru lebih gelap */
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  font-size: 1.1rem;
+  color: #374151;
+  margin-bottom: 2rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Tombol hero konsisten dengan tombol global */
+.hero-buttons .btn,
+.hero-buttons .btn-outline {
+  padding: 0.8rem 1.6rem;
+  font-size: 1rem;
+  border-radius: 8px;
+}
+
+/* ================================================ */
+/* === HALAMAN MATERI & BAB === */
+/* /kritika/material/index.html, /kritika/material/jurumiya/bab1.html, dsb. */
 .content {
   max-width: 1100px;
   width: 100%;
@@ -80,7 +127,7 @@ header {
   color: #374151;
 }
 
-/* === Card Grid === */
+/* Card Grid untuk daftar materi */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -115,12 +162,10 @@ header {
   box-shadow: 0 6px 16px rgba(0,0,0,0.1);
 }
 
-/* === Buttons === */
+/* ================================================ */
+/* === BUTTONS GLOBAL === */
 .btn, .btn-outline {
-  padding: 0.65rem 1.4rem;
   font-weight: 600;
-  border-radius: 8px;
-  font-size: 1rem;
   text-decoration: none;
   transition: all 0.3s ease;
 }
@@ -145,7 +190,8 @@ header {
   color: #fff;
 }
 
-/* === Footer === */
+/* ================================================ */
+/* === FOOTER === */
 footer {
   background-color: #111827;
   color: #d1d5db;
@@ -155,7 +201,8 @@ footer {
   margin-top: auto;
 }
 
-/* === Responsiveness === */
+/* ================================================ */
+/* === RESPONSIVENESS === */
 @media (max-width: 768px) {
   .section-header h2 {
     font-size: 1.7rem;
@@ -172,5 +219,8 @@ footer {
   .navbar {
     flex-direction: column;
     gap: 0.5rem;
+  }
+  .hero {
+    padding: 2rem 1rem;
   }
 }
