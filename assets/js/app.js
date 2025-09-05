@@ -1,34 +1,37 @@
 // ===============================
+// IMPORT SUPABASE
+// ===============================
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+// ===============================
 // CONFIG SUPABASE
 // ===============================
 const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE'; // ganti dengan key kamu
-const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ===============================
 // FETCH DATA
 // ===============================
-async function getMaterials() {
+export async function getMaterials() {
   const { data, error } = await supabase.from('materials').select('*').order('id', { ascending: true });
   return error ? [] : data;
 }
 
-async function getQuestions(material_id) {
+export async function getQuestions(material_id) {
   const { data, error } = await supabase.from('questions').select('*').eq('material_id', material_id).order('id', { ascending: true });
   return error ? [] : data;
 }
 
-async function getReflections(material_id, user_id) {
+export async function getReflections(material_id, user_id) {
   const { data, error } = await supabase.from('reflections').select('*').eq('material_id', material_id).eq('user_id', user_id).order('created_at', { ascending: false });
   return error ? [] : data;
 }
 
-async function saveReflection(material_id, user_id, reflectionText) {
+export async function saveReflection(material_id, user_id, reflectionText) {
   const { data, error } = await supabase.from('reflections').insert([{ material_id, user_id, reflection: reflectionText }]);
   return error ? null : data;
 }
-
-window.App = { getMaterials, getQuestions, getReflections, saveReflection };
 
 // ===============================
 // CONFIG AI (OpenRouter)
@@ -36,7 +39,7 @@ window.App = { getMaterials, getQuestions, getReflections, saveReflection };
 const OPENROUTER_API_KEY = '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';
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-async function generateCriticalQuestion(materialText) {
+export async function generateCriticalQuestion(materialText) {
   try {
     const res = await fetch(OPENROUTER_API_URL, {
       method: 'POST',
@@ -52,7 +55,7 @@ async function generateCriticalQuestion(materialText) {
   } catch { return null; }
 }
 
-async function analyzeReflection(reflectionText) {
+export async function analyzeReflection(reflectionText) {
   try {
     const res = await fetch(OPENROUTER_API_URL, {
       method:'POST',
@@ -68,4 +71,7 @@ async function analyzeReflection(reflectionText) {
   } catch { return null; }
 }
 
+// ===============================
+// EXPORT KE GLOBAL (opsional, agar HTML bisa akses tanpa import)
+window.App = { getMaterials, getQuestions, getReflections, saveReflection };
 window.AppAI = { generateCriticalQuestion, analyzeReflection };
