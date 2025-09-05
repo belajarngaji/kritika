@@ -8,8 +8,6 @@
   <link rel="stylesheet" href="/kritika/assets/css/style.css">
   <!-- Font Modern -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 </head>
 <body>
   <!-- HEADER / NAVBAR -->
@@ -57,30 +55,7 @@
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
 
-  <!-- JS -->
-  <script src="/kritika/assets/js/app.js" defer></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      // FETCH MATERI DARI SUPABASE
-      const materials = await App.getMaterials();
-      const materi = materials.find(m => m.slug === 'jurumiya-bab1');
-      const materiContent = document.getElementById('materiContent');
-      if (materi) {
-        materiContent.innerHTML = materi.content;
-      } else {
-        materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
-      }
-
-      // GENERATE PERTANYAAN AI
-      const btnGenerate = document.getElementById('btnGenerate');
-      const aiOutput = document.getElementById('aiOutput');
-      btnGenerate.addEventListener('click', async () => {
-        if (!materi) return;
-        aiOutput.innerHTML = '<p>Loading AI...</p>';
-        const questions = await AppAI.generateCriticalQuestion(materi.content);
-        aiOutput.innerHTML = questions ? `<p>${questions}</p>` : '<p>AI gagal generate pertanyaan.</p>';
-      });
-    });
-  </script>
+  <!-- JS MODULE -->
+  <script type="module" src="/kritika/assets/js/app.js"></script>
 </body>
 </html>
