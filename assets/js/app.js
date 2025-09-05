@@ -69,7 +69,8 @@ async function init() {
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
 
   if (materi) {
-    materiContent.innerHTML = marked.parse(materi.content);
+    // ✅ Render HTML langsung, jangan pakai marked.parse()
+    materiContent.innerHTML = materi.content;
   } else {
     materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
   }
@@ -83,6 +84,7 @@ async function init() {
 
     const questions = await generateCriticalQuestion(materi.content);
 
+    // ✅ AI output boleh tetap pakai marked.parse() agar bisa render markdown
     aiOutput.innerHTML = questions
       ? marked.parse(questions)
       : '<p>AI gagal generate pertanyaan.</p>';
