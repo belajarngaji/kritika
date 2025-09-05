@@ -13,17 +13,19 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // FETCH MATERI
 // ===============================
 async function getMaterials() {
-  const { data, error } = await supabase
-    .from('materials')
-    .select('*')
-    .order('id', { ascending: true });
+  try {
+    const { data, error } = await supabase
+      .from('materials')
+      .select('*')
+      .order('id', { ascending: true });
 
-  if (error) {
-    console.error('❌ Error fetch materials:', error);
+    if (error) throw error;
+    console.log('✅ Data materials:', data);
+    return data || [];
+  } catch (err) {
+    console.error('❌ Error fetch materials:', err.message);
     return [];
   }
-  console.log('✅ Data materials:', data);
-  return data;
 }
 
 // ===============================
@@ -31,7 +33,6 @@ async function getMaterials() {
 // ===============================
 const API_URL = 'https://hmmz-bot01.vercel.app/chat';
 
-// Generate pertanyaan kritis
 async function generateCriticalQuestion(materialText) {
   try {
     const response = await fetch(API_URL, {
@@ -46,16 +47,15 @@ async function generateCriticalQuestion(materialText) {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error(`❌ HTTP Error ${response.status}:`, errText);
-      return null;
+      throw new Error(`HTTP ${response.status}: ${errText}`);
     }
 
     const result = await response.json();
     console.log('✅ Full response AI:', result);
 
-    return result.reply || null;
+    return result.reply?.trim() || null;
   } catch (err) {
-    console.error('❌ Error generate AI question:', err);
+    console.error('❌ Error generate AI question:', err.message);
     return null;
   }
 }
@@ -72,20 +72,23 @@ async function init() {
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
 
-  if (materi) {
-    materiContent.innerHTML = materi.content;
-  } else {
-    materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
-  }
+  materiContent.innerHTML = materi
+    ? materi.content
+    : '<p>Materi belum tersedia.</p>';
 
   // Event: generate pertanyaan kritis
   btnGenerate.addEventListener('click', async () => {
-    if (!materi) return;
-    aiOutput.innerHTML = '<p>Loading AI...</p>';
+    if (!materi) {
+      aiOutput.innerHTML = '<p>Materi tidak ditemukan.</p>';
+      return;
+    }
+
+    aiOutput.innerHTML = '<p>⏳ AI sedang memproses...</p>';
     const questions = await generateCriticalQuestion(materi.content);
+
     aiOutput.innerHTML = questions
-      ? `<p>${questions}</p>`
-      : '<p>AI gagal generate pertanyaan.</p>';
+      ? `<div class="ai-result">${questions.replace(/\n/g, '<br>')}</div>`
+      : '<p>❌ AI gagal generate pertanyaan.</p>';
   });
 }
 
