@@ -50,10 +50,17 @@ async function init() {
   const btnGenerate = document.getElementById('btnGenerate');
   const aiOutput = document.getElementById('aiOutput');
 
+  // Ambil materi
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
 
-  materiContent.innerHTML = materi ? materi.content : '<p>Materi belum tersedia.</p>';
+  if (!materi) {
+    materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
+    return; // hentikan init jika materi tidak ada
+  }
+
+  // Tampilkan materi
+  materiContent.innerHTML = materi.content;
 
   // Pastikan kolom jawaban & koreksi HANYA ada satu
   let answerSection = document.querySelector('.answer-section');
@@ -78,10 +85,9 @@ async function init() {
     answerSection.after(aiCorrection);
   }
 
-  // Generate pertanyaan
+  // Pasang listener generate pertanyaan (hanya sekali)
   if (!btnGenerate.dataset.listenerAdded) {
     btnGenerate.addEventListener('click', async () => {
-      if (!materi) return;
       btnGenerate.disabled = true;
       btnGenerate.textContent = 'Loading...';
       aiOutput.innerHTML = '';
@@ -95,7 +101,7 @@ async function init() {
     btnGenerate.dataset.listenerAdded = 'true';
   }
 
-  // Cek jawaban
+  // Pasang listener cek jawaban (hanya sekali)
   const btnCheck = document.getElementById('btnCheck');
   const userAnswer = document.getElementById('userAnswer');
 
@@ -103,12 +109,19 @@ async function init() {
     btnCheck.addEventListener('click', async () => {
       const answerText = userAnswer.value.trim();
       if (!answerText) return alert('Tulis jawaban dulu!');
+
       aiCorrection.innerHTML = '<p>Memeriksa jawaban...</p>';
 
+      // Kirim ke endpoint koreksi
       const result = await checkAnswer(answerText, materi.content);
-      aiCorrection.innerHTML = result 
-        ? `<p>Skor: ${result.score}</p><p>Feedback: ${result.feedback}</p>` 
-        : '<p>AI gagal memeriksa jawaban.</p>';
+
+      // Tampilkan hasil
+      if (result && typeof result === 'object' && 'score' in result && 'feedback' in result) {
+        aiCorrection.innerHTML = `<p>Skor: ${result.score}</p><p>Feedback: ${result.feedback}</p>`;
+      } else {
+        aiCorrection.innerHTML = '<p>AI gagal memeriksa jawaban.</p>';
+        console.error('❌ Response AI tidak valid:', result);
+      }
     });
     btnCheck.dataset.listenerAdded = 'true';
   }
