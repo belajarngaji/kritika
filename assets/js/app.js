@@ -39,10 +39,12 @@ async function generateCriticalQuestion(materialText) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://belajarngaji.github.io',
+        'X-Title': 'Kritika'
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'openai/gpt-oss-120b',
         messages: [
           {
             role: 'user',
@@ -87,7 +89,9 @@ async function init() {
     if (!materi) return;
     aiOutput.innerHTML = '<p>Loading AI...</p>';
     const questions = await generateCriticalQuestion(materi.content);
-    aiOutput.innerHTML = questions ? `<p>${questions}</p>` : '<p>AI gagal generate pertanyaan.</p>';
+    aiOutput.innerHTML = questions
+      ? `<p>${questions}</p>`
+      : '<p>AI gagal generate pertanyaan.</p>';
   });
 }
 
