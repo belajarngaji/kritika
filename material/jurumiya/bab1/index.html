@@ -4,51 +4,63 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jurumiya - Bab 1 | Kritika</title>
-  <link rel="stylesheet" href="/kritika/assets/css/style.css">
+
+  <!-- CSS Lokal -->
+  <link rel="stylesheet" href="./assets/css/style.css">
+
+  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<!-- Tambahkan di <head> -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Marked.js untuk parsing markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
+  <!-- NAVBAR -->
   <header>
     <nav class="navbar">
       <h1 class="logo">Kritika</h1>
       <ul class="nav-links">
-        <li><a href="/kritika/index.html">Beranda</a></li>
-        <li><a href="/kritika/material/index.html" class="active">Materi</a></li>
-        <li><a href="/kritika/question/index.html">Pertanyaan</a></li>
-        <li><a href="/kritika/reflection/index.html">Refleksi</a></li>
+        <li><a href="./index.html">Beranda</a></li>
+        <li><a href="./material/index.html" class="active">Materi</a></li>
+        <li><a href="./question/index.html">Pertanyaan</a></li>
+        <li><a href="./reflection/index.html">Refleksi</a></li>
       </ul>
     </nav>
   </header>
 
+  <!-- MAIN CONTENT -->
   <main class="content">
     <section class="section-header">
       <h2>Jurumiya - Bab 1</h2>
       <p>Pengenalan awal Jurumiya untuk memahami dasar-dasar.</p>
     </section>
 
+    <!-- Materi -->
     <article class="lesson" id="materiContent">
       <p>Loading materi...</p>
     </article>
 
+    <!-- Tombol AI -->
     <div class="ai-actions">
-      <button id="btnGenerate" class="btn">Generate Pertanyaan Kritis</button>
+      <button id="btnGenerate" class="btn">Loading...</button>
     </div>
 
+    <!-- Output AI -->
     <div id="aiOutput" class="ai-output"></div>
 
+    <!-- Navigasi -->
     <div class="lesson-nav">
-      <a href="/kritika/material/jurumiya/index.html" class="btn-outline">← Kembali ke Daftar Bab</a>
-      <a href="/kritika/material/jurumiya/bab2/index.html" class="btn">Lanjut ke Bab 2 →</a>
+      <a href="./material/jurumiya/index.html" class="btn-outline">← Kembali ke Daftar Bab</a>
+      <a href="./material/jurumiya/bab2/index.html" class="btn">Lanjut ke Bab 2 →</a>
     </div>
   </main>
 
+  <!-- FOOTER -->
   <footer>
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
 
-  <!-- Pakai module -->
-  <script type="module" src="/kritika/assets/js/app.js"></script>
+  <!-- Script JS -->
+  <script type="module" src="./assets/js/app.js"></script>
 </body>
 </html>
