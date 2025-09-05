@@ -224,3 +224,156 @@ footer {
     padding: 2rem 1rem;
   }
 }
+
+/* ===== BAB 1 ===== */
+
+/* Reset dasar */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f7fa;
+  color: #1f2937;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #1f2937;
+  color: #fff;
+}
+
+.navbar .logo {
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-links li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-links li a.active,
+.nav-links li a:hover {
+  color: #3b82f6;
+}
+
+/* Main content */
+.content {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Section header */
+.section-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.section-header p {
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+/* Materi / lesson */
+.lesson {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 1.5rem;
+}
+
+.lesson p {
+  margin-bottom: 0.75rem;
+}
+
+/* Tombol */
+.btn, .btn-outline {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.btn:hover {
+  background-color: #2563eb;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+}
+
+.btn-outline:hover {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+/* AI Output / koreksi */
+.ai-output {
+  background-color: #e5e7eb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  min-height: 3rem;
+}
+
+/* Answer section */
+.answer-section {
+  margin-bottom: 1.5rem;
+}
+
+.answer-section textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  resize: vertical;
+  margin-bottom: 0.5rem;
+}
+
+/* Navigasi bab */
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  background-color: #1f2937;
+  color: #fff;
+  margin-top: 2rem;
+  font-size: 0.875rem;
+}
