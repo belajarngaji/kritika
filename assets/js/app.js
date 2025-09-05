@@ -1,81 +1,45 @@
-// ===============================
-// IMPORT SUPABASE
-// ===============================
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-// Konfigurasi Supabase
 const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ===============================
-// FETCH MATERI
-// ===============================
-async function getMaterials() {
-  const { data, error } = await supabase
-    .from('materials')
-    .select('*')
-    .order('id', { ascending: true });
+const API_URL = 'https://hmmz-bot01.vercel.app/chat';
 
-  if (error) {
-    console.error('❌ Error fetch materials:', error);
-    return [];
-  }
+async function getMaterials() {
+  const { data, error } = await supabase.from('materials').select('*').order('id');
+  if (error) { console.error('❌ Error fetch materials:', error); return []; }
   return data;
 }
 
-// ===============================
-// GENERATE PERTANYAAN VIA FASTAPI
-// ===============================
-const API_URL = 'https://hmmz-bot01.vercel.app/chat';
-
 async function generateCriticalQuestion(materialText) {
   try {
-    const response = await fetch(API_URL, {
+    const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: `Buatkan 3 pertanyaan kritis dari teks berikut:\n${materialText}`,
-        mode: "qa",
-        session_id: "jurumiya-bab1"
-      })
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ message:`Buatkan 3 pertanyaan kritis dari teks berikut:\n${materialText}`, mode:"qa", session_id:"jurumiya-bab1"})
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error(`❌ HTTP Error ${response.status}:`, errText);
-      return null;
-    }
-
-    const result = await response.json();
-    return result.reply || null;
-
-  } catch (err) {
-    console.error('❌ Error generate AI question:', err);
-    return null;
-  }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.reply || null;
+  } catch (err) { console.error('❌ Error AI:', err); return null; }
 }
 
-// ===============================
-// INIT
-// ===============================
 async function init() {
   const materiContent = document.getElementById('materiContent');
   const btnGenerate = document.getElementById('btnGenerate');
   const aiOutput = document.getElementById('aiOutput');
 
-  // Ambil materi Bab 1
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
 
   if (materi) {
-    // ✅ Render HTML langsung, jangan pakai marked.parse()
+    // Gunakan innerHTML agar HTML Supabase tampil
     materiContent.innerHTML = materi.content;
   } else {
     materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
   }
 
-  // Event: generate pertanyaan kritis
   btnGenerate.addEventListener('click', async () => {
     if (!materi) return;
     btnGenerate.disabled = true;
@@ -83,16 +47,11 @@ async function init() {
     aiOutput.innerHTML = '';
 
     const questions = await generateCriticalQuestion(materi.content);
-
-    // ✅ AI output boleh tetap pakai marked.parse() agar bisa render markdown
-    aiOutput.innerHTML = questions
-      ? marked.parse(questions)
-      : '<p>AI gagal generate pertanyaan.</p>';
+    aiOutput.innerHTML = questions ? marked.parse(questions) : '<p>AI gagal generate pertanyaan.</p>';
 
     btnGenerate.disabled = false;
     btnGenerate.textContent = 'Generate Pertanyaan Kritis';
   });
 }
 
-// Jalankan
 init();
