@@ -13,12 +13,13 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  overflow-x: hidden; /* mencegah scroll horizontal */
 }
 
 /* === Navbar === */
 header {
   background: #111827;
-  padding: 1rem 1rem; /* padding dikurangi untuk mobile */
+  padding: 1rem;
 }
 
 .navbar {
@@ -27,6 +28,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .logo {
@@ -38,7 +40,7 @@ header {
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 1rem; /* dikurangi sedikit untuk mobile */
+  gap: 0.8rem;
   flex-wrap: wrap;
 }
 
@@ -56,10 +58,10 @@ header {
 
 /* === Halaman Konten === */
 .content {
-  max-width: 760px; /* batas maksimal untuk desktop */
-  width: 100%;      /* full lebar di mobile */
-  margin: 1.25rem auto 2rem;
-  padding: 0 1rem;  /* padding kiri-kanan agar mobile friendly */
+  max-width: 760px;   /* maksimal untuk desktop */
+  width: 100%;        /* full width untuk mobile */
+  margin: 1rem auto 2rem;
+  padding: 0 1rem;    /* padding kiri-kanan untuk mobile */
 }
 
 .section-header {
@@ -70,30 +72,31 @@ header {
 .section-header h2 {
   font-size: 1.6rem;
   margin-bottom: 0.5rem;
+  word-wrap: break-word;
 }
 
+/* === Lesson / Materi === */
 .lesson {
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.lesson h1, .lesson h2, .lesson h3, .lesson h4, .lesson h5, .lesson h6 {
+  margin: 1rem 0 0.5rem;
+  font-weight: 600;
   word-wrap: break-word;
 }
 
-/* Markdown support */
-.lesson h1,
-.lesson h2,
-.lesson h3 {
-  margin: 1rem 0 0.5rem;
-  font-weight: 600;
-}
-
-.lesson p {
+.lesson p, .lesson li, .lesson td, .lesson th {
   margin-bottom: 1rem;
   color: #374151;
-  word-wrap: break-word; /* memastikan teks panjang tidak keluar */
+  word-wrap: break-word;
 }
 
 .lesson ul,
@@ -119,6 +122,7 @@ header {
   overflow-x: auto;
   margin: 1rem 0;
   font-size: 0.9rem;
+  word-wrap: break-word;
 }
 
 /* === AI Area === */
