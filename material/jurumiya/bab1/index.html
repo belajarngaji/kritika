@@ -6,53 +6,61 @@
   <title>Jurumiya - Bab 1 | Kritika</title>
 
   <!-- CSS Lokal -->
-  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="../../../assets/css/style.css">
 
   <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Marked.js -->
+  <!-- Marked.js untuk parsing Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
+  <!-- NAVBAR -->
   <header>
     <nav class="navbar">
       <h1 class="logo">Kritika</h1>
       <ul class="nav-links">
-        <li><a href="./index.html">Beranda</a></li>
-        <li><a href="./material/index.html" class="active">Materi</a></li>
-        <li><a href="./question/index.html">Pertanyaan</a></li>
-        <li><a href="./reflection/index.html">Refleksi</a></li>
+        <li><a href="../../../index.html">Beranda</a></li>
+        <li><a href="../../index.html" class="active">Materi</a></li>
+        <li><a href="../../../question/index.html">Pertanyaan</a></li>
+        <li><a href="../../../reflection/index.html">Refleksi</a></li>
       </ul>
     </nav>
   </header>
 
+  <!-- MAIN CONTENT -->
   <main class="content">
     <section class="section-header">
       <h2>Jurumiya - Bab 1</h2>
       <p>Pengenalan awal Jurumiya untuk memahami dasar-dasar.</p>
     </section>
 
+    <!-- Materi -->
     <article class="lesson" id="materiContent">
       <p>Loading materi...</p>
     </article>
 
+    <!-- Tombol AI -->
     <div class="ai-actions">
       <button id="btnGenerate" class="btn">Generate Pertanyaan Kritis</button>
     </div>
 
+    <!-- Output AI -->
     <div id="aiOutput" class="ai-output"></div>
 
+    <!-- Navigasi Bab -->
     <div class="lesson-nav">
-      <a href="./material/jurumiya/index.html" class="btn-outline">← Kembali ke Daftar Bab</a>
-      <a href="./material/jurumiya/bab2/index.html" class="btn">Lanjut ke Bab 2 →</a>
+      <a href="../index.html" class="btn-outline">← Kembali ke Daftar Bab</a>
+      <a href="../bab2/index.html" class="btn">Lanjut ke Bab 2 →</a>
     </div>
   </main>
 
+  <!-- FOOTER -->
   <footer>
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
 
-  <script type="module" src="./assets/js/app.js"></script>
+  <!-- Script JS -->
+  <script type="module" src="../../../assets/js/app.js"></script>
 </body>
 </html>
