@@ -1,24 +1,26 @@
 /* ================================================ */
 /* === GLOBAL RESET === */
+/* Reset margin, padding, box-sizing di semua elemen untuk konsistensi */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* Body global */
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f5f7fa; /* lembut, netral */
+  background-color: #f5f7fa; /* lembut, netral untuk seluruh halaman */
   color: #1f2937;
   line-height: 1.6;
   min-height: 100vh;
-  display: flex;
+  display: flex;           /* flex untuk footer tetap di bawah */
   flex-direction: column;
 }
 
 /* ================================================ */
 /* === NAVBAR === */
-/* Digunakan di semua halaman (utama, materi, bab) */
+/* Digunakan di semua halaman */
 header {
   background-color: #111827;
   padding: 1rem 2rem;
@@ -61,9 +63,9 @@ header {
 
 /* ================================================ */
 /* === HALAMAN UTAMA === */
-/* /kritika/index.html */
+/* Hero section di halaman utama */
 .hero {
-  background-color: #e0e7ff; /* lembut biru */
+  background-color: #e0e7ff; 
   padding: 4rem 1rem;
   text-align: center;
   border-radius: 12px;
@@ -73,7 +75,7 @@ header {
 
 .hero-content h2 {
   font-size: 2.2rem;
-  color: #1e3a8a; /* biru lebih gelap */
+  color: #1e3a8a; 
   margin-bottom: 1rem;
 }
 
@@ -93,7 +95,6 @@ header {
   flex-wrap: wrap;
 }
 
-/* Tombol hero konsisten dengan tombol global */
 .hero-buttons .btn,
 .hero-buttons .btn-outline {
   padding: 0.8rem 1.6rem;
@@ -103,9 +104,9 @@ header {
 
 /* ================================================ */
 /* === HALAMAN MATERI & BAB === */
-/* /kritika/material/index.html, /kritika/material/jurumiya/bab1.html, dsb. */
+/* Content wrapper untuk materi / bab */
 .content {
-  max-width: 1100px;
+  max-width: 1100px;  /* Lebar maksimal wrapper */
   width: 100%;
   margin: 1rem auto 2rem;
   padding: 0 1rem;
@@ -127,7 +128,9 @@ header {
   color: #374151;
 }
 
-/* Card Grid untuk daftar materi */
+/* ================================================ */
+/* === CARD GRID === */
+/* Daftar materi / link bab */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -198,7 +201,7 @@ footer {
   text-align: center;
   padding: 1.2rem;
   font-size: 0.9rem;
-  margin-top: auto;
+  margin-top: auto; /* Footer selalu di bawah */
 }
 
 /* ================================================ */
@@ -225,75 +228,20 @@ footer {
   }
 }
 
-/* ===== BAB 1 ===== */
+/* ================================================ */
+/* === BAB 1 === */
+/* === PERMASALAHAN DUPLIKASI === */
+/* Catatan: bagian ini duplikat reset dan body. 
+   Tidak perlu ulang deklarasi *, body, navbar. */
+/* === PERBAIKAN === */
+/* Hapus duplikasi, cukup gunakan selector unik untuk Bab 1 */
 
-/* Reset dasar */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #f5f7fa;
-  color: #1f2937;
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-/* Navbar */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: #1f2937;
-  color: #fff;
-}
-
-.navbar .logo {
-  font-weight: 700;
-  font-size: 1.5rem;
-}
-
-.nav-links {
-  list-style: none;
-  display: flex;
-  gap: 1rem;
-}
-
-.nav-links li a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.nav-links li a.active,
-.nav-links li a:hover {
-  color: #3b82f6;
-}
-
-/* Main content */
-.content {
+.content-bab1 {  /* Wrapper khusus Bab 1, hindari konflik */
   max-width: 900px;
   margin: 2rem auto;
   padding: 0 1rem;
 }
 
-/* Section header */
-.section-header h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.section-header p {
-  color: #4b5563;
-  margin-bottom: 1.5rem;
-}
-
-/* Materi / lesson */
 .lesson {
   background-color: #fff;
   padding: 1.5rem;
@@ -306,7 +254,7 @@ body {
   margin-bottom: 0.75rem;
 }
 
-/* Tombol */
+/* Tombol Bab 1 */
 .btn, .btn-outline {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
@@ -316,6 +264,7 @@ body {
   transition: all 0.2s;
 }
 
+/* Tombol biru utama */
 .btn {
   background-color: #3b82f6;
   color: #fff;
@@ -325,6 +274,7 @@ body {
   background-color: #2563eb;
 }
 
+/* Tombol outline Bab 1 */
 .btn-outline {
   background-color: transparent;
   color: #3b82f6;
@@ -336,7 +286,7 @@ body {
   color: #fff;
 }
 
-/* AI Output / koreksi */
+/* AI Output / Koreksi */
 .ai-output {
   background-color: #e5e7eb;
   padding: 1rem;
@@ -345,7 +295,7 @@ body {
   min-height: 3rem;
 }
 
-/* Answer section */
+/* Answer Section */
 .answer-section {
   margin-bottom: 1.5rem;
 }
@@ -361,14 +311,14 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* Navigasi bab */
+/* Navigasi Bab */
 .lesson-nav {
   display: flex;
   justify-content: space-between;
   margin-top: 2rem;
 }
 
-/* Footer */
+/* Footer Bab 1 */
 footer {
   text-align: center;
   padding: 1.5rem;
@@ -377,3 +327,10 @@ footer {
   margin-top: 2rem;
   font-size: 0.875rem;
 }
+
+/* ================================================ */
+/* === CATATAN === */
+/* Untuk mencegah duplikasi:
+   1. Hapus semua deklarasi * dan body kedua kali
+   2. Gunakan class unik / wrapper untuk Bab 1 (misal .content-bab1)
+   3. Hindari mendeklarasikan ulang .navbar, footer, btn global di Bab 1 */
