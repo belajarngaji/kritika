@@ -106,7 +106,7 @@ async function generateCriticalQuestion(materialText) {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',  // bisa disesuaikan
+        model: 'openai/gpt-oss-120b',  // bisa disesuaikan
         messages: [
           {
             role: 'user',
