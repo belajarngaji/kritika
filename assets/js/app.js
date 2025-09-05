@@ -39,7 +39,7 @@ async function generateCriticalQuestion(materialText) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer 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`,
         'HTTP-Referer': 'https://belajarngaji.github.io',
         'X-Title': 'Kritika'
       },
