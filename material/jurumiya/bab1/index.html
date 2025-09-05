@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jurumiya - Bab 1 | Kritika</title>
+  <!-- CSS Global -->
+  <link rel="stylesheet" href="/kritika/assets/css/style.css">
+  <!-- Font Modern -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- HEADER / NAVBAR -->
+  <header>
+    <nav class="navbar">
+      <h1 class="logo">Kritika</h1>
+      <ul class="nav-links">
+        <li><a href="/kritika/index.html">Beranda</a></li>
+        <li><a href="/kritika/material/index.html" class="active">Materi</a></li>
+        <li><a href="/kritika/question/index.html">Pertanyaan</a></li>
+        <li><a href="/kritika/reflection/index.html">Refleksi</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+    <section class="section-header">
+      <h2>Jurumiya - Bab 1</h2>
+      <p>Pengenalan awal Jurumiya untuk memahami dasar-dasar.</p>
+    </section>
+
+    <!-- MATERI -->
+    <article class="lesson" id="materiContent">
+      <p>Loading materi...</p>
+    </article>
+
+    <!-- TOMBOL AI -->
+    <div class="ai-actions">
+      <button id="btnGenerate" class="btn">Generate Pertanyaan Kritis</button>
+    </div>
+
+    <!-- HASIL AI -->
+    <div id="aiOutput" class="ai-output"></div>
+
+    <!-- NAVIGASI BAB -->
+    <div class="lesson-nav">
+      <a href="/kritika/material/jurumiya/index.html" class="btn-outline">← Kembali ke Daftar Bab</a>
+      <a href="/kritika/material/jurumiya/bab2/index.html" class="btn">Lanjut ke Bab 2 →</a>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Kritika | Belajar Kritis</p>
+  </footer>
+
+  <!-- JS -->
+  <script src="/kritika/assets/js/supabase.js" defer></script>
+  <script src="/kritika/assets/js/app.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // FETCH MATERI DARI SUPABASE
+      const materials = await App.getMaterials();
+      const materi = materials.find(m => m.slug === 'jurumiya-bab1');
+      const materiContent = document.getElementById('materiContent');
+      if (materi) {
+        materiContent.innerHTML = materi.content;
+      } else {
+        materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
+      }
+
+      // GENERATE PERTANYAAN AI
+      const btnGenerate = document.getElementById('btnGenerate');
+      const aiOutput = document.getElementById('aiOutput');
+      btnGenerate.addEventListener('click', async () => {
+        aiOutput.innerHTML = '<p>Loading AI...</p>';
+        const questions = await AppAI.generateCriticalQuestion(materi.content);
+        aiOutput.innerHTML = questions ? `<p>${questions}</p>` : '<p>AI gagal generate pertanyaan.</p>';
+      });
+    });
+  </script>
+</body>
+</html>
