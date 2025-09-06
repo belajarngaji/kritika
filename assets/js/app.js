@@ -1,19 +1,33 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
+// ==============================
+// Supabase Config
+// ==============================
 const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ==============================
+// API URL
+// ==============================
 const API_URL = 'https://hmmz-bot01.vercel.app/chat';
 const CHECK_URL = 'https://hmmz-bot01.vercel.app/check';
 
-// Ambil semua materi
+// ==============================
+// Ambil semua materi dari Supabase
+// ==============================
 async function getMaterials() {
   try {
     const { data, error } = await supabase.from('materials').select('*').order('id');
-    if (error) { console.error(error); return []; }
+    if (error) {
+      console.error('❌ Error fetch materials:', error);
+      return [];
+    }
     return data;
-  } catch (err) { console.error(err); return []; }
+  } catch (err) {
+    console.error('❌ Exception fetch materials:', err);
+    return [];
+  }
 }
 
 // ==============================
@@ -40,7 +54,9 @@ async function generateCriticalQuestion(materialText) {
   }
 }
 
-// Koreksi jawaban
+// ==============================
+// Koreksi jawaban user via AI
+// ==============================
 async function checkAnswer(answer, materi) {
   try {
     const res = await fetch(CHECK_URL, {
@@ -49,34 +65,31 @@ async function checkAnswer(answer, materi) {
       body: JSON.stringify({ answer, context: materi, mode: "check" })
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch(err) { console.error(err); return null; }
+    return await res.json(); // { score, feedback }
+  } catch(err) {
+    console.error('❌ Error AI koreksi:', err);
+    return null;
+  }
 }
 
 // ==============================
-// Inisialisasi halaman materi
+// INIT Halaman Materi
 // ==============================
-// Pastikan struktur HTML di main content:
-// materiContent
-// btnGenerate
-// aiOutput
-// kolom jawaban & koreksi (akan dibuat JS)
-
-// INIT
 async function init() {
+  // Ambil elemen dari HTML
   const materiContent = document.getElementById('materiContent');
   const btnGenerate = document.getElementById('btnGenerate');
-  
-  // Buat aiOutput hanya sekali
+
+  // ======= Buat aiOutput (hasil generate pertanyaan) =======
   let aiOutput = document.getElementById('aiOutput');
   if (!aiOutput) {
     aiOutput = document.createElement('div');
     aiOutput.id = 'aiOutput';
     aiOutput.classList.add('ai-output');
-    btnGenerate.after(aiOutput); // Hasil generate muncul tepat di bawah tombol
+    btnGenerate.after(aiOutput); // Hasil generate langsung di bawah tombol
   }
 
-  // Buat kolom jawaban & koreksi hanya jika belum ada
+  // ======= Buat kolom jawaban user =======
   let answerSection = document.querySelector('.answer-section');
   if (!answerSection) {
     answerSection = document.createElement('div');
@@ -86,29 +99,31 @@ async function init() {
       <textarea id="userAnswer" placeholder="Tulis jawaban Anda di sini..." rows="4"></textarea>
       <button id="btnCheck" class="btn">Cek Jawaban</button>
     `;
-    aiOutput.after(answerSection); // Kolom jawaban muncul setelah aiOutput
+    aiOutput.after(answerSection); // Muncul tepat di bawah hasil generate
   }
 
+  // ======= Buat kolom koreksi AI =======
   let aiCorrection = document.getElementById('aiCorrection');
   if (!aiCorrection) {
     aiCorrection = document.createElement('div');
     aiCorrection.id = 'aiCorrection';
     aiCorrection.classList.add('ai-output');
     aiCorrection.innerHTML = '<p>Koreksi akan ditampilkan di sini setelah dicek.</p>';
-    answerSection.after(aiCorrection);
+    answerSection.after(aiCorrection); // Muncul di bawah kolom jawaban
   }
 
-  // Ambil materi dari Supabase
+  // ======= Ambil materi dari Supabase =======
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
   materiContent.innerHTML = materi ? materi.content : '<p>Materi belum tersedia.</p>';
 
-  // Event Generate Pertanyaan
+  // ======= Event Generate Pertanyaan Kritis =======
   btnGenerate.addEventListener('click', async () => {
     if (!materi) return;
+
     btnGenerate.disabled = true;
     btnGenerate.textContent = 'Loading...';
-    aiOutput.innerHTML = ''; // Hasil generate masuk sini
+    aiOutput.innerHTML = ''; // Reset hasil generate
 
     const questions = await generateCriticalQuestion(materi.content);
     aiOutput.innerHTML = questions ? marked.parse(questions) : '<p>AI gagal generate pertanyaan.</p>';
@@ -117,9 +132,10 @@ async function init() {
     btnGenerate.textContent = 'Generate Pertanyaan Kritis';
   });
 
-  // Event Cek Jawaban
+  // ======= Event Cek Jawaban =======
   const btnCheck = document.getElementById('btnCheck');
   const userAnswer = document.getElementById('userAnswer');
+
   btnCheck.addEventListener('click', async () => {
     const answerText = userAnswer.value.trim();
     if (!answerText) return alert('Tulis jawaban dulu!');
@@ -138,4 +154,5 @@ async function init() {
   });
 }
 
+// Jalankan init
 init();
