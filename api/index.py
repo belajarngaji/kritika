@@ -7,11 +7,11 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-# ===== Load env =====
+# Load env
 load_dotenv()  
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-# ===== Setup FastAPI =====
+# Setup FastAPI
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL_NAME = "openai/gpt-oss-120b"
 
-# Prompt dasar AI
+# Prompt dasar
 BASE_SYSTEM_PROMPT = {
     "role": "system",
     "content": (
@@ -50,7 +50,7 @@ def call_openrouter_api(messages: list) -> str:
         logging.error(f"API error: {e}")
         return "❌ Error saat memproses respons AI."
 
-# ===== Generate pertanyaan =====
+# Generate pertanyaan
 @app.post("/chat")
 async def chat(request: Request):
     try:
@@ -59,7 +59,6 @@ async def chat(request: Request):
         if not materi_text:
             return JSONResponse({"error": "Materi kosong"}, status_code=400)
 
-        # Prompt untuk generate soal
         messages = [
             BASE_SYSTEM_PROMPT,
             {"role": "user", "content": f"Buatkan 3 pertanyaan kritis dari teks berikut:\n{materi_text}"}
@@ -70,7 +69,7 @@ async def chat(request: Request):
         logging.error(f"/chat error: {e}")
         return JSONResponse({"error": "Bad request"}, status_code=400)
 
-# ===== Koreksi jawaban =====
+# Koreksi jawaban
 @app.post("/check")
 async def check(request: Request):
     try:
@@ -80,13 +79,11 @@ async def check(request: Request):
         if not answer or not materi:
             return JSONResponse({"error": "Answer atau context kosong"}, status_code=400)
 
-        # Prompt untuk koreksi jawaban
         messages = [
             BASE_SYSTEM_PROMPT,
             {"role": "user", "content": f"Materi: {materi}\nJawaban user: {answer}\nBerikan skor 0-100 dan feedback singkat."}
         ]
         reply = call_openrouter_api(messages)
-
         return {"score": "?", "feedback": reply}
     except Exception as e:
         logging.error(f"/check error: {e}")
