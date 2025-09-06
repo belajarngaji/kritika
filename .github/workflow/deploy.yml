@@ -6,22 +6,23 @@ on:
       - main
 
 jobs:
-  run-api:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
       - name: Install dependencies
         run: |
-          pip install fastapi uvicorn requests python-dotenv
+          pip install --upgrade pip
+          pip install -r api/requirements.txt
 
-      - name: Run FastAPI server
+      - name: Run FastAPI
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
