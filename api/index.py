@@ -19,7 +19,7 @@ app.add_middleware(
 
 logging.basicConfig(level=logging.INFO)
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL_NAME = "openai/gpt-3.5-turbo" # Mengganti model jika yang lama tidak ada
+MODEL_NAME = "openai/gpt-oss-120b" # Mengganti model jika yang lama tidak ada
 BASE_SYSTEM_PROMPT = {
     "role": "system",
     "content": "Kamu adalah asisten AI yang memberikan jawaban singkat, jelas, dan relevan. Hanya jawab pertanyaan user atau koreksi jawaban user."
