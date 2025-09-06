@@ -62,7 +62,12 @@ async function checkAnswer(answer, materi) {
     const res = await fetch(CHECK_URL, {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ answer, context: materi, mode: "check" })
+      body: JSON.stringify({ 
+        answer, 
+        context: materi, 
+        mode: "check",
+        session_id: "jurumiya-bab1" // <-- TAMBAHKAN BARIS INI
+      })
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json(); // { score, feedback }
@@ -71,6 +76,7 @@ async function checkAnswer(answer, materi) {
     return null;
   }
 }
+
 
 // ==============================
 // INIT Halaman Materi
