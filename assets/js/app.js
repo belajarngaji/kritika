@@ -19,10 +19,7 @@ const CHECK_URL = 'https://hmmz-bot01.vercel.app/check';
 async function getMaterials() {
   try {
     const { data, error } = await supabase.from('materials').select('*').order('id');
-    if (error) {
-      console.error('❌ Error fetch materials:', error);
-      return [];
-    }
+    if (error) { console.error('❌ Error fetch materials:', error); return []; }
     return data;
   } catch (err) {
     console.error('❌ Exception fetch materials:', err);
@@ -44,7 +41,6 @@ async function generateCriticalQuestion(materialText) {
         session_id: "jurumiya-bab1"
       })
     });
-
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     return data.reply || null;
@@ -76,20 +72,20 @@ async function checkAnswer(answer, materi) {
 // INIT Halaman Materi
 // ==============================
 async function init() {
-  // Ambil elemen dari HTML
+  // Ambil elemen HTML
   const materiContent = document.getElementById('materiContent');
   const btnGenerate = document.getElementById('btnGenerate');
 
-  // ======= Buat aiOutput (hasil generate pertanyaan) =======
+  // ===== Buat aiOutput (hasil generate pertanyaan) =====
   let aiOutput = document.getElementById('aiOutput');
   if (!aiOutput) {
     aiOutput = document.createElement('div');
     aiOutput.id = 'aiOutput';
     aiOutput.classList.add('ai-output');
-    btnGenerate.after(aiOutput); // Hasil generate langsung di bawah tombol
+    btnGenerate.after(aiOutput); // Tepat di bawah tombol generate
   }
 
-  // ======= Buat kolom jawaban user =======
+  // ===== Buat kolom jawaban user =====
   let answerSection = document.querySelector('.answer-section');
   if (!answerSection) {
     answerSection = document.createElement('div');
@@ -99,25 +95,25 @@ async function init() {
       <textarea id="userAnswer" placeholder="Tulis jawaban Anda di sini..." rows="4"></textarea>
       <button id="btnCheck" class="btn">Cek Jawaban</button>
     `;
-    aiOutput.after(answerSection); // Muncul tepat di bawah hasil generate
+    aiOutput.after(answerSection); // Tepat di bawah hasil generate pertanyaan
   }
 
-  // ======= Buat kolom koreksi AI =======
+  // ===== Buat kolom koreksi AI =====
   let aiCorrection = document.getElementById('aiCorrection');
   if (!aiCorrection) {
     aiCorrection = document.createElement('div');
     aiCorrection.id = 'aiCorrection';
     aiCorrection.classList.add('ai-output');
     aiCorrection.innerHTML = '<p>Koreksi akan ditampilkan di sini setelah dicek.</p>';
-    answerSection.after(aiCorrection); // Muncul di bawah kolom jawaban
+    answerSection.after(aiCorrection); // Tepat di bawah kolom jawaban
   }
 
-  // ======= Ambil materi dari Supabase =======
+  // ===== Ambil materi dari Supabase =====
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
   materiContent.innerHTML = materi ? materi.content : '<p>Materi belum tersedia.</p>';
 
-  // ======= Event Generate Pertanyaan Kritis =======
+  // ===== Event Generate Pertanyaan Kritis =====
   btnGenerate.addEventListener('click', async () => {
     if (!materi) return;
 
@@ -132,7 +128,7 @@ async function init() {
     btnGenerate.textContent = 'Generate Pertanyaan Kritis';
   });
 
-  // ======= Event Cek Jawaban =======
+  // ===== Event Cek Jawaban =====
   const btnCheck = document.getElementById('btnCheck');
   const userAnswer = document.getElementById('userAnswer');
 
