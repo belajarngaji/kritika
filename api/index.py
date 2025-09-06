@@ -5,10 +5,14 @@ import requests
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv  # panggil config env
 
+# ===== Load env =====
+load_dotenv()  # pastikan file .env ada di folder api
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
+# ===== Setup FastAPI =====
 app = FastAPI()
-
-# CORS agar bisa diakses dari frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,26 +20,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 logging.basicConfig(level=logging.INFO)
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL_NAME = "openai/gpt-oss-120b"
 
-# Prompt dasar untuk generate & koreksi
+# Prompt dasar untuk AI
 BASE_SYSTEM_PROMPT = {
     "role": "system",
-    "content": (
-        "Kamu adalah asisten AI yang memberikan jawaban singkat, jelas, dan relevan. "
-        "Hanya jawab pertanyaan user atau koreksi jawaban user."
-    )
+    "content": "Kamu adalah asisten AI yang memberikan jawaban singkat, jelas, dan relevan. Hanya jawab pertanyaan user atau koreksi jawaban user."
 }
 
-# Konfigurasi mode QA
-MODE_SETTINGS = {
-    "qa": {"max_tokens": 3000, "temperature": 0.3, "top_p": 0.9}
-}
+MODE_SETTINGS = {"max_tokens": 3000, "temperature": 0.3, "top_p": 0.9}
 
 # Riwayat percakapan per session
 CONVERSATIONS = {}
@@ -60,9 +56,9 @@ def call_openrouter_api(messages: list) -> str:
         payload = {
             "model": MODEL_NAME,
             "messages": messages,
-            "max_tokens": MODE_SETTINGS["qa"]["max_tokens"],
-            "temperature": MODE_SETTINGS["qa"]["temperature"],
-            "top_p": MODE_SETTINGS["qa"]["top_p"]
+            "max_tokens": MODE_SETTINGS["max_tokens"],
+            "temperature": MODE_SETTINGS["temperature"],
+            "top_p": MODE_SETTINGS["top_p"]
         }
         response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=15)
         response.raise_for_status()
@@ -72,9 +68,9 @@ def call_openrouter_api(messages: list) -> str:
         logging.error(f"API error: {e}")
         return "❌ Error saat memproses respons AI."
 
+# ===== Endpoint generate pertanyaan =====
 @app.post("/chat")
 async def chat(request: Request):
-    """Generate pertanyaan kritis dari materi."""
     try:
         body = await request.json()
         materi_text = body.get("message", "").strip()
@@ -93,9 +89,9 @@ async def chat(request: Request):
         logging.error(f"/chat error: {e}")
         return JSONResponse({"error": "Bad request"}, status_code=400)
 
+# ===== Endpoint koreksi jawaban =====
 @app.post("/check")
 async def check(request: Request):
-    """Koreksi jawaban user berdasarkan materi."""
     try:
         body = await request.json()
         answer = body.get("answer", "").strip()
@@ -110,7 +106,6 @@ async def check(request: Request):
         reply = call_openrouter_api(messages)
         add_to_conversation(session_id, "assistant", reply)
 
-        # Optional: bisa parse skor & feedback dari reply jika backend AI formatnya
         return {"score": "?", "feedback": reply, "session_id": session_id}
     except Exception as e:
         logging.error(f"/check error: {e}")
