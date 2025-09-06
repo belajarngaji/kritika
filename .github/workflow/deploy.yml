@@ -3,7 +3,7 @@ name: Deploy FastAPI
 on:
   push:
     branches:
-      - main  # atau branch yang ingin dipakai
+      - main
 
 jobs:
   deploy:
@@ -13,7 +13,7 @@ jobs:
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -26,6 +26,5 @@ jobs:
           python -m pip install --upgrade pip
           pip install fastapi uvicorn requests
 
-      - name: Run FastAPI (example)
-        run: |
-          uvicorn api.index:app --host 0.0.0.0 --port 8000
+      - name: Run FastAPI
+        run: uvicorn api.index:app --host 0.0.0.0 --port 8000
