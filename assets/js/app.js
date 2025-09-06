@@ -16,18 +16,28 @@ async function getMaterials() {
   } catch (err) { console.error(err); return []; }
 }
 
-// Generate pertanyaan AI
+// ==============================
+// Generate pertanyaan kritis AI
+// ==============================
 async function generateCriticalQuestion(materialText) {
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ message: materialText, mode: "qa" })
+      body: JSON.stringify({
+        message: `Buatkan 3 pertanyaan kritis dari teks berikut:\n${materialText}`,
+        mode: "qa",
+        session_id: "jurumiya-bab1"
+      })
     });
+
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     return data.reply || null;
-  } catch(err) { console.error(err); return null; }
+  } catch (err) {
+    console.error('❌ Error AI generate:', err);
+    return null;
+  }
 }
 
 // Koreksi jawaban
