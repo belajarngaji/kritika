@@ -1,17 +1,19 @@
-# api/index.py
 import os
 import logging
 import requests
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv  # panggil config env
 
-# ===== Load env =====
-load_dotenv()  # pastikan file .env ada di folder api
+# ===== Load API Key dari environment =====
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+if not OPENROUTER_API_KEY:
+    logging.warning("❌ OPENROUTER_API_KEY belum di set di environment!")
 
-# ===== Setup FastAPI =====
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+MODEL_NAME = "openai/gpt-oss-120b"
+
+# ===== Setup FastAPI & CORS =====
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -22,10 +24,7 @@ app.add_middleware(
 )
 logging.basicConfig(level=logging.INFO)
 
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL_NAME = "openai/gpt-oss-120b"
-
-# Prompt dasar untuk AI
+# ===== Prompt dasar =====
 BASE_SYSTEM_PROMPT = {
     "role": "system",
     "content": "Kamu adalah asisten AI yang memberikan jawaban singkat, jelas, dan relevan. Hanya jawab pertanyaan user atau koreksi jawaban user."
@@ -33,7 +32,7 @@ BASE_SYSTEM_PROMPT = {
 
 MODE_SETTINGS = {"max_tokens": 3000, "temperature": 0.3, "top_p": 0.9}
 
-# Riwayat percakapan per session
+# ===== Riwayat percakapan per session =====
 CONVERSATIONS = {}
 MAX_HISTORY = 10
 
@@ -46,7 +45,6 @@ def add_to_conversation(session_id: str, role: str, content: str):
 
 def call_openrouter_api(messages: list) -> str:
     if not OPENROUTER_API_KEY:
-        logging.error("OPENROUTER_API_KEY is not set.")
         return "❌ Error: API key tidak ditemukan."
     try:
         headers = {
