@@ -46,30 +46,28 @@ async function checkAnswer(answer, materi) {
 // ==============================
 // Inisialisasi halaman materi
 // ==============================
+// Pastikan struktur HTML di main content:
+// materiContent
+// btnGenerate
+// aiOutput
+// kolom jawaban & koreksi (akan dibuat JS)
+
+// INIT
 async function init() {
   const materiContent = document.getElementById('materiContent');
   const btnGenerate = document.getElementById('btnGenerate');
-  const aiOutput = document.getElementById('aiOutput');
-
-  if (!materiContent || !btnGenerate || !aiOutput) return;
-
-  const materials = await getMaterials();
-
-  // Ambil slug dari dataset, misal <main data-slug="jurumiya-bab1">
-  const slug = materiContent.dataset.slug;
-  const materi = materials.find(m => m.slug === slug);
-
-  if (!materi) {
-    materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
-    return;
+  
+  // Buat aiOutput hanya sekali
+  let aiOutput = document.getElementById('aiOutput');
+  if (!aiOutput) {
+    aiOutput = document.createElement('div');
+    aiOutput.id = 'aiOutput';
+    aiOutput.classList.add('ai-output');
+    btnGenerate.after(aiOutput); // Hasil generate muncul tepat di bawah tombol
   }
 
-  materiContent.innerHTML = materi.content;
-
-  // ===== Buat kolom jawaban & koreksi =====
+  // Buat kolom jawaban & koreksi hanya jika belum ada
   let answerSection = document.querySelector('.answer-section');
-  let aiCorrection = document.getElementById('aiCorrection');
-
   if (!answerSection) {
     answerSection = document.createElement('div');
     answerSection.classList.add('answer-section');
@@ -78,9 +76,10 @@ async function init() {
       <textarea id="userAnswer" placeholder="Tulis jawaban Anda di sini..." rows="4"></textarea>
       <button id="btnCheck" class="btn">Cek Jawaban</button>
     `;
-    btnGenerate.after(answerSection);
+    aiOutput.after(answerSection); // Kolom jawaban muncul setelah aiOutput
   }
 
+  let aiCorrection = document.getElementById('aiCorrection');
   if (!aiCorrection) {
     aiCorrection = document.createElement('div');
     aiCorrection.id = 'aiCorrection';
@@ -89,45 +88,44 @@ async function init() {
     answerSection.after(aiCorrection);
   }
 
-  const userAnswer = document.getElementById('userAnswer');
+  // Ambil materi dari Supabase
+  const materials = await getMaterials();
+  const materi = materials.find(m => m.slug === 'jurumiya-bab1');
+  materiContent.innerHTML = materi ? materi.content : '<p>Materi belum tersedia.</p>';
+
+  // Event Generate Pertanyaan
+  btnGenerate.addEventListener('click', async () => {
+    if (!materi) return;
+    btnGenerate.disabled = true;
+    btnGenerate.textContent = 'Loading...';
+    aiOutput.innerHTML = ''; // Hasil generate masuk sini
+
+    const questions = await generateCriticalQuestion(materi.content);
+    aiOutput.innerHTML = questions ? marked.parse(questions) : '<p>AI gagal generate pertanyaan.</p>';
+
+    btnGenerate.disabled = false;
+    btnGenerate.textContent = 'Generate Pertanyaan Kritis';
+  });
+
+  // Event Cek Jawaban
   const btnCheck = document.getElementById('btnCheck');
+  const userAnswer = document.getElementById('userAnswer');
+  btnCheck.addEventListener('click', async () => {
+    const answerText = userAnswer.value.trim();
+    if (!answerText) return alert('Tulis jawaban dulu!');
 
-  // ===== Event generate pertanyaan =====
-  if (!btnGenerate.dataset.listenerAdded) {
-    btnGenerate.addEventListener('click', async () => {
-      btnGenerate.disabled = true;
-      btnGenerate.textContent = 'Loading...';
-      aiOutput.innerHTML = '';
+    aiCorrection.innerHTML = '<p>Memeriksa jawaban...</p>';
+    const result = await checkAnswer(answerText, materi.content);
 
-      const questions = await generateCriticalQuestion(materi.content);
-      aiOutput.innerHTML = questions ? marked.parse(questions) : '<p>AI gagal generate pertanyaan.</p>';
-
-      btnGenerate.disabled = false;
-      btnGenerate.textContent = 'Generate Pertanyaan Kritis';
-    });
-    btnGenerate.dataset.listenerAdded = 'true';
-  }
-
-  // ===== Event cek jawaban =====
-  if (!btnCheck.dataset.listenerAdded) {
-    btnCheck.addEventListener('click', async () => {
-      const answerText = userAnswer.value.trim();
-      if (!answerText) return alert('Tulis jawaban dulu!');
-
-      aiCorrection.innerHTML = '<p>Memeriksa jawaban...</p>';
-
-      const result = await checkAnswer(answerText, materi.content);
-      if (result && 'score' in result && 'feedback' in result) {
-        aiCorrection.innerHTML = `
-          <p><strong>Skor:</strong> ${result.score}</p>
-          <p><strong>Feedback:</strong> ${result.feedback}</p>
-        `;
-      } else {
-        aiCorrection.innerHTML = '<p>AI gagal memeriksa jawaban.</p>';
-      }
-    });
-    btnCheck.dataset.listenerAdded = 'true';
-  }
+    if (result && 'score' in result && 'feedback' in result) {
+      aiCorrection.innerHTML = `
+        <p><strong>Skor:</strong> ${result.score}</p>
+        <p><strong>Feedback:</strong> ${result.feedback}</p>
+      `;
+    } else {
+      aiCorrection.innerHTML = '<p>AI gagal memeriksa jawaban.</p>';
+    }
+  });
 }
 
 init();
