@@ -130,35 +130,93 @@ header {
 }
 
 /* ================================================ */
-/* === HALAMAN PROFIL === */
+/* === HEADR PROFIL BARU === */
 /* ================================================ */
 
+.profile-header {
+  background-color: #111827;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-title {
+  color: #f9fafb;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0; /* Pastikan tidak ada margin default */
+}
+
+.close-button {
+  color: #d1d5db;
+  font-size: 1.8rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.close-button:hover {
+  color: #fff;
+}
+
+
+/* ================================================ */
+/* === HALAMAN PROFIL (PERBAIKAN & PENAMBAHAN) === */
+/* ================================================ */
+
+/* Pastikan profile-container di tengah dan ada jarak */
 .profile-container {
-  max-width: 600px; /* Lebar maksimal konten profil */
-  margin: 2rem auto; /* Posisi di tengah dengan jarak atas/bawah */
+  max-width: 600px; 
+  margin: 2rem auto; 
   padding: 0 1rem;
 }
 
 .profile-card {
-  background-color: #f9fafb; /* Latar belakang terang untuk kartu */
+  background-color: #f9fafb; 
   padding: 2.5rem 2rem;
-  border-radius: 12px; /* Sudut melengkung */
+  border-radius: 12px; 
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   text-align: center;
   margin-bottom: 1.5rem;
 }
 
-.profile-avatar {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%; /* Membuat gambar menjadi bulat */
-  object-fit: cover; /* Memastikan gambar tidak gepeng */
-  border: 4px solid #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+/* Pembungkus avatar untuk positioning lencana */
+.avatar-wrapper {
+  position: relative; /* Penting untuk lencana */
+  display: inline-block; /* Agar bisa diatur lebar/tingginya otomatis */
   margin-bottom: 1rem;
 }
 
+/* Perbaikan untuk foto profil bulat sempurna */
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%; /* Membuat gambar menjadi bulat sempurna */
+  object-fit: cover; /* Memastikan gambar tidak gepeng, akan memotong jika perlu */
+  border: 4px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Styling untuk lencana */
+.badge {
+  position: absolute;
+  bottom: 5px; /* Jarak dari bawah avatar */
+  right: -10px; /* Jarak dari kanan avatar */
+  background-color: #facc15; /* Warna latar belakang lencana (kuning) */
+  color: #111827; /* Warna teks lencana */
+  padding: 0.3em 0.7em;
+  border-radius: 15px; /* Sudut melengkung */
+  font-size: 0.8em;
+  font-weight: 600;
+  white-space: nowrap; /* Mencegah teks patah baris */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  border: 2px solid #fff; /* Border putih agar lebih menonjol */
+}
+
 /* --- Progress Bar --- */
+/* Tidak ada perubahan signifikan di sini, hanya memastikan konsistensi */
 .level-progress {
   display: flex;
   align-items: center;
@@ -179,7 +237,7 @@ header {
 
 .progress-bar {
   height: 100%;
-  background-color: #3b82f6; /* Warna biru sebagai warna progres */
+  background-color: #3b82f6; 
   border-radius: 5px;
 }
 /* --- End of Progress Bar --- */
@@ -224,6 +282,7 @@ header {
   font-weight: 700;
   color: #111827;
 }
+
 
 
 /* ================================================ */
