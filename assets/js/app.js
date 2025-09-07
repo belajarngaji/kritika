@@ -179,7 +179,9 @@ async function init() {
 
           div.querySelectorAll('.option-btn').forEach(b => (b.disabled = true));
 
-          if (user === correct) {
+          const isCorrect = (user === correct);
+
+          if (isCorrect) {
             correctCount += 1;
             fb.textContent = '✅ Benar';
             fb.style.color = 'green';
@@ -187,8 +189,20 @@ async function init() {
             fb.textContent = `❌ Salah. Jawaban benar: ${correct}`;
             fb.style.color = 'red';
           }
+
           answered += 1;
-          summary.innerHTML = `<strong>Skor:</strong> ${correctCount}/${total} (terjawab ${answered}/${total})`;
+
+          // tampilkan ringkasan skor
+          const wrongCount = answered - correctCount;
+          const scorePercent = ((correctCount / total) * 100).toFixed(0);
+
+          summary.innerHTML = `
+            <strong>Total Soal:</strong> ${total}<br>
+            <strong>Terjawab:</strong> ${answered}/${total}<br>
+            <strong>Benar:</strong> ${correctCount}<br>
+            <strong>Salah:</strong> ${wrongCount}<br>
+            <strong>Skor:</strong> ${scorePercent}%
+          `;
         });
       });
     });
