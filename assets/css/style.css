@@ -34,6 +34,9 @@ header {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+  position: relative; 
+  /* TAMBAHKAN BARIS INI */
+  padding-right: 40px; /* Memberi ruang untuk ikon */
 }
 
 .logo {
