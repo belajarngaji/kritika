@@ -1,4 +1,29 @@
 /* ================================================ */
+/* === STRUKTUR LAYOUT DASAR === */
+/* ================================================ */
+
+html {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Memastikan body setinggi layar */
+  margin: 0; /* Menghapus margin bawaan browser */
+}
+
+main.content {
+  flex-grow: 1; /* Membuat <main> mengisi sisa ruang yang tersedia */
+  
+  /* Menjadikan konten di dalamnya (profile-container) center */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 0; /* Memberi sedikit jarak atas-bawah */
+}
+
+/* ================================================ */
 /* === GLOBAL RESET === */
 /* Reset margin, padding, box-sizing di semua elemen untuk konsistensi */
 * {
