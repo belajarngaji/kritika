@@ -1,8 +1,4 @@
----
 
-### JavaScript (`app.js`) yang Direvisi
-
-```javascript
 import { createClient } from '[https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm](https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm)';
 
 // ==============================
