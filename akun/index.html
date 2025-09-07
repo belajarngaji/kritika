@@ -4,15 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pengaturan Akun | Kritika</title>
-  
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/kritika/assets/js/auth-guard.js"></script> <link rel="stylesheet" href="/kritika/assets/css/style.css"> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/kritika/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="center-content">
 
   <header class="profile-header">
     <h1 class="profile-title">Pengaturan Akun</h1>
-    <a href="/kritika/index.html" class="close-button">X</a> </header>
+    <a href="/kritika/index.html" class="close-button">X</a>
+  </header>
 
   <main class="content">
     <div class="profile-container">
@@ -42,7 +43,7 @@
             </div>
             <div id="edit-name-section">
               <div class="form-group">
-                  <label for="fullName">Nama Pengguna</label>
+                  <label for="fullName">Nama Pengguna (dapat diubah sekali)</label>
                   <input type="text" id="fullName" class="form-control" placeholder="Isi nama pengguna Anda">
               </div>
               <button type="submit" class="btn-save">Simpan Nama</button>
@@ -60,13 +61,13 @@
             <button type="submit" class="btn-save">Ubah Kata Sandi</button>
           </form>
         </div>
-        
+
         <div class="settings-card danger-zone">
           <h2 class="settings-title">Keluar</h2>
           <button id="logout-button" class="btn-logout" style="width: 100%;">Logout dari Akun</button>
         </div>
       </div>
-      
+
       <nav class="profile-navigation">
         <a href="/kritika/profil/" class="nav-item">Profil</a>
         <a href="/kritika/statistik.html" class="nav-item">Statistik</a>
@@ -81,6 +82,8 @@
   <footer>
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
-  
-  <script src="/kritika/assets/js/account.js"></script> </body>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="/kritika/assets/js/account.js"></script>
+</body>
 </html>
