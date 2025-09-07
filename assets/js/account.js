@@ -1,16 +1,23 @@
+// =================================================
+// KONFIGURASI SUPABASE
+// =================================================
 const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg8ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
 
 const { createClient } = supabase;
 const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // =================================================
-// VARIABEL GLOBAL & ELEMEN HTML
+// ELEMEN HTML
 // =================================================
-let currentUser = null;
 const profileForm = document.getElementById('profile-form');
 const securityForm = document.getElementById('security-form');
 const logoutButton = document.getElementById('logout-button');
+
+// =================================================
+// STATE APLIKASI
+// =================================================
+let currentUser = null;
 
 // =================================================
 // FUNGSI UTAMA
@@ -21,7 +28,7 @@ const logoutButton = document.getElementById('logout-button');
  */
 async function loadAccountData() {
     const { data: { user } } = await _supabase.auth.getUser();
-    if (!user) return; // Dijaga oleh auth-guard.js
+    if (!user) return;
 
     currentUser = user;
     document.getElementById('email').value = user.email;
@@ -42,7 +49,6 @@ async function loadAccountData() {
         const editNameSection = document.getElementById('edit-name-section');
         
         if (profile.full_name) {
-            // Jika nama sudah ada, ganti form dengan teks yang tidak bisa diubah
             editNameSection.innerHTML = `
                 <div class="form-group">
                     <label>Nama Pengguna</label>
@@ -63,24 +69,25 @@ async function handleProfileUpdate(event) {
 
     if (!newFullName.trim()) return alert('Nama Pengguna tidak boleh kosong.');
 
-    // Nonaktifkan tombol saat proses berjalan
     saveButton.disabled = true;
     saveButton.textContent = 'Menyimpan...';
 
-    const { error } = await _supabase
-        .from('profiles')
-        .update({ full_name: newFullName, updated_at: new Date() })
-        .eq('id', currentUser.id);
-    
-    // Aktifkan kembali tombol setelah selesai
-    saveButton.disabled = false;
-    saveButton.textContent = originalButtonText;
+    try {
+        const { error } = await _supabase
+            .from('profiles')
+            .update({ full_name: newFullName, updated_at: new Date() })
+            .eq('id', currentUser.id);
 
-    if (error) {
-        alert('Gagal memperbarui nama: ' + error.message);
-    } else {
+        if (error) throw error;
+
         alert('Nama berhasil disimpan!');
-        loadAccountData(); // Muat ulang data untuk menyembunyikan form
+        loadAccountData();
+    } catch (error) {
+        alert('Gagal memperbarui nama: ' + error.message);
+    } finally {
+        // Bagian ini akan selalu berjalan, baik berhasil maupun gagal
+        saveButton.disabled = false;
+        saveButton.textContent = originalButtonText;
     }
 }
 
@@ -95,21 +102,21 @@ async function handlePasswordUpdate(event) {
 
     if (newPassword.length < 6) return alert('Kata sandi minimal 6 karakter.');
     
-    // Nonaktifkan tombol saat proses berjalan
     saveButton.disabled = true;
     saveButton.textContent = 'Mengubah...';
 
-    const { error } = await _supabase.auth.updateUser({ password: newPassword });
-
-    // Aktifkan kembali tombol setelah selesai
-    saveButton.disabled = false;
-    saveButton.textContent = originalButtonText;
-
-    if (error) {
-        alert('Gagal mengubah kata sandi: ' + error.message);
-    } else {
+    try {
+        const { error } = await _supabase.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+        
         alert('Kata sandi berhasil diubah!');
         event.target.reset();
+    } catch (error) {
+        alert('Gagal mengubah kata sandi: ' + error.message);
+    } finally {
+        // Bagian ini akan selalu berjalan
+        saveButton.disabled = false;
+        saveButton.textContent = originalButtonText;
     }
 }
 
@@ -119,20 +126,17 @@ async function handlePasswordUpdate(event) {
 async function handleLogout() {
     logoutButton.disabled = true;
     logoutButton.textContent = 'Keluar...';
-    
     await _supabase.auth.signOut();
-    // auth-guard.js akan otomatis mengalihkan ke halaman login
+    // auth-guard.js akan otomatis mengalihkan
 }
 
 // =================================================
 // EVENT LISTENERS
 // =================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Pastikan semua elemen ada sebelum menambahkan listener
     if (profileForm) profileForm.addEventListener('submit', handleProfileUpdate);
     if (securityForm) securityForm.addEventListener('submit', handlePasswordUpdate);
     if (logoutButton) logoutButton.addEventListener('click', handleLogout);
     
-    // Muat data akun setelah semua listener siap
     loadAccountData();
 });
