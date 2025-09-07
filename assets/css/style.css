@@ -13,15 +13,20 @@ body {
   margin: 0; /* Menghapus margin bawaan browser */
 }
 
+/* Styling umum untuk main.content di semua halaman */
 main.content {
-  flex-grow: 1; /* Membuat <main> mengisi sisa ruang yang tersedia */
-  
-  /* Menjadikan konten di dalamnya (profile-container) center */
+  flex-grow: 1;
+  padding: 2rem 0;
+}
+
+/* Styling KHUSUS untuk menengahkan konten di halaman profil, statistik, & akun */
+body.center-content main.content {
   display: flex;
+  flex-direction: column; /* Mengatur item dari atas ke bawah */
   justify-content: center;
   align-items: center;
-  padding: 2rem 0; /* Memberi sedikit jarak atas-bawah */
 }
+
 
 /* ================================================ */
 /* === GLOBAL RESET === */
