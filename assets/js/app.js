@@ -39,7 +39,13 @@ async function generateCriticalQuestion(materialText) {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({
-        message: `Buatkan 3 pertanyaan kritis dari teks berikut:\n${materialText}`,
+        message: `Berdasarkan teks berikut (dan *hanya teks ini*), buatkan 3 pertanyaan kritis singkat. 
+- Jangan ambil dari sumber lain. 
+- Pastikan pertanyaan fokus pada isi teks, bukan pengetahuan umum. 
+- Tampilkan pertanyaan dalam format daftar terurut.
+
+Teks:
+${materialText}`,
         mode: "qa",
         session_id: "jurumiya-bab1"
       })
@@ -66,7 +72,16 @@ async function checkAnswer(answer, materi) {
         answer, 
         context: materi, 
         mode: "check",
-        session_id: "jurumiya-bab1" // <-- TAMBAHKAN BARIS INI
+        session_id: "jurumiya-bab1",
+        instruction: `Evaluasi jawaban siswa *hanya berdasarkan teks berikut*:
+        
+"${materi}"
+
+Tugas:
+1. Nilai apakah jawaban relevan dengan isi teks.
+2. Berikan skor 0-10 (0 jika sama sekali tidak relevan).
+3. Tulis feedback singkat, jelas, to the point. 
+Jangan tambahkan referensi luar.`
       })
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
