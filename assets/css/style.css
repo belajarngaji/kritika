@@ -102,6 +102,30 @@ header {
   border-radius: 8px;
 }
 
+/* Styling untuk ikon profil */
+
+.navbar {
+  /* Tambahkan ini agar ikon bisa diposisikan relatif terhadap navbar */
+  position: relative; 
+}
+
+.profile-icon {
+  font-size: 28px; /* Ukuran ikon */
+  text-decoration: none; /* Hapus garis bawah */
+  color: #d1d5db; /* Disesuaikan agar warnanya sama dengan link nav lainnya */
+  transition: color 0.3s ease; /* Transisi yang sama dengan link nav lainnya */
+
+  /* Bagian untuk posisi di pojok kanan atas */
+  position: absolute;
+  top: 50%;
+  right: 0; /* Ubah ke 0 karena padding sudah ada di header */
+  transform: translateY(-50%); /* Membuat ikon pas di tengah secara vertikal */
+}
+
+.profile-icon:hover {
+  color: #fff; /* Efek hover yang sama dengan link nav lainnya */
+}
+
 /* ================================================ */
 /* === HALAMAN MATERI & BAB === */
 /* Content wrapper untuk materi / bab */
