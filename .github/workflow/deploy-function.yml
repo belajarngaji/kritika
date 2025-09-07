@@ -1,0 +1,37 @@
+# Nama workflow yang akan muncul di tab "Actions" di GitHub
+name: Deploy Supabase Edge Function
+
+# Pemicu: Jalankan workflow ini setiap kali ada push ke branch 'main'
+on:
+  push:
+    branches:
+      - main
+
+# Daftar pekerjaan yang harus dilakukan
+jobs:
+  deploy-function:
+    # Menggunakan mesin virtual Ubuntu terbaru
+    runs-on: ubuntu-latest
+
+    # Langkah-langkah yang akan dieksekusi
+    steps:
+      # 1. Mengunduh kode dari repositori Anda ke mesin virtual
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Menginstal Supabase CLI
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # 3. Men-deploy function ke Supabase
+      - name: Deploy Edge Function
+        env:
+          # Menggunakan secret yang sudah kita simpan di GitHub
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          # Ganti ID_PROYEK_ANDA dengan ID Proyek Supabase Anda
+          SUPABASE_PROJECT_ID: jpxtbdawajjyrvqrgijd
+        run: |
+          supabase functions deploy <nama-function-anda> --project-ref $SUPABASE_PROJECT_ID
+          
