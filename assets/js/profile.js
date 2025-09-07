@@ -8,8 +8,13 @@ const profileUserid = document.getElementById('profile-userid');
 const profileAvatar = document.getElementById('profile-avatar');
 const profileStats = document.getElementById('profile-stats');
 
-const uploadAvatarBtn = document.getElementById('upload-avatar-btn');
 const avatarInput = document.getElementById('avatar-input');
+const avatarModal = document.getElementById('avatar-modal');
+const modalImage = document.getElementById('modal-image');
+const modalClose = document.querySelector('.modal-close');
+const modalUploadBtn = document.getElementById('modal-upload-btn');
+
+let currentProfile = null; // Tambahkan variabel untuk menyimpan data profil
 
 // Fungsi untuk menampilkan profil "Tidak Diketahui"
 function displayUnknownProfile() {
@@ -17,26 +22,30 @@ function displayUnknownProfile() {
     profileUserid.textContent = 'Username Tidak Diketahui';
     profileAvatar.src = 'https://api.dicebear.com/8.x/initials/svg?seed=?';
     profileStats.style.display = 'none';
-    if (uploadAvatarBtn) {
-        uploadAvatarBtn.style.display = 'none'; // Sembunyikan tombol unggah
-    }
 }
 
 // Fungsi untuk menampilkan data profil yang ditemukan
-function displayProfileData(profile) {
+function displayProfileData(profile, user) {
+    currentProfile = profile;
     profileUsername.textContent = profile.full_name || profile.username || 'Tidak Diketahui';
     profileUserid.textContent = `@${profile.username || 'tidak diketahui'}`;
     
-    // Perbaikan: Gunakan Image Transformations saat menampilkan gambar
+    // Gunakan Image Transformations saat menampilkan gambar
     const avatarUrl = profile.avatar_url;
     if (avatarUrl) {
-      // Ubah ukuran gambar menjadi 200x200 piksel
       profileAvatar.src = `${avatarUrl}?width=200&height=200`;
     } else {
       profileAvatar.src = `https://api.dicebear.com/8.x/initials/svg?seed=${profile.username || '?'}`;
     }
     
     profileStats.style.display = 'flex';
+    
+    // Tampilkan/Sembunyikan fitur interaksi berdasarkan kepemilikan profil
+    if (user && user.id === profile.id) {
+        profileAvatar.style.cursor = 'pointer'; // Menandakan bisa diklik
+    } else {
+        profileAvatar.style.cursor = 'default';
+    }
 }
 
 // Fungsi utama untuk memuat profil
@@ -49,12 +58,12 @@ async function loadProfile() {
     if (username) {
         const { data: profile } = await _supabase
             .from('profiles')
-            .select('username, full_name, avatar_url')
+            .select('id, username, full_name, avatar_url')
             .eq('username', username)
             .single();
 
         if (profile) {
-            displayProfileData(profile);
+            displayProfileData(profile, user);
         } else {
             displayUnknownProfile();
             profileUsername.textContent = `Pengguna '${username}' Tidak Ditemukan`;
@@ -64,22 +73,15 @@ async function loadProfile() {
         if (user) {
             const { data: profile } = await _supabase
                 .from('profiles')
-                .select('username, full_name, avatar_url')
+                .select('id, username, full_name, avatar_url')
                 .eq('id', user.id)
                 .single();
 
             if (profile) {
-                displayProfileData(profile);
+                displayProfileData(profile, user);
             }
         } else {
             displayUnknownProfile();
-        }
-    }
-
-    // Tampilkan tombol unggah hanya jika pengguna sedang melihat profilnya sendiri
-    if (user && !username) {
-        if (uploadAvatarBtn) {
-            uploadAvatarBtn.style.display = 'flex';
         }
     }
 }
@@ -96,16 +98,19 @@ async function uploadAvatar(file) {
         alert('Anda harus login untuk mengunggah foto profil.');
         return;
     }
+    
+    // Sembunyikan modal saat upload
+    avatarModal.style.display = 'none';
 
+    // Logika unggah yang sama seperti sebelumnya
     const fileExt = file.name.split('.').pop();
     const newFilename = `${user.id}.${fileExt}`;
     const filePath = `avatars/${newFilename}`;
 
-    // Unggah file ke bucket 'avatars'
     const { error: uploadError } = await _supabase.storage
         .from('avatars')
         .upload(filePath, file, {
-            upsert: true // Ganti file jika sudah ada
+            upsert: true
         });
 
     if (uploadError) {
@@ -113,10 +118,8 @@ async function uploadAvatar(file) {
         return;
     }
 
-    // Dapatkan URL publik dari file yang diunggah
     const { data: publicUrl } = _supabase.storage.from('avatars').getPublicUrl(filePath);
 
-    // Perbarui URL avatar di tabel 'profiles'
     const { error: updateError } = await _supabase
         .from('profiles')
         .update({ avatar_url: publicUrl.publicUrl, updated_at: new Date() })
@@ -126,24 +129,49 @@ async function uploadAvatar(file) {
         alert('Gagal memperbarui URL foto profil: ' + updateError.message);
     } else {
         alert('Foto profil berhasil diperbarui!');
-        await loadProfile(); // Muat ulang profil untuk menampilkan foto baru
+        await loadProfile();
     }
 }
 
 // Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    loadProfile();
-    
-    if (uploadAvatarBtn) {
-        uploadAvatarBtn.addEventListener('click', () => {
-            avatarInput.click();
-        });
-    }
+document.addEventListener('DOMContentLoaded', loadProfile);
 
-    if (avatarInput) {
-        avatarInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            uploadAvatar(file);
-        });
-    }
-});
+// Menangani klik pada foto profil
+if (profileAvatar) {
+    profileAvatar.addEventListener('click', async () => {
+        const { data: { user } } = await _supabase.auth.getUser();
+        
+        // Tampilkan modal hanya jika user login dan melihat profilnya sendiri
+        if (user && currentProfile && user.id === currentProfile.id) {
+            avatarModal.style.display = 'flex';
+            modalImage.src = profileAvatar.src.replace(`?width=200&height=200`, ''); // Tampilkan gambar asli (tanpa transformasi)
+        } else {
+            // Jika user lain, langsung zoom gambar saja
+            avatarModal.style.display = 'flex';
+            modalImage.src = profileAvatar.src.replace(`?width=200&height=200`, '');
+            modalUploadBtn.style.display = 'none'; // Sembunyikan tombol upload
+        }
+    });
+}
+
+// Menangani klik tombol tutup modal
+if (modalClose) {
+    modalClose.addEventListener('click', () => {
+        avatarModal.style.display = 'none';
+    });
+}
+
+// Menangani klik tombol unggah di dalam modal
+if (modalUploadBtn) {
+    modalUploadBtn.addEventListener('click', () => {
+        avatarInput.click();
+    });
+}
+
+// Menangani pemilihan file dari input
+if (avatarInput) {
+    avatarInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        uploadAvatar(file);
+    });
+}
