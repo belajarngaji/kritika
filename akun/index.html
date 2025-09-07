@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pengaturan Akun | Kritika</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/kritika/assets/js/auth-guard.js"></script> <link rel="stylesheet" href="/kritika/assets/css/style.css"> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="center-content">
 
   <header class="profile-header">
     <h1 class="profile-title">Pengaturan Akun</h1>
@@ -18,36 +19,6 @@
     <div class="profile-container">
 
       <div class="settings-card">
-        <h2 class="settings-title">Informasi Profil</h2>
-        <form>
-          <div class="form-group">
-            <label for="fullName">Nama Lengkap</label>
-            <input type="text" id="fullName" class="form-control" value="Nama Pengguna">
-          </div>
-          <div class="form-group">
-            <label for="email">Alamat Email</label>
-            <input type="email" id="email" class="form-control" value="email@contoh.com">
-          </div>
-          <button type="submit" class="btn-save">Simpan Perubahan</button>
-        </form>
-      </div>
-
-      <div class="settings-card">
-        <h2 class="settings-title">Keamanan</h2>
-        <form>
-          <div class="form-group">
-            <label for="currentPassword">Kata Sandi Saat Ini</label>
-            <input type="password" id="currentPassword" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="newPassword">Kata Sandi Baru</label>
-            <input type="password" id="newPassword" class="form-control">
-          </div>
-          <button type="submit" class="btn-save">Ubah Kata Sandi</button>
-        </form>
-      </div>
-
-            <div class="settings-card">
         <h2 class="settings-title">Informasi Profil</h2>
         <form id="profile-form">
           <div class="form-group">
@@ -68,21 +39,26 @@
         </form>
       </div>
 
+      <div class="settings-card">
+        <h2 class="settings-title">Keamanan</h2>
+        <form id="security-form">
+          <div class="form-group">
+            <label for="newPassword">Kata Sandi Baru</label>
+            <input type="password" id="newPassword" class="form-control" placeholder="Minimal 6 karakter" minlength="6">
+          </div>
+          <button type="submit" class="btn-save">Ubah Kata Sandi</button>
+        </form>
+      </div>
+      
       <div class="settings-card danger-zone">
-        <h2 class="settings-title">Zona Berbahaya</h2>
-        <div class="danger-actions">
-            <button class="btn-logout">Keluar</button>
-            <button class="btn-delete">Hapus Akun</button>
-        </div>
+        <h2 class="settings-title">Keluar</h2>
+        <button id="logout-button" class="btn-logout" style="width: 100%;">Logout dari Akun</button>
       </div>
 
       <nav class="profile-navigation">
-        <a href="profil.html" class="nav-item">Profil</a>
-        <a href="statistik.html" class="nav-item">Statistik</a>
-        <a href="#materi" class="nav-item">Materi</a>
+        <a href="/kritika/profil/" class="nav-item">Profil</a> <a href="/kritika/statistik.html" class="nav-item">Statistik</a> <a href="#materi" class="nav-item">Materi</a>
         <a href="#riwayat" class="nav-item">Riwayat</a>
-        <a href="#" class="nav-item active">Akun</a>
-      </nav>
+        <a href="/kritika/akun/" class="nav-item active">Akun</a> </nav>
 
     </div>
   </main>
@@ -90,6 +66,6 @@
   <footer>
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
-
-</body>
+  
+  <script src="/kritika/assets/js/account.js"></script> </body>
 </html>
