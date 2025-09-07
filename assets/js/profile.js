@@ -14,7 +14,7 @@ const modalImage = document.getElementById('modal-image');
 const modalClose = document.querySelector('.modal-close');
 const modalUploadBtn = document.getElementById('modal-upload-btn');
 
-let currentProfile = null; // Tambahkan variabel untuk menyimpan data profil
+let currentProfile = null;
 
 // Fungsi untuk menampilkan profil "Tidak Diketahui"
 function displayUnknownProfile() {
@@ -29,20 +29,19 @@ function displayProfileData(profile, user) {
     currentProfile = profile;
     profileUsername.textContent = profile.full_name || profile.username || 'Tidak Diketahui';
     profileUserid.textContent = `@${profile.username || 'tidak diketahui'}`;
-    
-    // Gunakan Image Transformations saat menampilkan gambar
+
     const avatarUrl = profile.avatar_url;
     if (avatarUrl) {
+      // Gunakan Image Transformations untuk menampilkan ukuran 200x200
       profileAvatar.src = `${avatarUrl}?width=200&height=200`;
     } else {
       profileAvatar.src = `https://api.dicebear.com/8.x/initials/svg?seed=${profile.username || '?'}`;
     }
-    
+
     profileStats.style.display = 'flex';
-    
-    // Tampilkan/Sembunyikan fitur interaksi berdasarkan kepemilikan profil
+
     if (user && user.id === profile.id) {
-        profileAvatar.style.cursor = 'pointer'; // Menandakan bisa diklik
+        profileAvatar.style.cursor = 'pointer';
     } else {
         profileAvatar.style.cursor = 'default';
     }
@@ -54,7 +53,6 @@ async function loadProfile() {
     const username = params.get('user');
     const { data: { user } } = await _supabase.auth.getUser();
 
-    // Skenario 1: Profil Publik (username di URL)
     if (username) {
         const { data: profile } = await _supabase
             .from('profiles')
@@ -69,7 +67,6 @@ async function loadProfile() {
             profileUsername.textContent = `Pengguna '${username}' Tidak Ditemukan`;
         }
     } else {
-        // Skenario 2: Profil Pengguna yang Sedang Login
         if (user) {
             const { data: profile } = await _supabase
                 .from('profiles')
@@ -87,29 +84,46 @@ async function loadProfile() {
 }
 
 /**
- * Mengunggah file avatar ke Supabase Storage.
+ * Mengunggah file avatar ke Supabase Storage dengan kompresi.
  * @param {File} file - File gambar yang akan diunggah.
  */
-async function uploadAvatar(file) {
+function uploadAvatar(file) {
     if (!file) return;
 
+    avatarModal.style.display = 'none';
+
+    // Kompresi gambar menjadi 100x100 piksel
+    new Compressor(file, {
+        width: 100,
+        height: 100,
+        quality: 0.8, // Kualitas 80%
+        success(result) {
+            handleUpload(result);
+        },
+        error(err) {
+            alert('Gagal mengompres gambar: ' + err.message);
+        },
+    });
+}
+
+/**
+ * Menangani proses unggah ke Supabase setelah kompresi.
+ * @param {File} compressedFile - File yang sudah dikompresi.
+ */
+async function handleUpload(compressedFile) {
     const { data: { user } } = await _supabase.auth.getUser();
     if (!user) {
         alert('Anda harus login untuk mengunggah foto profil.');
         return;
     }
-    
-    // Sembunyikan modal saat upload
-    avatarModal.style.display = 'none';
 
-    // Logika unggah yang sama seperti sebelumnya
-    const fileExt = file.name.split('.').pop();
+    const fileExt = compressedFile.name.split('.').pop();
     const newFilename = `${user.id}.${fileExt}`;
     const filePath = `avatars/${newFilename}`;
 
     const { error: uploadError } = await _supabase.storage
         .from('avatars')
-        .upload(filePath, file, {
+        .upload(filePath, compressedFile, {
             upsert: true
         });
 
@@ -134,44 +148,43 @@ async function uploadAvatar(file) {
 }
 
 // Event Listeners
-document.addEventListener('DOMContentLoaded', loadProfile);
+document.addEventListener('DOMContentLoaded', () => {
+    loadProfile();
 
-// Menangani klik pada foto profil
-if (profileAvatar) {
-    profileAvatar.addEventListener('click', async () => {
-        const { data: { user } } = await _supabase.auth.getUser();
-        
-        // Tampilkan modal hanya jika user login dan melihat profilnya sendiri
-        if (user && currentProfile && user.id === currentProfile.id) {
-            avatarModal.style.display = 'flex';
-            modalImage.src = profileAvatar.src.replace(`?width=200&height=200`, ''); // Tampilkan gambar asli (tanpa transformasi)
-        } else {
-            // Jika user lain, langsung zoom gambar saja
-            avatarModal.style.display = 'flex';
-            modalImage.src = profileAvatar.src.replace(`?width=200&height=200`, '');
-            modalUploadBtn.style.display = 'none'; // Sembunyikan tombol upload
-        }
-    });
-}
+    if (profileAvatar) {
+        profileAvatar.addEventListener('click', async () => {
+            const { data: { user } } = await _supabase.auth.getUser();
 
-// Menangani klik tombol tutup modal
-if (modalClose) {
-    modalClose.addEventListener('click', () => {
-        avatarModal.style.display = 'none';
-    });
-}
+            if (user && currentProfile && user.id === currentProfile.id) {
+                avatarModal.style.display = 'flex';
+                // Hapus string query untuk menampilkan gambar asli di modal
+                modalImage.src = profileAvatar.src.replace(/\?.*$/, '');
+                modalUploadBtn.style.display = 'block';
+            } else if (profileAvatar.src && profileAvatar.src.includes('http')) {
+                // Tampilkan modal zoom untuk profil publik
+                avatarModal.style.display = 'flex';
+                modalImage.src = profileAvatar.src.replace(/\?.*$/, '');
+                modalUploadBtn.style.display = 'none';
+            }
+        });
+    }
 
-// Menangani klik tombol unggah di dalam modal
-if (modalUploadBtn) {
-    modalUploadBtn.addEventListener('click', () => {
-        avatarInput.click();
-    });
-}
+    if (modalClose) {
+        modalClose.addEventListener('click', () => {
+            avatarModal.style.display = 'none';
+        });
+    }
 
-// Menangani pemilihan file dari input
-if (avatarInput) {
-    avatarInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        uploadAvatar(file);
-    });
-}
+    if (modalUploadBtn) {
+        modalUploadBtn.addEventListener('click', () => {
+            avatarInput.click();
+        });
+    }
+
+    if (avatarInput) {
+        avatarInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            uploadAvatar(file);
+        });
+    }
+});
