@@ -343,6 +343,26 @@ header {
   background-color: #2563eb; /* Sedikit lebih gelap saat di-hover */
 }
 
+/* ================================================ */
+/* === HALAMAN STATISTIK (TAMBAHAN) === */
+/* ================================================ */
+
+/* Judul di dalam kartu chart */
+.chart-title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+}
+
+/* Kontainer untuk canvas agar responsif */
+.chart-container {
+    position: relative;
+    width: 100%;
+    margin: auto;
+}
+
 
 
 /* ================================================ */
