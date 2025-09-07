@@ -31,7 +31,7 @@ async function getMaterials() {
 }
 
 // ==============================
-// Generate soal pilihan ganda AI
+// Generate pertanyaan pilihan ganda dari AI
 // ==============================
 async function generateQuestions(materialText) {
   try {
@@ -56,7 +56,8 @@ async function generateQuestions(materialText) {
     }
   ]
 }
-- Urutan opsi (A–D) harus acak, jangan selalu benar di A.
+- Jangan menuliskan kunci jawaban di luar JSON.
+- "correct_answer" hanya untuk sistem, tidak ditampilkan ke siswa.
 
 Teks:
 ${materialText}`,
@@ -67,34 +68,11 @@ ${materialText}`,
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return data.reply || null; // AI balikin string JSON
+    return data.reply || null;
   } catch (err) {
     console.error('❌ Error AI generate:', err);
     return null;
   }
-}
-
-// ==============================
-// Parse JSON aman
-// ==============================
-function safeParseJSON(str) {
-  try {
-    const clean = str.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
-  } catch (e) {
-    console.error("❌ Gagal parse JSON:", e, str);
-    return null;
-  }
-}
-
-// ==============================
-// Shuffle helper
-// ==============================
-function shuffle(array) {
-  return array
-    .map(value => ({ value, sort: Math.random() }))
-    .sort((a, b) => a.sort - b.sort)
-    .map(({ value }) => value);
 }
 
 // ==============================
@@ -130,9 +108,17 @@ Jangan tambahkan referensi luar.`
 }
 
 // ==============================
+// Shuffle Array Helper
+// ==============================
+function shuffleArray(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+// ==============================
 // INIT Halaman Materi
 // ==============================
 async function init() {
+  // Ambil elemen dari HTML
   const materiContent = document.getElementById('materiContent');
   const btnGenerate = document.getElementById('btnGenerate');
 
@@ -145,27 +131,14 @@ async function init() {
     btnGenerate.after(aiOutput);
   }
 
-  // ======= Buat kolom jawaban user =======
-  let answerSection = document.querySelector('.answer-section');
-  if (!answerSection) {
-    answerSection = document.createElement('div');
-    answerSection.classList.add('answer-section');
-    answerSection.innerHTML = `
-      <h3>Jawaban Anda</h3>
-      <textarea id="userAnswer" placeholder="Tulis jawaban Anda di sini..." rows="4"></textarea>
-      <button id="btnCheck" class="btn">Cek Jawaban</button>
-    `;
-    aiOutput.after(answerSection);
-  }
-
   // ======= Buat kolom koreksi AI =======
   let aiCorrection = document.getElementById('aiCorrection');
   if (!aiCorrection) {
     aiCorrection = document.createElement('div');
     aiCorrection.id = 'aiCorrection';
     aiCorrection.classList.add('ai-output');
-    aiCorrection.innerHTML = '<p>Koreksi akan ditampilkan di sini setelah dicek.</p>';
-    answerSection.after(aiCorrection);
+    aiCorrection.innerHTML = '<p>Koreksi akan ditampilkan di sini.</p>';
+    aiOutput.after(aiCorrection);
   }
 
   // ======= Ambil materi dari Supabase =======
@@ -173,7 +146,7 @@ async function init() {
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
   materiContent.innerHTML = materi ? materi.content : '<p>Materi belum tersedia.</p>';
 
-  // ======= Event Generate Soal Pilihan Ganda =======
+  // ======= Event Generate Pertanyaan =======
   btnGenerate.addEventListener('click', async () => {
     if (!materi) return;
 
@@ -181,75 +154,70 @@ async function init() {
     btnGenerate.textContent = 'Loading...';
     aiOutput.innerHTML = '';
 
-    const questionsJson = await generateQuestions(materi.content);
-    if (!questionsJson) {
-      aiOutput.innerHTML = '<p>AI gagal generate pertanyaan.</p>';
+    const raw = await generateQuestions(materi.content);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      console.error('❌ JSON parse error:', e, raw);
+      aiOutput.innerHTML = '<p>AI gagal generate pertanyaan (JSON tidak valid).</p>';
       btnGenerate.disabled = false;
-      btnGenerate.textContent = 'Generate Soal';
+      btnGenerate.textContent = 'Generate Pertanyaan';
       return;
     }
 
-    const parsed = safeParseJSON(questionsJson);
-    if (!parsed || !parsed.questions) {
-      aiOutput.innerHTML = '<p>Format JSON tidak valid.</p>';
-      btnGenerate.disabled = false;
-      btnGenerate.textContent = 'Generate Soal';
-      return;
-    }
-
-    aiOutput.innerHTML = '';
     parsed.questions.forEach(q => {
-      // Cari opsi jawaban benar sebelum diacak
-      const correctOpt = q.options.find(opt => opt.key === q.correct_answer);
-
-      // Acak opsi
-      let shuffled = shuffle(q.options);
-
-      // Buat ulang key jadi A-D setelah diacak
-      const keys = ['A','B','C','D'];
-      shuffled = shuffled.map((opt, i) => ({
-        key: keys[i],
-        text: opt.text
-      }));
-
-      // Cari kunci baru sesuai text jawaban benar
-      const newCorrect = shuffled.find(opt => opt.text === correctOpt.text);
-
       const div = document.createElement('div');
       div.classList.add('question-block');
+      div.dataset.correct = q.correct_answer; // simpan kunci rahasia
+
+      // Acak opsi
+      const shuffled = shuffleArray([...q.options]);
+
       div.innerHTML = `
         <p><strong>${q.id}.</strong> ${q.question}</p>
         <ul>
-          ${shuffled.map(opt => `<li>${opt.key}. ${opt.text}</li>`).join('')}
+          ${shuffled.map(opt => `
+            <li>
+              <button class="option-btn" data-key="${opt.key}">${opt.key}. ${opt.text}</button>
+            </li>
+          `).join('')}
         </ul>
-        <p><em>Kunci: ${newCorrect.key}</em></p>
+        <p class="feedback"></p>
       `;
+
+      // Event handler jawaban
+      div.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userChoice = btn.dataset.key;
+          const correct = div.dataset.correct;
+          const feedbackEl = div.querySelector('.feedback');
+
+          if (userChoice === correct) {
+            feedbackEl.textContent = "✅ Benar!";
+            feedbackEl.style.color = "green";
+          } else {
+            feedbackEl.textContent = `❌ Salah. Jawaban yang benar: ${correct}`;
+            feedbackEl.style.color = "red";
+          }
+
+          // (Opsional) cek dengan AI untuk feedback lebih detail
+          const result = await checkAnswer(userChoice, materi.content);
+          if (result && 'score' in result && 'feedback' in result) {
+            aiCorrection.innerHTML = `
+              <p><strong>Skor:</strong> ${result.score}</p>
+              <p><strong>Feedback AI:</strong> ${result.feedback}</p>
+            `;
+          }
+        });
+      });
+
       aiOutput.appendChild(div);
     });
 
     btnGenerate.disabled = false;
-    btnGenerate.textContent = 'Generate Soal';
-  });
-
-  // ======= Event Cek Jawaban =======
-  const btnCheck = document.getElementById('btnCheck');
-  const userAnswer = document.getElementById('userAnswer');
-
-  btnCheck.addEventListener('click', async () => {
-    const answerText = userAnswer.value.trim();
-    if (!answerText) return alert('Tulis jawaban dulu!');
-
-    aiCorrection.innerHTML = '<p>Memeriksa jawaban...</p>';
-    const result = await checkAnswer(answerText, materi.content);
-
-    if (result && 'score' in result && 'feedback' in result) {
-      aiCorrection.innerHTML = `
-        <p><strong>Skor:</strong> ${result.score}</p>
-        <p><strong>Feedback:</strong> ${result.feedback}</p>
-      `;
-    } else {
-      aiCorrection.innerHTML = '<p>AI gagal memeriksa jawaban.</p>';
-    }
+    btnGenerate.textContent = 'Generate Pertanyaan';
   });
 }
 
