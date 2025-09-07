@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    _supabaseGuard.auth.onAuthStateChange((event, session) => {
+    _supabase.auth.onAuthStateChange((event, session) => {
         if (session) {
             // Jika pengguna login, selalu tampilkan konten utama.
             protectedContent.classList.remove('hidden');
