@@ -521,7 +521,10 @@ input:checked + .slider:before {
     background-color: #dc2626;
 }
 
-
+/* Utility Class */
+.hidden {
+  display: none !important;
+}
 
 /* ================================================ */
 /* === HALAMAN MATERI & BAB === */
