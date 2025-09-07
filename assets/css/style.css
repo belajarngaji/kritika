@@ -537,6 +537,40 @@ footer {
 }
 
 /* ================================================ */
+/* === NAVIGASI HALAMAN PROFIL === */
+/* ================================================ */
+
+.profile-navigation {
+  display: flex;
+  justify-content: space-around;
+  background-color: #f9fafb; /* Warna latar sama dengan kartu */
+  padding: 0.75rem 0.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-top: 1.5rem; /* Memberi jarak dari kartu statistik di atasnya */
+}
+
+.profile-navigation .nav-item {
+  text-decoration: none;
+  color: #6b7280; /* Warna teks abu-abu untuk item non-aktif */
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px; /* Sudut melengkung untuk setiap item */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.profile-navigation .nav-item:hover {
+  background-color: #f3f4f6; /* Warna latar saat disentuh */
+}
+
+.profile-navigation .nav-item.active {
+  background-color: #3b82f6; /* Warna latar biru untuk item aktif */
+  color: #ffffff; /* Warna teks putih untuk item aktif */
+}
+
+
+/* ================================================ */
 /* === CATATAN === */
 /* Untuk mencegah duplikasi:
    1. Hapus semua deklarasi * dan body kedua kali
