@@ -10,7 +10,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ==============================
 // API URL
 // ==============================
-const API_URL = 'https://hmmz-bot01.vercel.app/chat'; 
+const API_URL = 'https://hmmz-bot01.vercel.app/chat';
+const CHECK_URL = 'https://hmmz-bot01.vercel.app/check';
 
 // ==============================
 // Ambil semua materi dari Supabase
@@ -30,28 +31,21 @@ async function getMaterials() {
 }
 
 // ==============================
-// Generate pertanyaan pilihan ganda
+// Generate pertanyaan kritis AI
 // ==============================
-async function generateMultipleChoiceQuestion(materialText) {
+async function generateCriticalQuestion(materialText) {
   try {
-    const prompt = `Berdasarkan teks berikut (dan *hanya teks ini*), buatkan 1 soal pilihan ganda dengan 4 opsi.
-- Opsi jawaban harus singkat dan berbeda.
-- Hanya 1 jawaban yang benar.
-- Tampilkan dalam format JSON berikut:
-{
-  "question": "Soal di sini",
-  "options": ["Opsi A", "Opsi B", "Opsi C", "Opsi D"],
-  "correct_answer": "Opsi yang benar"
-}
-
-Teks:
-${materialText}`;
-
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({
-        message: prompt,
+        message: `Berdasarkan teks berikut (dan *hanya teks ini*), buatkan 3 pertanyaan singkat. 
+- Jangan ambil dari sumber lain. 
+- Pastikan pertanyaan fokus pada isi teks, bukan pengetahuan umum. 
+- Tampilkan pertanyaan dalam format daftar terurut.
+
+Teks:
+${materialText}`,
         mode: "qa",
         session_id: "jurumiya-bab1"
       })
@@ -59,12 +53,45 @@ ${materialText}`;
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return JSON.parse(data.reply);
+    return data.reply || null;
   } catch (err) {
     console.error('❌ Error AI generate:', err);
     return null;
   }
 }
+
+// ==============================
+// Koreksi jawaban user via AI
+// ==============================
+async function checkAnswer(answer, materi) {
+  try {
+    const res = await fetch(CHECK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ 
+        answer, 
+        context: materi, 
+        mode: "check",
+        session_id: "jurumiya-bab1",
+        instruction: `Evaluasi jawaban siswa *hanya berdasarkan teks berikut*:
+
+"${materi}"
+
+Tugas:
+1. Nilai apakah jawaban relevan dengan isi teks.
+2. Berikan skor 0-10 (0 jika sama sekali tidak relevan).
+3. Tulis feedback singkat, jelas, to the point. 
+Jangan tambahkan referensi luar.`
+      })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json(); // { score, feedback }
+  } catch(err) {
+    console.error('❌ Error AI koreksi:', err);
+    return null;
+  }
+}
+
 
 // ==============================
 // INIT Halaman Materi
@@ -74,82 +101,84 @@ async function init() {
   const materiContent = document.getElementById('materiContent');
   const btnGenerate = document.getElementById('btnGenerate');
 
-  // Ambil elemen untuk tampilan soal pilihan ganda
-  const aiQuestionContainer = document.getElementById('aiQuestionContainer');
-  const questionText = document.getElementById('questionText');
-  const optionsList = document.getElementById('optionsList');
-  const feedbackMessage = document.getElementById('feedbackMessage');
+  // ======= Buat aiOutput (hasil generate pertanyaan) =======
+  let aiOutput = document.getElementById('aiOutput');
+  if (!aiOutput) {
+    aiOutput = document.createElement('div');
+    aiOutput.id = 'aiOutput';
+    aiOutput.classList.add('ai-output');
+    btnGenerate.after(aiOutput); // Hasil generate langsung di bawah tombol
+  }
 
-  // ======= Ambil materi dari Supabase dan tampilkan =======
+  // ======= Buat kolom jawaban user =======
+  let answerSection = document.querySelector('.answer-section');
+  if (!answerSection) {
+    answerSection = document.createElement('div');
+    answerSection.classList.add('answer-section');
+    answerSection.innerHTML = `
+      <h3>Jawaban Anda</h3>
+      <textarea id="userAnswer" placeholder="Tulis jawaban Anda di sini..." rows="4"></textarea>
+      <button id="btnCheck" class="btn">Cek Jawaban</button>
+    `;
+    aiOutput.after(answerSection); // Muncul tepat di bawah hasil generate
+  }
+
+  // ======= Buat kolom koreksi AI =======
+  let aiCorrection = document.getElementById('aiCorrection');
+  if (!aiCorrection) {
+    aiCorrection = document.createElement('div');
+    aiCorrection.id = 'aiCorrection';
+    aiCorrection.classList.add('ai-output');
+    aiCorrection.innerHTML = '<p>Koreksi akan ditampilkan di sini setelah dicek.</p>';
+    answerSection.after(aiCorrection); // Muncul di bawah kolom jawaban
+  }
+
+  // ======= Ambil materi dari Supabase =======
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
 
-  if (materi) {
-      materiContent.innerHTML = marked.parse(materi.content); 
-  } else {
-      materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
-  }
+  // ✅ Perbaikan #1
+  // Menggunakan marked.parse() untuk mengubah Markdown menjadi HTML
+  materiContent.innerHTML = materi ? marked.parse(materi.content) : '<p>Materi belum tersedia.</p>';
 
-  // ======== Event Generate Pertanyaan Pilihan Ganda ========
+  // ======= Event Generate Pertanyaan Kritis =======
   btnGenerate.addEventListener('click', async () => {
-    if (!materi) {
-      alert('Materi belum dimuat.');
-      return;
-    }
+    if (!materi) return;
 
     btnGenerate.disabled = true;
-    btnGenerate.textContent = 'Membuat Soal...';
-    aiQuestionContainer.style.display = 'none';
-    optionsList.innerHTML = ''; // Kosongkan opsi sebelumnya
-    feedbackMessage.textContent = ''; // Kosongkan feedback
+    btnGenerate.textContent = 'Loading...';
+    aiOutput.innerHTML = ''; // Reset hasil generate
 
-    const questionData = await generateMultipleChoiceQuestion(materi.content);
-
-    if (questionData && questionData.question && questionData.options && questionData.correct_answer) {
-      aiQuestionContainer.style.display = 'block';
-      questionText.textContent = questionData.question;
-
-      const shuffledOptions = questionData.options.sort(() => Math.random() - 0.5);
-
-      shuffledOptions.forEach(option => {
-        const li = document.createElement('li');
-        const button = document.createElement('button');
-        button.textContent = option;
-
-        button.addEventListener('click', () => {
-          optionsList.querySelectorAll('button').forEach(btn => btn.disabled = true);
-
-          if (option === questionData.correct_answer) {
-            button.classList.add('correct');
-            feedbackMessage.innerHTML = '✅ **Jawaban Anda benar!**';
-            feedbackMessage.style.color = 'green';
-          } else {
-            button.classList.add('wrong');
-            const correctAnswerButton = optionsList.querySelector(`button[data-correct="true"]`);
-            if (correctAnswerButton) {
-                correctAnswerButton.classList.add('correct');
-            }
-            feedbackMessage.innerHTML = `❌ **Jawaban Anda salah.** Jawaban yang benar adalah: "${questionData.correct_answer}"`;
-            feedbackMessage.style.color = 'red';
-          }
-        });
-
-        if (option === questionData.correct_answer) {
-            button.setAttribute('data-correct', 'true');
-        }
-
-        li.appendChild(button);
-        optionsList.appendChild(li);
-      });
-
-    } else {
-      aiQuestionContainer.style.display = 'block';
-      questionText.textContent = 'AI gagal membuat soal. Silakan coba lagi.';
-    }
+    const questions = await generateCriticalQuestion(materi.content);
+    aiOutput.innerHTML = questions ? marked.parse(questions) : '<p>AI gagal generate pertanyaan.</p>';
 
     btnGenerate.disabled = false;
-    btnGenerate.textContent = 'Generate Pertanyaan';
+    btnGenerate.textContent = 'Generate Pertanyaan Kritis';
+  });
+
+  // ======= Event Cek Jawaban =======
+  const btnCheck = document.getElementById('btnCheck');
+  const userAnswer = document.getElementById('userAnswer');
+
+  btnCheck.addEventListener('click', async () => {
+    const answerText = userAnswer.value.trim();
+    if (!answerText) return alert('Tulis jawaban dulu!');
+
+    aiCorrection.innerHTML = '<p>Memeriksa jawaban...</p>';
+    // ✅ Perbaikan #2
+    // Mengirim materi.content (teks) ke AI, bukan seluruh objek materi
+    const result = await checkAnswer(answerText, materi.content);
+
+    if (result && 'score' in result && 'feedback' in result) {
+      aiCorrection.innerHTML = `
+        <p><strong>Skor:</strong> ${result.score}</p>
+        <p><strong>Feedback:</strong> ${result.feedback}</p>
+      `;
+    } else {
+      aiCorrection.innerHTML = '<p>AI gagal memeriksa jawaban.</p>';
+    }
   });
 }
 
+// Jalankan init
 init();
