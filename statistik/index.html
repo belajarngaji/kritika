@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistik | Kritika</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <header class="profile-header">
+    <h1 class="profile-title">Halaman Statistik</h1>
+    <a href="javascript:history.back()" class="close-button">X</a>
+  </header>
+
+  <main class="content">
+    <div class="profile-container">
+
+      <div class="profile-card">
+        <h2 class="chart-title">Statistik Keahlian Kritis</h2>
+        <div class="chart-container">
+          <canvas id="radarChart"></canvas>
+        </div>
+      </div>
+
+      <nav class="profile-navigation">
+        <a href="profil.html" class="nav-item">Profil</a> <a href="#" class="nav-item active">Statistik</a> <a href="#materi" class="nav-item">Materi</a>
+        <a href="#riwayat" class="nav-item">Riwayat</a>
+        <a href="#akun" class="nav-item">Akun</a>
+      </nav>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Kritika | Belajar Kritis</p>
+  </footer>
+
+  <script>
+    // Data untuk statistik (nilai 0-100)
+    const data = {
+      labels: [
+        'Analisis',
+        'Logika',
+        'Evaluasi',
+        'Refleksi',
+        'Konsistensi'
+      ],
+      datasets: [{
+        label: 'Keahlian Berpikir Kritis',
+        data: [80, 65, 75, 90, 70], // Contoh data nilai pengguna
+        fill: true,
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        borderColor: 'rgb(59, 130, 246)',
+        pointBackgroundColor: 'rgb(59, 130, 246)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgb(59, 130, 246)'
+      }]
+    };
+
+    // Konfigurasi chart
+    const config = {
+      type: 'radar',
+      data: data,
+      options: {
+        responsive: true, // Membuat chart responsif
+        maintainAspectRatio: true, // Menjaga rasio aspek
+        elements: {
+          line: {
+            borderWidth: 3
+          }
+        },
+        scales: {
+          r: {
+            angleLines: {
+              display: true
+            },
+            suggestedMin: 0,
+            suggestedMax: 100,
+            pointLabels: {
+              font: {
+                size: 12, // Ukuran font label (Analisis, Logika, dst)
+                weight: 'bold'
+              }
+            },
+            ticks: {
+              backdropColor: 'rgba(255, 255, 255, 1)' // Memberi latar belakang putih pada angka (0, 20, 40..)
+            }
+          }
+        },
+        plugins: {
+            legend: {
+                display: false // Menyembunyikan label 'Keahlian Berpikir Kritis' di atas
+            }
+        }
+      },
+    };
+
+    // Render chart di canvas
+    const radarChart = new Chart(
+      document.getElementById('radarChart'),
+      config
+    );
+  </script>
+
+</body>
+</html>
