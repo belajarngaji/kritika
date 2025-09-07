@@ -79,14 +79,14 @@ async function init() {
   const questionText = document.getElementById('questionText');
   const optionsList = document.getElementById('optionsList');
   const feedbackMessage = document.getElementById('feedbackMessage');
-  
+
   // ======== Ambil materi dari Supabase dan tampilkan ========
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
 
   if (materi) {
-      // Perbaikan: gunakan marked.parse untuk menampilkan konten
-      materiContent.innerHTML = marked.parse(materi.content); 
+      // PERBAIKAN: Menggunakan .textContent untuk menampilkan teks biasa
+      materiContent.textContent = materi.content; 
   } else {
       materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
   }
@@ -105,21 +105,21 @@ async function init() {
     feedbackMessage.textContent = ''; // Kosongkan feedback
 
     const questionData = await generateMultipleChoiceQuestion(materi.content);
-    
+
     if (questionData && questionData.question && questionData.options && questionData.correct_answer) {
       aiQuestionContainer.style.display = 'block';
       questionText.textContent = questionData.question;
-      
+
       const shuffledOptions = questionData.options.sort(() => Math.random() - 0.5);
 
       shuffledOptions.forEach(option => {
         const li = document.createElement('li');
         const button = document.createElement('button');
         button.textContent = option;
-        
+
         button.addEventListener('click', () => {
           optionsList.querySelectorAll('button').forEach(btn => btn.disabled = true);
-          
+
           if (option === questionData.correct_answer) {
             button.classList.add('correct');
             feedbackMessage.innerHTML = '✅ **Jawaban Anda benar!**';
@@ -134,7 +134,7 @@ async function init() {
             feedbackMessage.style.color = 'red';
           }
         });
-        
+
         if (option === questionData.correct_answer) {
             button.setAttribute('data-correct', 'true');
         }
@@ -142,7 +142,7 @@ async function init() {
         li.appendChild(button);
         optionsList.appendChild(li);
       });
-      
+
     } else {
       aiQuestionContainer.style.display = 'block';
       questionText.textContent = 'AI gagal membuat soal. Silakan coba lagi.';
