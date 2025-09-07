@@ -1,3 +1,5 @@
+// /kritika/assets/js/account.js (File Gabungan)
+
 // =================================================
 // KONFIGURASI SUPABASE
 // =================================================
@@ -14,10 +16,14 @@ const profileForm = document.getElementById('profile-form');
 const securityForm = document.getElementById('security-form');
 const logoutButton = document.getElementById('logout-button');
 
+const protectedContent = document.getElementById('protected-content');
+const loginPrompt = document.getElementById('login-prompt');
+
 // =================================================
 // STATE APLIKASI
 // =================================================
 let currentUser = null;
+const isDevMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
 // =================================================
 // FUNGSI UTAMA
@@ -28,7 +34,10 @@ let currentUser = null;
  */
 async function loadAccountData() {
     const { data: { user } } = await _supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+        // Jika tidak ada user, hentikan fungsi
+        return;
+    }
 
     currentUser = user;
     document.getElementById('email').value = user.email;
@@ -43,17 +52,22 @@ async function loadAccountData() {
         console.error('Error mengambil profil:', error.message);
         return;
     }
-    
+
     if (profile) {
         document.getElementById('username').value = profile.username || 'Belum diatur';
+
         const editNameSection = document.getElementById('edit-name-section');
-        
+        const fullNameInput = document.getElementById('fullName');
+        const saveButton = editNameSection.querySelector('.btn-save');
+
+        // PERBAIKAN LOGIKA: Jangan hapus HTML, tapi atur tampilan elemen
         if (profile.full_name) {
-            editNameSection.innerHTML = `
-                <div class="form-group">
-                    <label>Nama Pengguna</label>
-                    <input type="text" class="form-control" value="${profile.full_name}" disabled>
-                </div>`;
+            fullNameInput.value = profile.full_name;
+            fullNameInput.disabled = true;
+            if (saveButton) saveButton.style.display = 'none'; // Sembunyikan tombol
+        } else {
+            fullNameInput.disabled = false;
+            if (saveButton) saveButton.style.display = 'block'; // Tampilkan tombol
         }
     }
 }
@@ -63,11 +77,15 @@ async function loadAccountData() {
  */
 async function handleProfileUpdate(event) {
     event.preventDefault();
+    if (!currentUser) return; // Pastikan user sudah dimuat
     const saveButton = event.target.querySelector('.btn-save');
     const originalButtonText = saveButton.textContent;
     const newFullName = document.getElementById('fullName').value;
 
-    if (!newFullName.trim()) return alert('Nama Pengguna tidak boleh kosong.');
+    if (!newFullName.trim()) {
+        alert('Nama Pengguna tidak boleh kosong.');
+        return;
+    }
 
     saveButton.disabled = true;
     saveButton.textContent = 'Menyimpan...';
@@ -81,11 +99,10 @@ async function handleProfileUpdate(event) {
         if (error) throw error;
 
         alert('Nama berhasil disimpan!');
-        loadAccountData();
+        await loadAccountData(); // Muat ulang data setelah disimpan
     } catch (error) {
         alert('Gagal memperbarui nama: ' + error.message);
     } finally {
-        // Bagian ini akan selalu berjalan, baik berhasil maupun gagal
         saveButton.disabled = false;
         saveButton.textContent = originalButtonText;
     }
@@ -100,21 +117,23 @@ async function handlePasswordUpdate(event) {
     const originalButtonText = saveButton.textContent;
     const newPassword = document.getElementById('newPassword').value;
 
-    if (newPassword.length < 6) return alert('Kata sandi minimal 6 karakter.');
-    
+    if (newPassword.length < 6) {
+        alert('Kata sandi minimal 6 karakter.');
+        return;
+    }
+
     saveButton.disabled = true;
     saveButton.textContent = 'Mengubah...';
 
     try {
         const { error } = await _supabase.auth.updateUser({ password: newPassword });
         if (error) throw error;
-        
+
         alert('Kata sandi berhasil diubah!');
-        event.target.reset();
+        event.target.reset(); // Reset form setelah sukses
     } catch (error) {
         alert('Gagal mengubah kata sandi: ' + error.message);
     } finally {
-        // Bagian ini akan selalu berjalan
         saveButton.disabled = false;
         saveButton.textContent = originalButtonText;
     }
@@ -124,11 +143,38 @@ async function handlePasswordUpdate(event) {
  * Menangani proses logout.
  */
 async function handleLogout() {
+    if (!logoutButton) return;
     logoutButton.disabled = true;
     logoutButton.textContent = 'Keluar...';
     await _supabase.auth.signOut();
-    // auth-guard.js akan otomatis mengalihkan
+    // authStateChange akan mengalihkan halaman
 }
+
+// =================================================
+// AUTENTIKASI DAN TAMPILAN
+// =================================================
+_supabase.auth.onAuthStateChange((event, session) => {
+    if (!protectedContent || !loginPrompt) {
+        console.warn('Peringatan: Elemen otentikasi tidak ditemukan.');
+        return;
+    }
+    
+    if (session) {
+        protectedContent.classList.remove('hidden');
+        loginPrompt.classList.add('hidden');
+        loadAccountData(); // Muat data setelah user terautentikasi
+    } else {
+        if (isDevMode) {
+            console.log('Mode Dev Aktif: Konten ditampilkan tanpa login.');
+            protectedContent.classList.remove('hidden');
+            loginPrompt.classList.add('hidden');
+            loadAccountData(); // Untuk pengujian di mode dev
+        } else {
+            protectedContent.classList.add('hidden');
+            loginPrompt.classList.remove('hidden');
+        }
+    }
+});
 
 // =================================================
 // EVENT LISTENERS
@@ -137,6 +183,4 @@ document.addEventListener('DOMContentLoaded', () => {
     if (profileForm) profileForm.addEventListener('submit', handleProfileUpdate);
     if (securityForm) securityForm.addEventListener('submit', handlePasswordUpdate);
     if (logoutButton) logoutButton.addEventListener('click', handleLogout);
-    
-    loadAccountData();
 });
