@@ -85,7 +85,7 @@ async function init() {
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
 
   if (materi) {
-      // PERBAIKAN: Menggunakan .textContent untuk menampilkan teks biasa
+      // ✅ Revisi utama: Menggunakan .textContent untuk menampilkan teks biasa
       materiContent.textContent = materi.content; 
   } else {
       materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
