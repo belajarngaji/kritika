@@ -4,13 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profil Pengguna | Kritika</title>
-  <link rel="stylesheet" href="/kritika/assets/css/style.css"> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="stylesheet" href="/kritika/assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <header class="profile-header">
     <h1 class="profile-title">Halaman Profil</h1>
-    <a href="/kritika/index.html" class="close-button">X</a> </header>
+    <a href="/kritika/index.html" class="close-button">X</a>
+  </header>
 
   <main class="content">
     <div class="profile-container">
@@ -18,13 +23,13 @@
       <div class="profile-card">
         <div class="avatar-wrapper">
           <img src="https://api.dicebear.com/8.x/initials/svg?seed=?" alt="Foto Profil" id="profile-avatar" class="profile-avatar">
-          <div class="badge">😭 Pemula</div>
+          <div class="badge" id="profile-badge">Memuat...</div>
         </div>
 
         <div class="level-progress">
-          <span>LV. 5</span>
+          <span id="profile-level">LV. ...</span>
           <div class="progress-bar-container">
-            <div class="progress-bar" style="width: 60%;"></div>
+            <div class="progress-bar" style="width: 0%;"></div>
           </div>
         </div>
 
@@ -32,14 +37,14 @@
         <p class="user-id" id="profile-userid">Memuat...</p>
       </div>
 
-      <div class="profile-stats">
+      <div class="profile-stats" id="profile-stats">
         <div class="stat-item">
           <span class="stat-label">Materi Favorit</span>
-          <span class="stat-number">12</span>
+          <span class="stat-number" id="stats-favorite">-</span>
         </div>
         <div class="stat-item">
           <span class="stat-label">Soal Dikerjakan</span>
-          <span class="stat-number">89</span>
+          <span class="stat-number" id="stats-completed">-</span>
         </div>
       </div>
 
@@ -47,7 +52,8 @@
         <a href="/kritika/profil/" class="nav-item active">Profil</a>
         <a href="/kritika/statistik.html" class="nav-item">Statistik</a>
         <a href="/kritika/materi/" class="nav-item">Materi</a>
-        <a href="#" class="nav-item">Riwayat</a> <a href="/kritika/akun/" class="nav-item">Akun</a>
+        <a href="#" class="nav-item">Riwayat</a>
+        <a href="/kritika/akun/" class="nav-item">Akun</a>
       </nav>
 
     </div>
@@ -57,6 +63,7 @@
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/kritika/assets/js/profile.js"></script> </body>
+  <script src="/kritika/assets/js/profile.js"></script>
+
+</body>
 </html>
