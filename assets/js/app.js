@@ -14,6 +14,21 @@ const API_URL = 'https://hmmz-bot01.vercel.app/chat';
 const CHECK_URL = 'https://hmmz-bot01.vercel.app/check';
 
 // ==============================
+// Utility: Parse JSON aman
+// ==============================
+function safeParseJSON(str) {
+  try {
+    if (typeof str !== "string") return str; // kalau sudah object, langsung return
+    // buang ```json / ```
+    const clean = str.replace(/```json|```/g, "").trim();
+    return JSON.parse(clean);
+  } catch (e) {
+    console.error("❌ Gagal parse JSON:", e, str);
+    return null;
+  }
+}
+
+// ==============================
 // Ambil semua materi dari Supabase
 // ==============================
 async function getMaterials() {
@@ -56,6 +71,7 @@ async function generateQuestions(materialText) {
     }
   ]
 }
+⚠️ Output hanya JSON, tanpa teks lain, tanpa markdown fence.
 
 Teks:
 ${materialText}`,
@@ -66,7 +82,8 @@ ${materialText}`,
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return data.reply || null; // AI balikin string JSON
+    console.log("🔎 AI raw reply:", data.reply);
+    return data.reply || null;
   } catch (err) {
     console.error('❌ Error AI generate:', err);
     return null;
@@ -166,10 +183,8 @@ async function init() {
       return;
     }
 
-    let parsed;
-    try {
-      parsed = JSON.parse(questionsJson);
-    } catch (err) {
+    const parsed = safeParseJSON(questionsJson);
+    if (!parsed || !parsed.questions) {
       aiOutput.innerHTML = '<p>Format JSON tidak valid.</p>';
       btnGenerate.disabled = false;
       btnGenerate.textContent = 'Generate Soal';
