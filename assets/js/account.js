@@ -4,27 +4,37 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Variabel global untuk menyimpan data pengguna saat ini
 let currentUser = null;
 
+/**
+ * Fungsi untuk memuat data pengguna ke dalam form di halaman akun.
+ */
 async function loadAccountData() {
     const { data: { user } } = await _supabase.auth.getUser();
-    if (!user) return; // Ditangani oleh auth-guard.js
-    
+    if (!user) return; // auth-guard.js sudah menangani pengalihan
+
     currentUser = user;
     document.getElementById('email').value = user.email;
 
-    const { data: profile } = await _supabase
+    // Ambil data dari tabel profiles
+    const { data: profile, error } = await _supabase
         .from('profiles')
         .select('username, full_name')
         .eq('id', user.id)
         .single();
 
+    if (error) {
+        console.error('Error mengambil profil:', error);
+        return;
+    }
+    
     if (profile) {
-        document.getElementById('username').value = profile.username || '';
+        document.getElementById('username').value = profile.username || 'Belum diatur';
         const editNameSection = document.getElementById('edit-name-section');
         
+        // Logika untuk menampilkan atau menyembunyikan form ubah nama
         if (profile.full_name) {
-            // Jika nama sudah ada, ganti form dengan teks biasa
             editNameSection.innerHTML = `
                 <div class="form-group">
                     <label>Nama Pengguna</label>
@@ -34,24 +44,60 @@ async function loadAccountData() {
     }
 }
 
-// Event listener untuk update nama
-document.getElementById('profile-form').addEventListener('submit', async (event) => {
+/**
+ * Fungsi untuk menangani pembaruan nama pengguna.
+ */
+async function handleProfileUpdate(event) {
     event.preventDefault();
     const newFullName = document.getElementById('fullName').value;
-    if (!newFullName.trim()) return alert('Nama tidak boleh kosong.');
+    if (!newFullName.trim()) return alert('Nama Pengguna tidak boleh kosong.');
 
     const { error } = await _supabase
         .from('profiles')
-        .update({ full_name: newFullName })
+        .update({ full_name: newFullName, updated_at: new Date() })
         .eq('id', currentUser.id);
 
     if (error) {
-        alert('Gagal menyimpan nama: ' + error.message);
+        alert('Gagal memperbarui nama: ' + error.message);
     } else {
         alert('Nama berhasil disimpan!');
-        loadAccountData(); // Muat ulang untuk menyembunyikan form
+        loadAccountData(); // Muat ulang data untuk menyembunyikan form
     }
-});
+}
 
-// Panggil fungsi utama saat halaman dimuat
-document.addEventListener('DOMContentLoaded', loadAccountData);
+/**
+ * Fungsi untuk menangani pembaruan kata sandi.
+ */
+async function handlePasswordUpdate(event) {
+    event.preventDefault();
+    const newPassword = document.getElementById('newPassword').value;
+    if (!newPassword) return alert('Kata sandi baru tidak boleh kosong.');
+    if (newPassword.length < 6) return alert('Kata sandi minimal 6 karakter.');
+
+    const { error } = await _supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+        alert('Gagal mengubah kata sandi: ' + error.message);
+    } else {
+        alert('Kata sandi berhasil diubah!');
+        event.target.reset(); // Mengosongkan form
+    }
+}
+
+/**
+ * Fungsi untuk menangani logout.
+ */
+async function handleLogout() {
+    const { error } = await _supabase.auth.signOut();
+    if (error) {
+        console.error('Error saat logout:', error);
+    }
+    // Tidak perlu redirect di sini karena auth-guard akan otomatis menangani
+}
+
+// Menambahkan semua event listener saat halaman selesai dimuat
+document.addEventListener('DOMContentLoaded', () => {
+    loadAccountData();
+    document.getElementById('profile-form').addEventListener('submit', handleProfileUpdate);
+    document.getElementById('security-form').addEventListener('submit', handlePasswordUpdate);
+    document.getElementById('logout-button').addEventListener('click', handleLogout);
+});
