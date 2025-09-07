@@ -4,22 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profil Pengguna | Kritika</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/kritika/assets/css/style.css"> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <header class="profile-header">
     <h1 class="profile-title">Halaman Profil</h1>
-    <a href="javascript:history.back()" class="close-button">X</a>
-  </header>
+    <a href="/kritika/index.html" class="close-button">X</a> </header>
 
   <main class="content">
     <div class="profile-container">
 
       <div class="profile-card">
         <div class="avatar-wrapper">
-          <img src="https://api.dicebear.com/8.x/initials/svg?seed=Nama Pengguna" alt="Foto Profil" class="profile-avatar">
+          <img src="https://api.dicebear.com/8.x/initials/svg?seed=?" alt="Foto Profil" id="profile-avatar" class="profile-avatar">
           <div class="badge">😭 Pemula</div>
         </div>
 
@@ -30,8 +28,8 @@
           </div>
         </div>
 
-        <h2 class="username">Nama Pengguna</h2>
-        <p class="user-id">ID: 12345678</p>
+        <h2 class="username" id="profile-username">Memuat...</h2>
+        <p class="user-id" id="profile-userid">Memuat...</p>
       </div>
 
       <div class="profile-stats">
@@ -46,11 +44,10 @@
       </div>
 
       <nav class="profile-navigation">
-        <a href="#profil" class="nav-item active">Profil</a>
-        <a href="../statistik" class="nav-item">Statistik</a>
-        <a href="../materi" class="nav-item">Materi</a>
-        <a href="../riwayat" class="nav-item">Riwayat</a>
-        <a href="../akun" class="nav-item">Akun</a>
+        <a href="/kritika/profil/" class="nav-item active">Profil</a>
+        <a href="/kritika/statistik.html" class="nav-item">Statistik</a>
+        <a href="/kritika/materi/" class="nav-item">Materi</a>
+        <a href="#" class="nav-item">Riwayat</a> <a href="/kritika/akun/" class="nav-item">Akun</a>
       </nav>
 
     </div>
@@ -60,5 +57,6 @@
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
 
-</body>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/kritika/assets/js/profile.js"></script> </body>
 </html>
