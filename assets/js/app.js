@@ -39,7 +39,7 @@ async function generateCriticalQuestion(materialText) {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({
-        message: `Berdasarkan teks berikut (dan *hanya teks ini*), buatkan 3 pertanyaan singkat. 
+        message: `Berdasarkan teks berikut (dan *hanya teks ini*), buatkan 10 pertanyaan singkat. 
 - Jangan ambil dari sumber lain. 
 - Pastikan pertanyaan fokus pada isi teks, bukan pengetahuan umum. 
 - Tampilkan pertanyaan dalam format daftar terurut.
