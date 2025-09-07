@@ -1,25 +1,17 @@
-
-import { createClient } from '[https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm](https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm)';
-
-// ==============================
-// Supabase Config
-// ==============================
-const SUPABASE_URL = '[https://jpxtbdawajjyrvqrgijd.supabase.co](https://jpxtbdawajjyrvqrgijd.supabase.co)';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+import { _supabase } from './supabase-client.js';
 
 // ==============================
 // API URL
 // ==============================
-// Ganti URL ini dengan API yang Anda gunakan untuk GPT-4o mini
-const API_URL = '[https://hmmz-bot01.vercel.app/chat](https://hmmz-bot01.vercel.app/chat)'; 
+const API_URL = 'https://hmmz-bot01.vercel.app/chat'; 
 
 // ==============================
 // Ambil semua materi dari Supabase
 // ==============================
 async function getMaterials() {
   try {
-    const { data, error } = await supabase.from('materials').select('*').order('id');
+    // Ganti 'supabase' dengan '_supabase' dari import
+    const { data, error } = await _supabase.from('materials').select('*').order('id');
     if (error) {
       console.error('❌ Error fetch materials:', error);
       return [];
@@ -81,11 +73,21 @@ async function init() {
 
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
-  materiContent.innerHTML = materi ? marked.parse(materi.content) : '<p>Materi belum tersedia.</p>';
   
+  // Memastikan materi ditemukan sebelum mencoba memprosesnya
+  if (materi) {
+      // Gunakan marked.js untuk memproses konten markdown
+      materiContent.innerHTML = marked.parse(materi.content);
+  } else {
+      materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
+  }
+
   // ======= Event Generate Pertanyaan =======
   btnGenerate.addEventListener('click', async () => {
-    if (!materi) return;
+    if (!materi) {
+        alert('Materi belum dimuat. Silakan muat ulang halaman.');
+        return;
+    }
 
     btnGenerate.disabled = true;
     btnGenerate.textContent = 'Membuat Soal...';
@@ -94,11 +96,11 @@ async function init() {
     feedbackMessage.textContent = ''; // Kosongkan feedback
 
     const questionData = await generateMultipleChoiceQuestion(materi.content);
-    
+
     if (questionData && questionData.question && questionData.options && questionData.correct_answer) {
       aiQuestionContainer.style.display = 'block';
       questionText.textContent = questionData.question;
-      
+
       // Mengacak urutan opsi jawaban
       const shuffledOptions = questionData.options.sort(() => Math.random() - 0.5);
 
@@ -106,10 +108,10 @@ async function init() {
         const li = document.createElement('li');
         const button = document.createElement('button');
         button.textContent = option;
-        
+
         button.addEventListener('click', () => {
           optionsList.querySelectorAll('button').forEach(btn => btn.disabled = true);
-          
+
           if (option === questionData.correct_answer) {
             button.classList.add('correct');
             feedbackMessage.innerHTML = '✅ **Jawaban Anda benar!**';
@@ -122,7 +124,7 @@ async function init() {
             feedbackMessage.style.color = 'red';
           }
         });
-        
+
         if (option === questionData.correct_answer) {
             button.setAttribute('data-correct', 'true');
         }
@@ -130,7 +132,7 @@ async function init() {
         li.appendChild(button);
         optionsList.appendChild(li);
       });
-      
+
     } else {
       aiQuestionContainer.style.display = 'block';
       questionText.textContent = 'AI gagal membuat soal. Silakan coba lagi.';
@@ -139,8 +141,7 @@ async function init() {
     btnGenerate.disabled = false;
     btnGenerate.textContent = 'Generate Pertanyaan';
   });
-
-  // ======= Jalankan init =======
-  // Mengambil materi secara otomatis saat halaman dimuat
-  init();
 }
+
+// Jalankan init
+init();
