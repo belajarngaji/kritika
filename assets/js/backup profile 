@@ -1,0 +1,72 @@
+// Konfigurasi koneksi ke Supabase
+const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co'; // Ganti dengan URL proyek Supabase Anda
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE'; // Ganti dengan Kunci Anon Supabase Anda
+
+const { createClient } = supabase;
+const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Elemen-elemen HTML
+const profileUsername = document.getElementById('profile-username');
+const profileUserid = document.getElementById('profile-userid');
+const profileAvatar = document.getElementById('profile-avatar');
+const profileStats = document.getElementById('profile-stats');
+
+// Fungsi untuk menampilkan profil "Tidak Diketahui"
+function displayUnknownProfile() {
+    profileUsername.textContent = 'Nama Tidak Diketahui';
+    profileUserid.textContent = 'Username Tidak Diketahui';
+    profileAvatar.src = 'https://api.dicebear.com/8.x/initials/svg?seed=?';
+    profileStats.style.display = 'none'; // Sembunyikan kartu statistik
+}
+
+// Fungsi untuk menampilkan data profil yang ditemukan
+function displayProfileData(profile) {
+    profileUsername.textContent = profile.full_name || profile.username || 'Tidak Diketahui';
+    profileUserid.textContent = `@${profile.username || 'tidak diketahui'}`;
+    profileAvatar.src = profile.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${profile.username || '?'}`;
+    profileStats.style.display = 'flex'; // Tampilkan kembali kartu statistik
+}
+
+// Fungsi utama untuk memuat profil
+async function loadProfile() {
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('user');
+
+    if (username) {
+        // --- Skenario 1: Ada username di URL (Profil Publik) ---
+        const { data: profile } = await _supabase
+            .from('profiles')
+            .select('username, full_name, avatar_url')
+            .eq('username', username)
+            .single();
+
+        if (profile) {
+            displayProfileData(profile);
+        } else {
+            displayUnknownProfile();
+            profileUsername.textContent = `Pengguna '${username}' Tidak Ditemukan`;
+        }
+    } else {
+        // --- Skenario 2: Tidak ada username di URL ---
+        const { data: { user } } = await _supabase.auth.getUser();
+
+        if (user) {
+            // Pengguna sedang login, tampilkan profilnya
+            const { data: profile } = await _supabase
+                .from('profiles')
+                .select('username, full_name, avatar_url')
+                .eq('id', user.id)
+                .single();
+
+            if (profile) {
+                displayProfileData(profile);
+            }
+        } else {
+            // Pengguna belum login, tampilkan profil "Tidak Diketahui"
+            displayUnknownProfile();
+        }
+    }
+}
+
+// Jalankan saat halaman dimuat
+document.addEventListener('DOMContentLoaded', loadProfile);
