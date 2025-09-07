@@ -7,11 +7,11 @@
   <meta name="description" content="Belajar kritis dengan materi Jurumiya Bab 1. Kembangkan kemampuan berpikir analitis melalui pertanyaan dan refleksi.">
 
   <link rel="stylesheet" href="../../../assets/css/style.css">
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
+
   <style>
     /* Styling tambahan untuk soal pilihan ganda */
     .question-card {
@@ -66,24 +66,19 @@
   </header>
 
   <main class="content">
-
     <section class="section-header">
       <h2>Jurumiya - Bab 1</h2>
       <p>Pengenalan awal Jurumiya untuk memahami dasar-dasar.</p>
     </section>
-
     <article class="lesson" id="materiContent" data-slug="jurumiya-bab1"></article>
-
     <div class="ai-actions">
       <button id="btnGenerate" class="btn">Generate Pertanyaan</button>
     </div>
-
     <div id="aiQuestionContainer" class="question-card" style="display:none;">
       <h3 id="questionText"></h3>
       <ul class="options-list" id="optionsList"></ul>
       <div id="feedbackMessage" style="margin-top: 15px;"></div>
     </div>
-    
     <div class="lesson-nav">
       <a href="../index.html" class="btn-outline">← Kembali ke Daftar Bab</a>
       <a href="../bab2/index.html" class="btn">Lanjut ke Bab 2 →</a>
