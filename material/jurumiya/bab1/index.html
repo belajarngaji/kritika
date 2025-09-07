@@ -6,17 +6,52 @@
   <title>Jurumiya - Bab 1 | Kritika</title>
   <meta name="description" content="Belajar kritis dengan materi Jurumiya Bab 1. Kembangkan kemampuan berpikir analitis melalui pertanyaan dan refleksi.">
 
-  <!-- CSS Lokal -->
   <link rel="stylesheet" href="../../../assets/css/style.css">
 
-  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Marked.js untuk parsing Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <style>
+    /* Styling tambahan untuk soal pilihan ganda */
+    .question-card {
+        background: #f4f4f4;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .question-card h3 {
+        margin-top: 0;
+    }
+    .options-list {
+        list-style: none;
+        padding: 0;
+    }
+    .options-list button {
+        width: 100%;
+        text-align: left;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: white;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .options-list button:hover {
+        background-color: #f0f0f0;
+    }
+    .options-list button.correct {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+    .options-list button.wrong {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+  </style>
 </head>
 <body>
-  <!-- NAVBAR -->
   <header>
     <nav class="navbar">
       <h1 class="logo">Kritika</h1>
@@ -30,41 +65,35 @@
     </nav>
   </header>
 
-  <!-- MAIN CONTENT -->
   <main class="content">
 
-    <!-- Judul Bab -->
     <section class="section-header">
       <h2>Jurumiya - Bab 1</h2>
       <p>Pengenalan awal Jurumiya untuk memahami dasar-dasar.</p>
     </section>
 
-    <!-- Materi -->
     <article class="lesson" id="materiContent" data-slug="jurumiya-bab1"></article>
 
-    <!-- Tombol Generate Pertanyaan AI -->
     <div class="ai-actions">
-      <button id="btnGenerate" class="btn">Generate Pertanyaan Kritis</button>
+      <button id="btnGenerate" class="btn">Generate Pertanyaan</button>
     </div>
 
-    <!-- Output Pertanyaan AI -->
-    <div id="aiOutput" class="ai-output" aria-live="polite"></div>
-
-    <!-- Kolom Jawaban & Koreksi akan dibuat otomatis oleh JS -->
-
-    <!-- Navigasi Bab -->
+    <div id="aiQuestionContainer" class="question-card" style="display:none;">
+      <h3 id="questionText"></h3>
+      <ul class="options-list" id="optionsList"></ul>
+      <div id="feedbackMessage" style="margin-top: 15px;"></div>
+    </div>
+    
     <div class="lesson-nav">
       <a href="../index.html" class="btn-outline">← Kembali ke Daftar Bab</a>
       <a href="../bab2/index.html" class="btn">Lanjut ke Bab 2 →</a>
     </div>
   </main>
 
-  <!-- FOOTER -->
   <footer>
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
 
-  <!-- Script JS -->
   <script type="module" src="../../../assets/js/app.js"></script>
 </body>
 </html>
