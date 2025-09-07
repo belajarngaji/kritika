@@ -14,21 +14,6 @@ const API_URL = 'https://hmmz-bot01.vercel.app/chat';
 const CHECK_URL = 'https://hmmz-bot01.vercel.app/check';
 
 // ==============================
-// Utility: Parse JSON aman
-// ==============================
-function safeParseJSON(str) {
-  try {
-    if (typeof str !== "string") return str; // kalau sudah object, langsung return
-    // buang ```json / ```
-    const clean = str.replace(/```json|```/g, "").trim();
-    return JSON.parse(clean);
-  } catch (e) {
-    console.error("❌ Gagal parse JSON:", e, str);
-    return null;
-  }
-}
-
-// ==============================
 // Ambil semua materi dari Supabase
 // ==============================
 async function getMaterials() {
@@ -71,7 +56,7 @@ async function generateQuestions(materialText) {
     }
   ]
 }
-⚠️ Output hanya JSON, tanpa teks lain, tanpa markdown fence.
+- Urutan opsi (A–D) harus acak, jangan selalu benar di A.
 
 Teks:
 ${materialText}`,
@@ -82,12 +67,34 @@ ${materialText}`,
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    console.log("🔎 AI raw reply:", data.reply);
-    return data.reply || null;
+    return data.reply || null; // AI balikin string JSON
   } catch (err) {
     console.error('❌ Error AI generate:', err);
     return null;
   }
+}
+
+// ==============================
+// Parse JSON aman
+// ==============================
+function safeParseJSON(str) {
+  try {
+    const clean = str.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch (e) {
+    console.error("❌ Gagal parse JSON:", e, str);
+    return null;
+  }
+}
+
+// ==============================
+// Shuffle helper
+// ==============================
+function shuffle(array) {
+  return array
+    .map(value => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
 }
 
 // ==============================
@@ -126,11 +133,10 @@ Jangan tambahkan referensi luar.`
 // INIT Halaman Materi
 // ==============================
 async function init() {
-  // Ambil elemen dari HTML
   const materiContent = document.getElementById('materiContent');
   const btnGenerate = document.getElementById('btnGenerate');
 
-  // ======= Buat aiOutput (hasil generate pertanyaan) =======
+  // ======= Buat aiOutput =======
   let aiOutput = document.getElementById('aiOutput');
   if (!aiOutput) {
     aiOutput = document.createElement('div');
@@ -193,14 +199,30 @@ async function init() {
 
     aiOutput.innerHTML = '';
     parsed.questions.forEach(q => {
+      // Cari opsi jawaban benar sebelum diacak
+      const correctOpt = q.options.find(opt => opt.key === q.correct_answer);
+
+      // Acak opsi
+      let shuffled = shuffle(q.options);
+
+      // Buat ulang key jadi A-D setelah diacak
+      const keys = ['A','B','C','D'];
+      shuffled = shuffled.map((opt, i) => ({
+        key: keys[i],
+        text: opt.text
+      }));
+
+      // Cari kunci baru sesuai text jawaban benar
+      const newCorrect = shuffled.find(opt => opt.text === correctOpt.text);
+
       const div = document.createElement('div');
       div.classList.add('question-block');
       div.innerHTML = `
         <p><strong>${q.id}.</strong> ${q.question}</p>
         <ul>
-          ${q.options.map(opt => `<li>${opt.key}. ${opt.text}</li>`).join('')}
+          ${shuffled.map(opt => `<li>${opt.key}. ${opt.text}</li>`).join('')}
         </ul>
-        <p><em>Kunci: ${q.correct_answer}</em></p>
+        <p><em>Kunci: ${newCorrect.key}</em></p>
       `;
       aiOutput.appendChild(div);
     });
