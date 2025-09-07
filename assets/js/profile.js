@@ -5,44 +5,68 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Fungsi utama untuk memuat data profil pengguna yang sedang login
-async function loadProfileData() {
-  // 1. Ambil data sesi pengguna saat ini
-  const { data: { user }, error: userError } = await _supabase.auth.getUser();
+// Elemen-elemen HTML
+const profileUsername = document.getElementById('profile-username');
+const profileUserid = document.getElementById('profile-userid');
+const profileAvatar = document.getElementById('profile-avatar');
+const profileStats = document.getElementById('profile-stats');
 
-  // Jika tidak ada pengguna yang login, paksa ke halaman login
-  if (userError || !user) {
-    console.log('Pengguna belum login, mengalihkan ke halaman login...');
-    window.location.replace('/kritika/login.html'); // Sesuaikan path jika perlu
-    return;
-  }
-
-  // 2. Ambil data dari tabel 'profiles' berdasarkan ID pengguna
-  const { data: profile, error: profileError } = await _supabase
-    .from('profiles')
-    .select('username, avatar_url') // Ambil kolom yang diminta
-    .eq('id', user.id)
-    .single();
-
-  if (profileError) {
-    console.error('Gagal mengambil profil:', profileError);
-    return;
-  }
-
-  // 3. Tampilkan data ke elemen HTML menggunakan ID
-  if (profile) {
-    // Tampilkan username, jika tidak ada, tampilkan pesan
-    document.getElementById('profile-username').textContent = profile.username || 'Username belum diatur';
-    
-    // Tampilkan avatar, jika tidak ada, gunakan avatar default
-    document.getElementById('profile-avatar').src = profile.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${profile.username || '?'}`;
-    
-    // Tampilkan 8 karakter pertama dari ID pengguna
-    document.getElementById('profile-userid').textContent = `ID: ${user.id.substring(0, 8)}...`;
-  }
+// Fungsi untuk menampilkan profil "Tidak Diketahui"
+function displayUnknownProfile() {
+    profileUsername.textContent = 'Nama Tidak Diketahui';
+    profileUserid.textContent = 'Username Tidak Diketahui';
+    profileAvatar.src = 'https://api.dicebear.com/8.x/initials/svg?seed=?';
+    profileStats.style.display = 'none'; // Sembunyikan kartu statistik
 }
 
-// Jalankan fungsi saat halaman selesai dimuat
-document.addEventListener('DOMContentLoaded', () => {
-  loadProfileData();
-});
+// Fungsi untuk menampilkan data profil yang ditemukan
+function displayProfileData(profile) {
+    profileUsername.textContent = profile.full_name || profile.username || 'Tidak Diketahui';
+    profileUserid.textContent = `@${profile.username || 'tidak diketahui'}`;
+    profileAvatar.src = profile.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${profile.username || '?'}`;
+    profileStats.style.display = 'flex'; // Tampilkan kembali kartu statistik
+}
+
+// Fungsi utama untuk memuat profil
+async function loadProfile() {
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('user');
+
+    if (username) {
+        // --- Skenario 1: Ada username di URL (Profil Publik) ---
+        const { data: profile } = await _supabase
+            .from('profiles')
+            .select('username, full_name, avatar_url')
+            .eq('username', username)
+            .single();
+        
+        if (profile) {
+            displayProfileData(profile);
+        } else {
+            displayUnknownProfile();
+            profileUsername.textContent = `Pengguna '${username}' Tidak Ditemukan`;
+        }
+    } else {
+        // --- Skenario 2: Tidak ada username di URL ---
+        const { data: { user } } = await _supabase.auth.getUser();
+
+        if (user) {
+            // Pengguna sedang login, tampilkan profilnya
+            const { data: profile } = await _supabase
+                .from('profiles')
+                .select('username, full_name, avatar_url')
+                .eq('id', user.id)
+                .single();
+            
+            if (profile) {
+                displayProfileData(profile);
+            }
+        } else {
+            // Pengguna belum login, tampilkan profil "Tidak Diketahui"
+            displayUnknownProfile();
+        }
+    }
+}
+
+// Jalankan saat halaman dimuat
+document.addEventListener('DOMContentLoaded', loadProfile);
