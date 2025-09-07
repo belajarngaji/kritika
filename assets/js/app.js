@@ -1,3 +1,4 @@
+// /kritika/assets/js/app.js
 import { _supabase } from './supabase-client.js';
 
 // ==============================
@@ -10,7 +11,6 @@ const API_URL = 'https://hmmz-bot01.vercel.app/chat';
 // ==============================
 async function getMaterials() {
   try {
-    // Ganti 'supabase' dengan '_supabase' dari import
     const { data, error } = await _supabase.from('materials').select('*').order('id');
     if (error) {
       console.error('❌ Error fetch materials:', error);
@@ -53,7 +53,7 @@ ${materialText}`;
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return JSON.parse(data.reply); // Mengubah string JSON menjadi objek JavaScript
+    return JSON.parse(data.reply);
   } catch (err) {
     console.error('❌ Error AI generate:', err);
     return null;
@@ -73,16 +73,13 @@ async function init() {
 
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
-  
-  // Memastikan materi ditemukan sebelum mencoba memprosesnya
+
   if (materi) {
-      // Gunakan marked.js untuk memproses konten markdown
       materiContent.innerHTML = marked.parse(materi.content);
   } else {
       materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
   }
 
-  // ======= Event Generate Pertanyaan =======
   btnGenerate.addEventListener('click', async () => {
     if (!materi) {
         alert('Materi belum dimuat. Silakan muat ulang halaman.');
@@ -92,8 +89,8 @@ async function init() {
     btnGenerate.disabled = true;
     btnGenerate.textContent = 'Membuat Soal...';
     aiQuestionContainer.style.display = 'none';
-    optionsList.innerHTML = ''; // Kosongkan opsi sebelumnya
-    feedbackMessage.textContent = ''; // Kosongkan feedback
+    optionsList.innerHTML = '';
+    feedbackMessage.textContent = '';
 
     const questionData = await generateMultipleChoiceQuestion(materi.content);
 
@@ -101,7 +98,6 @@ async function init() {
       aiQuestionContainer.style.display = 'block';
       questionText.textContent = questionData.question;
 
-      // Mengacak urutan opsi jawaban
       const shuffledOptions = questionData.options.sort(() => Math.random() - 0.5);
 
       shuffledOptions.forEach(option => {
@@ -118,7 +114,6 @@ async function init() {
             feedbackMessage.style.color = 'green';
           } else {
             button.classList.add('wrong');
-            // Tandai jawaban yang benar
             optionsList.querySelector(`button[data-correct="true"]`).classList.add('correct');
             feedbackMessage.innerHTML = `❌ **Jawaban Anda salah.** Jawaban yang benar adalah: "${questionData.correct_answer}"`;
             feedbackMessage.style.color = 'red';
@@ -143,5 +138,4 @@ async function init() {
   });
 }
 
-// Jalankan init
 init();
