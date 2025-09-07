@@ -4,20 +4,28 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Variabel global untuk menyimpan data pengguna saat ini
+// =================================================
+// VARIABEL GLOBAL & ELEMEN HTML
+// =================================================
 let currentUser = null;
+const profileForm = document.getElementById('profile-form');
+const securityForm = document.getElementById('security-form');
+const logoutButton = document.getElementById('logout-button');
+
+// =================================================
+// FUNGSI UTAMA
+// =================================================
 
 /**
- * Fungsi untuk memuat data pengguna ke dalam form di halaman akun.
+ * Memuat data pengguna yang login dan menampilkannya di form.
  */
 async function loadAccountData() {
     const { data: { user } } = await _supabase.auth.getUser();
-    if (!user) return; // auth-guard.js sudah menangani pengalihan
+    if (!user) return; // Dijaga oleh auth-guard.js
 
     currentUser = user;
     document.getElementById('email').value = user.email;
 
-    // Ambil data dari tabel profiles
     const { data: profile, error } = await _supabase
         .from('profiles')
         .select('username, full_name')
@@ -25,7 +33,7 @@ async function loadAccountData() {
         .single();
 
     if (error) {
-        console.error('Error mengambil profil:', error);
+        console.error('Error mengambil profil:', error.message);
         return;
     }
     
@@ -33,8 +41,8 @@ async function loadAccountData() {
         document.getElementById('username').value = profile.username || 'Belum diatur';
         const editNameSection = document.getElementById('edit-name-section');
         
-        // Logika untuk menampilkan atau menyembunyikan form ubah nama
         if (profile.full_name) {
+            // Jika nama sudah ada, ganti form dengan teks yang tidak bisa diubah
             editNameSection.innerHTML = `
                 <div class="form-group">
                     <label>Nama Pengguna</label>
@@ -45,17 +53,28 @@ async function loadAccountData() {
 }
 
 /**
- * Fungsi untuk menangani pembaruan nama pengguna.
+ * Menangani update nama pengguna.
  */
 async function handleProfileUpdate(event) {
     event.preventDefault();
+    const saveButton = event.target.querySelector('.btn-save');
+    const originalButtonText = saveButton.textContent;
     const newFullName = document.getElementById('fullName').value;
+
     if (!newFullName.trim()) return alert('Nama Pengguna tidak boleh kosong.');
+
+    // Nonaktifkan tombol saat proses berjalan
+    saveButton.disabled = true;
+    saveButton.textContent = 'Menyimpan...';
 
     const { error } = await _supabase
         .from('profiles')
         .update({ full_name: newFullName, updated_at: new Date() })
         .eq('id', currentUser.id);
+    
+    // Aktifkan kembali tombol setelah selesai
+    saveButton.disabled = false;
+    saveButton.textContent = originalButtonText;
 
     if (error) {
         alert('Gagal memperbarui nama: ' + error.message);
@@ -66,38 +85,54 @@ async function handleProfileUpdate(event) {
 }
 
 /**
- * Fungsi untuk menangani pembaruan kata sandi.
+ * Menangani update kata sandi.
  */
 async function handlePasswordUpdate(event) {
     event.preventDefault();
+    const saveButton = event.target.querySelector('.btn-save');
+    const originalButtonText = saveButton.textContent;
     const newPassword = document.getElementById('newPassword').value;
-    if (!newPassword) return alert('Kata sandi baru tidak boleh kosong.');
+
     if (newPassword.length < 6) return alert('Kata sandi minimal 6 karakter.');
+    
+    // Nonaktifkan tombol saat proses berjalan
+    saveButton.disabled = true;
+    saveButton.textContent = 'Mengubah...';
 
     const { error } = await _supabase.auth.updateUser({ password: newPassword });
+
+    // Aktifkan kembali tombol setelah selesai
+    saveButton.disabled = false;
+    saveButton.textContent = originalButtonText;
+
     if (error) {
         alert('Gagal mengubah kata sandi: ' + error.message);
     } else {
         alert('Kata sandi berhasil diubah!');
-        event.target.reset(); // Mengosongkan form
+        event.target.reset();
     }
 }
 
 /**
- * Fungsi untuk menangani logout.
+ * Menangani proses logout.
  */
 async function handleLogout() {
-    const { error } = await _supabase.auth.signOut();
-    if (error) {
-        console.error('Error saat logout:', error);
-    }
-    // Tidak perlu redirect di sini karena auth-guard akan otomatis menangani
+    logoutButton.disabled = true;
+    logoutButton.textContent = 'Keluar...';
+    
+    await _supabase.auth.signOut();
+    // auth-guard.js akan otomatis mengalihkan ke halaman login
 }
 
-// Menambahkan semua event listener saat halaman selesai dimuat
+// =================================================
+// EVENT LISTENERS
+// =================================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Pastikan semua elemen ada sebelum menambahkan listener
+    if (profileForm) profileForm.addEventListener('submit', handleProfileUpdate);
+    if (securityForm) securityForm.addEventListener('submit', handlePasswordUpdate);
+    if (logoutButton) logoutButton.addEventListener('click', handleLogout);
+    
+    // Muat data akun setelah semua listener siap
     loadAccountData();
-    document.getElementById('profile-form').addEventListener('submit', handleProfileUpdate);
-    document.getElementById('security-form').addEventListener('submit', handlePasswordUpdate);
-    document.getElementById('logout-button').addEventListener('click', handleLogout);
 });
