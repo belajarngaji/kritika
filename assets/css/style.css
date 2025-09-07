@@ -155,9 +155,10 @@ header {
 }
 
 /* ================================================ */
-/* === HEADR PROFIL BARU === */
+/* === HALAMAN PROFIL (REVISI LENGKAP) === */
 /* ================================================ */
 
+/* Header khusus untuk halaman profil */
 .profile-header {
   background-color: #111827;
   padding: 1rem 2rem;
@@ -167,14 +168,14 @@ header {
   align-items: center;
 }
 
-.profile-title {
+.profile-header .profile-title {
   color: #f9fafb;
   font-size: 1.5rem;
   font-weight: 700;
-  margin: 0; /* Pastikan tidak ada margin default */
+  margin: 0;
 }
 
-.close-button {
+.profile-header .close-button {
   color: #d1d5db;
   font-size: 1.8rem;
   text-decoration: none;
@@ -182,66 +183,71 @@ header {
   transition: color 0.3s ease;
 }
 
-.close-button:hover {
+.profile-header .close-button:hover {
   color: #fff;
 }
 
-
-/* ================================================ */
-/* === HALAMAN PROFIL (PERBAIKAN & PENAMBAHAN) === */
-/* ================================================ */
-
-/* Pastikan profile-container di tengah dan ada jarak */
+/* Kontainer utama untuk semua elemen profil */
 .profile-container {
-  max-width: 600px; 
-  margin: 2rem auto; 
+  max-width: 500px; /* Sedikit diperkecil agar lebih pas di mobile */
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 auto; /* Margin atas/bawah diatur oleh padding <main> */
   padding: 0 1rem;
 }
 
-.profile-card {
-  background-color: #f9fafb; 
-  padding: 2.5rem 2rem;
-  border-radius: 12px; 
+/* Menggunakan satu class .profile-widget untuk gaya kartu yang konsisten */
+.profile-card,
+.profile-stats,
+.profile-navigation {
+  background-color: #ffffff; /* Menggunakan putih bersih */
+  border-radius: 16px; /* Sudut lebih melengkung agar modern */
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  text-align: center;
+  width: 100%;
+}
+
+/* Jarak antar widget */
+.profile-card,
+.profile-stats {
   margin-bottom: 1.5rem;
 }
 
-/* Pembungkus avatar untuk positioning lencana */
+/* Styling spesifik untuk kartu profil utama */
+.profile-card {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
 .avatar-wrapper {
-  position: relative; /* Penting untuk lencana */
-  display: inline-block; /* Agar bisa diatur lebar/tingginya otomatis */
+  position: relative;
+  display: inline-block;
   margin-bottom: 1rem;
 }
 
-/* Perbaikan untuk foto profil bulat sempurna */
 .profile-avatar {
   width: 120px;
   height: 120px;
-  border-radius: 50%; /* Membuat gambar menjadi bulat sempurna */
-  object-fit: cover; /* Memastikan gambar tidak gepeng, akan memotong jika perlu */
+  border-radius: 50%;
+  object-fit: cover;
   border: 4px solid #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* Styling untuk lencana */
 .badge {
   position: absolute;
-  bottom: 5px; /* Jarak dari bawah avatar */
-  right: -10px; /* Jarak dari kanan avatar */
-  background-color: #facc15; /* Warna latar belakang lencana (kuning) */
-  color: #111827; /* Warna teks lencana */
-  padding: 0.3em 0.7em;
-  border-radius: 15px; /* Sudut melengkung */
+  bottom: 5px;
+  right: -10px;
+  background-color: #facc15;
+  color: #111827;
+  padding: 0.3em 0.8em;
+  border-radius: 99px; /* Bulat sempurna */
   font-size: 0.8em;
-  font-weight: 600;
-  white-space: nowrap; /* Mencegah teks patah baris */
+  font-weight: 700; /* Ditebalkan sedikit */
+  white-space: nowrap;
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-  border: 2px solid #fff; /* Border putih agar lebih menonjol */
+  border: 2px solid #fff;
 }
 
-/* --- Progress Bar --- */
-/* Tidak ada perubahan signifikan di sini, hanya memastikan konsistensi */
 .level-progress {
   display: flex;
   align-items: center;
@@ -265,7 +271,6 @@ header {
   background-color: #3b82f6; 
   border-radius: 5px;
 }
-/* --- End of Progress Bar --- */
 
 .username {
   font-size: 1.75rem;
@@ -280,14 +285,11 @@ header {
   margin-top: 0.25rem;
 }
 
-/* --- Statistik --- */
+/* Styling spesifik untuk kartu statistik */
 .profile-stats {
   display: flex;
   justify-content: space-around;
-  background-color: #f9fafb;
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .stat-item {
@@ -306,6 +308,39 @@ header {
   font-size: 2rem;
   font-weight: 700;
   color: #111827;
+}
+
+/* Styling spesifik untuk navigasi bawah */
+.profile-navigation {
+  display: flex;
+  justify-content: space-around;
+  padding: 0.75rem 0.5rem;
+}
+
+.profile-navigation .nav-item {
+  text-decoration: none;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  flex-grow: 1; /* Membuat setiap item sama lebar */
+  text-align: center; /* Teks di tengah item */
+}
+
+.profile-navigation .nav-item:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.profile-navigation .nav-item.active {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.profile-navigation .nav-item.active:hover {
+  background-color: #2563eb; /* Sedikit lebih gelap saat di-hover */
 }
 
 
@@ -535,40 +570,6 @@ footer {
   margin-top: 2rem;
   font-size: 0.875rem;
 }
-
-/* ================================================ */
-/* === NAVIGASI HALAMAN PROFIL === */
-/* ================================================ */
-
-.profile-navigation {
-  display: flex;
-  justify-content: space-around;
-  background-color: #f9fafb; /* Warna latar sama dengan kartu */
-  padding: 0.75rem 0.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  margin-top: 1.5rem; /* Memberi jarak dari kartu statistik di atasnya */
-}
-
-.profile-navigation .nav-item {
-  text-decoration: none;
-  color: #6b7280; /* Warna teks abu-abu untuk item non-aktif */
-  font-weight: 600;
-  font-size: 0.9rem;
-  padding: 0.5rem 1rem;
-  border-radius: 8px; /* Sudut melengkung untuk setiap item */
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.profile-navigation .nav-item:hover {
-  background-color: #f3f4f6; /* Warna latar saat disentuh */
-}
-
-.profile-navigation .nav-item.active {
-  background-color: #3b82f6; /* Warna latar biru untuk item aktif */
-  color: #ffffff; /* Warna teks putih untuk item aktif */
-}
-
 
 /* ================================================ */
 /* === CATATAN === */
