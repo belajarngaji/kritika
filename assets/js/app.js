@@ -1,4 +1,3 @@
-// /kritika/assets/js/app.js
 import { _supabase } from './supabase-client.js';
 
 // ==============================
@@ -53,7 +52,7 @@ ${materialText}`;
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return JSON.parse(data.reply);
+    return JSON.parse(data.reply); // Mengubah string JSON menjadi objek JavaScript
   } catch (err) {
     console.error('❌ Error AI generate:', err);
     return null;
@@ -63,6 +62,8 @@ ${materialText}`;
 // ==============================
 // INIT Halaman Materi
 // ==============================
+let currentMaterial = null; // Tambahkan variabel global untuk menyimpan materi
+
 async function init() {
   const materiContent = document.getElementById('materiContent');
   const btnGenerate = document.getElementById('btnGenerate');
@@ -71,17 +72,21 @@ async function init() {
   const optionsList = document.getElementById('optionsList');
   const feedbackMessage = document.getElementById('feedbackMessage');
 
+  // Logika pengambilan dan pemuatan materi di awal
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
 
   if (materi) {
-      materiContent.innerHTML = marked.parse(materi.content);
+      currentMaterial = materi;
+      materiContent.innerHTML = marked.parse(currentMaterial.content);
   } else {
       materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
+      btnGenerate.disabled = true; // Nonaktifkan tombol jika materi tidak ada
   }
 
+  // ======= Event Generate Pertanyaan =======
   btnGenerate.addEventListener('click', async () => {
-    if (!materi) {
+    if (!currentMaterial) {
         alert('Materi belum dimuat. Silakan muat ulang halaman.');
         return;
     }
@@ -92,7 +97,7 @@ async function init() {
     optionsList.innerHTML = '';
     feedbackMessage.textContent = '';
 
-    const questionData = await generateMultipleChoiceQuestion(materi.content);
+    const questionData = await generateMultipleChoiceQuestion(currentMaterial.content);
 
     if (questionData && questionData.question && questionData.options && questionData.correct_answer) {
       aiQuestionContainer.style.display = 'block';
@@ -114,7 +119,10 @@ async function init() {
             feedbackMessage.style.color = 'green';
           } else {
             button.classList.add('wrong');
-            optionsList.querySelector(`button[data-correct="true"]`).classList.add('correct');
+            const correctAnswerButton = optionsList.querySelector(`button[data-correct="true"]`);
+            if (correctAnswerButton) {
+                correctAnswerButton.classList.add('correct');
+            }
             feedbackMessage.innerHTML = `❌ **Jawaban Anda salah.** Jawaban yang benar adalah: "${questionData.correct_answer}"`;
             feedbackMessage.style.color = 'red';
           }
@@ -138,4 +146,5 @@ async function init() {
   });
 }
 
+// Jalankan init
 init();
