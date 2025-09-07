@@ -68,12 +68,19 @@
     <p class="text-gray-500">© 2025 Belajar Ngaji - Semua Hak Dilindungi</p>
   </footer>
 
-  <script type="module">
+    <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
     const SUPABASE_URL = "https://jpxtbdawajjyrvqrgijd.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // =======================================================
+    // 1. BACA PARAMETER 'redirectTo' DARI URL SAAT HALAMAN DIMUAT
+    // =======================================================
+    const params = new URLSearchParams(window.location.search);
+    const redirectTo = params.get('redirectTo');
+    // =======================================================
 
     const form = document.getElementById('login-form');
     const usernameInput = document.getElementById('username');
@@ -94,21 +101,18 @@
       const username = usernameInput.value;
       const password = passwordInput.value;
 
-      // KOREKSI: Langkah 1 - Cari email pengguna berdasarkan username di tabel 'profiles'
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('email') // Kita hanya butuh kolom email
+        .select('email')
         .eq('username', username)
-        .single(); // .single() akan error jika username tidak ditemukan, ini bagus untuk validasi
+        .single();
 
-      // Jika username tidak ditemukan, tampilkan pesan error
       if (profileError || !profileData) {
         console.error('Error fetching profile:', profileError);
         showMessage('Masuk Gagal', 'Nama pengguna atau kata sandi salah.');
         return;
       }
 
-      // KOREKSI: Langkah 2 - Gunakan email yang ditemukan untuk proses login
       const email = profileData.email;
       const { error } = await supabase.auth.signInWithPassword({
         email: email,
@@ -116,24 +120,36 @@
       });
 
       if (error) {
-        // Jika password salah, tampilkan pesan error yang sama
         console.error('Error signing in:', error);
         showMessage('Masuk Gagal', 'Nama pengguna atau kata sandi salah.');
       } else {
-        // Jika login berhasil
-        showMessage('Masuk Berhasil!', 'Anda akan dialihkan ke halaman profil...');
+        showMessage('Masuk Berhasil!', 'Anda akan dialihkan...');
         setTimeout(() => {
-          // Arahkan ke halaman profil utama
-          window.location.href = '../'; 
+          // =======================================================
+          // 2. LOGIKA PENGALIHAN CERDAS
+          // =======================================================
+          if (redirectTo) {
+            // Jika ada parameter, alihkan ke sana (contoh: ke /kritika/profil/)
+            window.location.href = redirectTo;
+          } else {
+            // Jika tidak, alihkan ke halaman default (halaman profil kuis)
+            window.location.href = '../'; 
+          }
+          // =======================================================
         }, 1500);
       }
     });
 
-    // Cek apakah pengguna sudah login saat halaman dimuat, jika ya, langsung arahkan
+    // Cek apakah pengguna sudah login saat halaman dimuat
     document.addEventListener('DOMContentLoaded', async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        window.location.href = '../'; // Arahkan ke halaman profil
+        // Jika sudah login, langsung alihkan
+        if (redirectTo) {
+          window.location.href = redirectTo;
+        } else {
+          window.location.href = '../';
+        }
       }
     });
   </script>
