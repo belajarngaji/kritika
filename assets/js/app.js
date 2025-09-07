@@ -31,18 +31,31 @@ async function getMaterials() {
 }
 
 // ==============================
-// Generate pertanyaan kritis AI
+// Generate soal pilihan ganda AI
 // ==============================
-async function generateCriticalQuestion(materialText) {
+async function generateQuestions(materialText) {
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({
-        message: `Berdasarkan teks berikut (dan *hanya teks ini*), buatkan 3 pertanyaan singkat. 
-- Jangan ambil dari sumber lain. 
-- Pastikan pertanyaan fokus pada isi teks, bukan pengetahuan umum. 
-- Tampilkan pertanyaan dalam format daftar terurut.
+        message: `Berdasarkan teks berikut (dan *hanya teks ini*), buatkan 3 soal pilihan ganda.
+- Format output HARUS JSON valid dengan struktur:
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "string",
+      "options": [
+        {"key": "A", "text": "string"},
+        {"key": "B", "text": "string"},
+        {"key": "C", "text": "string"},
+        {"key": "D", "text": "string"}
+      ],
+      "correct_answer": "A|B|C|D"
+    }
+  ]
+}
 
 Teks:
 ${materialText}`,
@@ -53,7 +66,7 @@ ${materialText}`,
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return data.reply || null;
+    return data.reply || null; // AI balikin string JSON
   } catch (err) {
     console.error('❌ Error AI generate:', err);
     return null;
@@ -92,7 +105,6 @@ Jangan tambahkan referensi luar.`
   }
 }
 
-
 // ==============================
 // INIT Halaman Materi
 // ==============================
@@ -107,7 +119,7 @@ async function init() {
     aiOutput = document.createElement('div');
     aiOutput.id = 'aiOutput';
     aiOutput.classList.add('ai-output');
-    btnGenerate.after(aiOutput); // Hasil generate langsung di bawah tombol
+    btnGenerate.after(aiOutput);
   }
 
   // ======= Buat kolom jawaban user =======
@@ -120,7 +132,7 @@ async function init() {
       <textarea id="userAnswer" placeholder="Tulis jawaban Anda di sini..." rows="4"></textarea>
       <button id="btnCheck" class="btn">Cek Jawaban</button>
     `;
-    aiOutput.after(answerSection); // Muncul tepat di bawah hasil generate
+    aiOutput.after(answerSection);
   }
 
   // ======= Buat kolom koreksi AI =======
@@ -130,30 +142,56 @@ async function init() {
     aiCorrection.id = 'aiCorrection';
     aiCorrection.classList.add('ai-output');
     aiCorrection.innerHTML = '<p>Koreksi akan ditampilkan di sini setelah dicek.</p>';
-    answerSection.after(aiCorrection); // Muncul di bawah kolom jawaban
+    answerSection.after(aiCorrection);
   }
 
   // ======= Ambil materi dari Supabase =======
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
+  materiContent.innerHTML = materi ? materi.content : '<p>Materi belum tersedia.</p>';
 
-  // ✅ Perbaikan #1
-  // Menggunakan marked.parse() untuk mengubah Markdown menjadi HTML
-  materiContent.innerHTML = materi ? marked.parse(materi.content) : '<p>Materi belum tersedia.</p>';
-
-  // ======= Event Generate Pertanyaan Kritis =======
+  // ======= Event Generate Soal Pilihan Ganda =======
   btnGenerate.addEventListener('click', async () => {
     if (!materi) return;
 
     btnGenerate.disabled = true;
     btnGenerate.textContent = 'Loading...';
-    aiOutput.innerHTML = ''; // Reset hasil generate
+    aiOutput.innerHTML = '';
 
-    const questions = await generateCriticalQuestion(materi.content);
-    aiOutput.innerHTML = questions ? marked.parse(questions) : '<p>AI gagal generate pertanyaan.</p>';
+    const questionsJson = await generateQuestions(materi.content);
+    if (!questionsJson) {
+      aiOutput.innerHTML = '<p>AI gagal generate pertanyaan.</p>';
+      btnGenerate.disabled = false;
+      btnGenerate.textContent = 'Generate Soal';
+      return;
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(questionsJson);
+    } catch (err) {
+      aiOutput.innerHTML = '<p>Format JSON tidak valid.</p>';
+      btnGenerate.disabled = false;
+      btnGenerate.textContent = 'Generate Soal';
+      return;
+    }
+
+    aiOutput.innerHTML = '';
+    parsed.questions.forEach(q => {
+      const div = document.createElement('div');
+      div.classList.add('question-block');
+      div.innerHTML = `
+        <p><strong>${q.id}.</strong> ${q.question}</p>
+        <ul>
+          ${q.options.map(opt => `<li>${opt.key}. ${opt.text}</li>`).join('')}
+        </ul>
+        <p><em>Kunci: ${q.correct_answer}</em></p>
+      `;
+      aiOutput.appendChild(div);
+    });
 
     btnGenerate.disabled = false;
-    btnGenerate.textContent = 'Generate Pertanyaan Kritis';
+    btnGenerate.textContent = 'Generate Soal';
   });
 
   // ======= Event Cek Jawaban =======
@@ -165,8 +203,6 @@ async function init() {
     if (!answerText) return alert('Tulis jawaban dulu!');
 
     aiCorrection.innerHTML = '<p>Memeriksa jawaban...</p>';
-    // ✅ Perbaikan #2
-    // Mengirim materi.content (teks) ke AI, bukan seluruh objek materi
     const result = await checkAnswer(answerText, materi.content);
 
     if (result && 'score' in result && 'feedback' in result) {
