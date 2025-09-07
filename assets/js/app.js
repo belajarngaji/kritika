@@ -1,5 +1,3 @@
-// /kritika/assets/js/app.js
-
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 // ==============================
@@ -12,7 +10,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ==============================
 // API URL
 // ==============================
-const API_URL = 'https://hmmz-bot01.vercel.app/chat';
+const API_URL = 'https://hmmz-bot01.vercel.app/chat'; 
 
 // ==============================
 // Ambil semua materi dari Supabase
@@ -41,7 +39,7 @@ async function generateMultipleChoiceQuestion(materialText) {
 - Hanya 1 jawaban yang benar.
 - Tampilkan dalam format JSON berikut:
 {
-  "question": "Isi soal di sini",
+  "question": "Soal di sini",
   "options": ["Opsi A", "Opsi B", "Opsi C", "Opsi D"],
   "correct_answer": "Opsi yang benar"
 }
@@ -75,24 +73,36 @@ async function init() {
   // Ambil elemen dari HTML
   const materiContent = document.getElementById('materiContent');
   const btnGenerate = document.getElementById('btnGenerate');
+
+  // Ganti pembuatan elemen dinamis dengan pengambilan elemen yang sudah ada
   const aiQuestionContainer = document.getElementById('aiQuestionContainer');
   const questionText = document.getElementById('questionText');
   const optionsList = document.getElementById('optionsList');
   const feedbackMessage = document.getElementById('feedbackMessage');
-
+  
+  // ======== Ambil materi dari Supabase dan tampilkan ========
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
-  materiContent.innerHTML = materi ? marked.parse(materi.content) : '<p>Materi belum tersedia.</p>';
 
-  // ======= Event Generate Pertanyaan =======
+  if (materi) {
+      // Perbaikan: gunakan marked.parse untuk menampilkan konten
+      materiContent.innerHTML = marked.parse(materi.content); 
+  } else {
+      materiContent.innerHTML = '<p>Materi belum tersedia.</p>';
+  }
+
+  // ======== Event Generate Pertanyaan Pilihan Ganda ========
   btnGenerate.addEventListener('click', async () => {
-    if (!materi) return;
+    if (!materi) {
+      alert('Materi belum dimuat.');
+      return;
+    }
 
     btnGenerate.disabled = true;
     btnGenerate.textContent = 'Membuat Soal...';
     aiQuestionContainer.style.display = 'none';
-    optionsList.innerHTML = '';
-    feedbackMessage.textContent = '';
+    optionsList.innerHTML = ''; // Kosongkan opsi sebelumnya
+    feedbackMessage.textContent = ''; // Kosongkan feedback
 
     const questionData = await generateMultipleChoiceQuestion(materi.content);
     
