@@ -8,8 +8,6 @@ const profileUserid = document.getElementById('profile-userid');
 const profileAvatar = document.getElementById('profile-avatar');
 const profileStats = document.getElementById('profile-stats');
 
-const statsScore = document.getElementById('stats-score');
-
 const avatarInput = document.getElementById('avatar-input');
 const avatarModal = document.getElementById('avatar-modal');
 const modalImage = document.getElementById('modal-image');
@@ -34,6 +32,7 @@ function displayProfileData(profile, user) {
 
     const avatarUrl = profile.avatar_url;
     if (avatarUrl) {
+      // Gunakan Image Transformations untuk menampilkan ukuran 200x200
       profileAvatar.src = `${avatarUrl}?width=200&height=200`;
     } else {
       profileAvatar.src = `https://api.dicebear.com/8.x/initials/svg?seed=${profile.username || '?'}`;
@@ -48,78 +47,6 @@ function displayProfileData(profile, user) {
     }
 }
 
-// 🔥 Fungsi untuk menghitung statistik lengkap dari tabel kritika_attempts
-async function loadProfileStats(userId) {
-    try {
-        const { data, error } = await _supabase
-            .from('kritika_attempts')
-            .select('score, session_id, category')
-            .eq('user_id', userId);
-
-        if (error) {
-            console.error('❌ Error fetch profile stats:', error);
-            return;
-        }
-
-        if (!data || data.length === 0) {
-            if (statsScore) statsScore.textContent = 0;
-            profileStats.innerHTML = `
-                <p>Total Skor: 0</p>
-                <p>Soal Dikerjakan: 0</p>
-                <p>Level: -</p>
-                <p>Badge: -</p>
-                <p>Materi Favorit: -</p>
-                <div class="xp-bar"><div class="xp-progress" style="width:0%"></div></div>
-            `;
-            return;
-        }
-
-        // Hitung total skor
-        const totalScore = data.reduce((sum, row) => sum + (row.score || 0), 0);
-
-        // Hitung total soal dikerjakan
-        const totalSoal = data.length;
-
-        // Level sederhana berdasarkan skor
-        const level = Math.floor(totalScore / 10) + 1;
-
-        // Tentukan badge
-        let badge = "Pemula";
-        if (totalScore >= 100) badge = "Expert";
-        else if (totalScore >= 50) badge = "Intermediate";
-
-        // Cari materi favorit (paling sering muncul)
-        const materiCount = {};
-        data.forEach(row => {
-            const materi = row.session_id || row.category || "unknown";
-            materiCount[materi] = (materiCount[materi] || 0) + 1;
-        });
-
-        const materiFavorit = Object.entries(materiCount)
-            .sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
-
-        // XP Progress
-        const xpForCurrentLevel = totalScore % 10;   // XP yg sudah dikumpulkan di level ini
-        const xpNeeded = 10;                        // Target XP per level
-        const xpPercent = Math.floor((xpForCurrentLevel / xpNeeded) * 100);
-
-        // Tampilkan ke UI
-        if (statsScore) statsScore.textContent = totalScore;
-        profileStats.innerHTML = `
-            <p><strong>Total Skor:</strong> ${totalScore}</p>
-            <p><strong>Soal Dikerjakan:</strong> ${totalSoal}</p>
-            <p><strong>Level:</strong> ${level}</p>
-            <p><strong>Badge:</strong> ${badge}</p>
-            <p><strong>Materi Favorit:</strong> ${materiFavorit}</p>
-            <div class="xp-bar" style="width:100%; height:15px; background:#ddd; border-radius:8px; margin-top:8px;">
-                <div class="xp-progress" style="width:${xpPercent}%; height:100%; background:#4caf50; border-radius:8px;"></div>
-            </div>
-            <small>XP: ${xpForCurrentLevel} / ${xpNeeded}</small>
-        `;
-    } catch (err) {
-        console.error('❌ Exception load profile stats:', err);
-    }
-}
 // Fungsi utama untuk memuat profil
 async function loadProfile() {
     const params = new URLSearchParams(window.location.search);
@@ -135,7 +62,6 @@ async function loadProfile() {
 
         if (profile) {
             displayProfileData(profile, user);
-            await loadProfileStats(profile.id); // 🔥 ganti loadTotalScore jadi loadProfileStats
         } else {
             displayUnknownProfile();
             profileUsername.textContent = `Pengguna '${username}' Tidak Ditemukan`;
@@ -150,7 +76,6 @@ async function loadProfile() {
 
             if (profile) {
                 displayProfileData(profile, user);
-                await loadProfileStats(profile.id); // 🔥 ganti loadTotalScore jadi loadProfileStats
             }
         } else {
             displayUnknownProfile();
@@ -167,10 +92,11 @@ function uploadAvatar(file) {
 
     avatarModal.style.display = 'none';
 
+    // Kompresi gambar menjadi 100x100 piksel
     new Compressor(file, {
         width: 100,
         height: 100,
-        quality: 0.8,
+        quality: 0.8, // Kualitas 80%
         success(result) {
             handleUpload(result);
         },
@@ -197,7 +123,9 @@ async function handleUpload(compressedFile) {
 
     const { error: uploadError } = await _supabase.storage
         .from('avatars')
-        .upload(filePath, compressedFile, { upsert: true });
+        .upload(filePath, compressedFile, {
+            upsert: true
+        });
 
     if (uploadError) {
         alert('Gagal mengunggah foto: ' + uploadError.message);
@@ -229,9 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (user && currentProfile && user.id === currentProfile.id) {
                 avatarModal.style.display = 'flex';
+                // Hapus string query untuk menampilkan gambar asli di modal
                 modalImage.src = profileAvatar.src.replace(/\?.*$/, '');
                 modalUploadBtn.style.display = 'block';
             } else if (profileAvatar.src && profileAvatar.src.includes('http')) {
+                // Tampilkan modal zoom untuk profil publik
                 avatarModal.style.display = 'flex';
                 modalImage.src = profileAvatar.src.replace(/\?.*$/, '');
                 modalUploadBtn.style.display = 'none';
