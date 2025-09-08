@@ -3,21 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jurumiya - Bab 1 | Kritika</title>
-  <meta name="description" content="Belajar kritis dengan materi Jurumiya Bab 1. Kembangkan kemampuan berpikir analitis melalui pertanyaan dan refleksi.">
+  <title>Materi Kuis | Kritika</title>
+  <meta name="description" content="Belajar kritis dengan materi interaktif. Kembangkan kemampuan berpikir analitis melalui pertanyaan dan refleksi.">
 
-  <!-- CSS Lokal -->
   <link rel="stylesheet" href="../../../assets/css/style.css">
 
-  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Marked.js untuk parsing Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-  <!-- NAVBAR -->
-  <header>9
+  <header>
     <nav class="navbar">
       <h1 class="logo">Kritika</h1>
       <ul class="nav-links">
@@ -29,39 +25,35 @@
     </nav>
   </header>
 
-  <!-- MAIN CONTENT -->
-   <main class="content">
+  <main class="content">
 
     <section class="section-header">
-      <h2>Jurumiya - Bab 1</h2>
-      <p>Pengenalan awal Jurumiya untuk memahami dasar-dasar.</p>
+      <h2 id="materiJudul">Memuat Materi...</h2>
+      <p id="materiDeskripsi"></p>
     </section>
 
     <div class="lesson-card">
-        <article class="lesson" id="materiContainer">
-            </article>
-        <div class="ai-actions">
-            <button id="btnGenerate" class="btn">Generate Pertanyaan Kritis</button>
-        </div>
+      <article class="lesson materi-container" id="materiContainer">
+        </article>
+      <div class="ai-actions">
+        <button id="btnGenerate" class="btn">Generate Pertanyaan Kritis</button>
+      </div>
     </div>
 
     <div id="aiOutput" class="ai-output"></div>
     <div id="quizSummary" class="ai-output"></div>
 
     <div class="lesson-nav">
-      <a href="../index.html" class="btn-outline">← Kembali ke Daftar Bab</a>
-      <a href="../bab2/index.html" class="btn">Lanjut ke Bab 2 →</a>
+      <a id="btnKembali" href="../index.html" class="btn-outline">← Kembali ke Daftar Bab</a>
+      <a id="btnLanjut" href="#" class="btn">Lanjut ke Bab Berikutnya →</a>
     </div>
-    
+
   </main>
 
-
-  <!-- FOOTER -->
   <footer>
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
 
-  <!-- Script JS -->
   <script type="module" src="../../../assets/js/app.js"></script>
 </body>
 </html>
