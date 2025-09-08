@@ -1,6 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { _supabase } from './supabase-client.js';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const API_URL = 'https://hmmz-bot01.vercel.app/chat';
 
 async function getMaterials() {
