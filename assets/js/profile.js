@@ -8,7 +8,7 @@ const profileUserid = document.getElementById('profile-userid');
 const profileAvatar = document.getElementById('profile-avatar');
 const profileStats = document.getElementById('profile-stats');
 
-const statsScore = document.getElementById('stats-score'); // ← baru ditambahkan
+const statsScore = document.getElementById('stats-score');
 
 const avatarInput = document.getElementById('avatar-input');
 const avatarModal = document.getElementById('avatar-modal');
@@ -48,24 +48,66 @@ function displayProfileData(profile, user) {
     }
 }
 
-// Fungsi untuk menghitung Total Skor dari tabel kritika_attempts
-async function loadTotalScore(userId) {
+// 🔥 Fungsi untuk menghitung statistik lengkap dari tabel kritika_attempts
+async function loadProfileStats(userId) {
     try {
         const { data, error } = await _supabase
             .from('kritika_attempts')
-            .select('nilai')
+            .select('score, session_id, category')
             .eq('user_id', userId);
 
         if (error) {
-            console.error('❌ Error fetch total score:', error);
+            console.error('❌ Error fetch profile stats:', error);
             return;
         }
 
-        const totalScore = data?.reduce((sum, row) => sum + (row.nilai || 0), 0) || 0;
+        if (!data || data.length === 0) {
+            if (statsScore) statsScore.textContent = 0;
+            profileStats.innerHTML = `
+                <p>Total Skor: 0</p>
+                <p>Soal Dikerjakan: 0</p>
+                <p>Level: -</p>
+                <p>Badge: -</p>
+                <p>Materi Favorit: -</p>
+            `;
+            return;
+        }
 
+        // Hitung total skor
+        const totalScore = data.reduce((sum, row) => sum + (row.score || 0), 0);
+
+        // Hitung total soal dikerjakan
+        const totalSoal = data.length;
+
+        // Level sederhana berdasarkan skor
+        const level = Math.floor(totalScore / 10) + 1;
+
+        // Tentukan badge
+        let badge = "Pemula";
+        if (totalScore >= 100) badge = "Expert";
+        else if (totalScore >= 50) badge = "Intermediate";
+
+        // Cari materi favorit (paling sering muncul)
+        const materiCount = {};
+        data.forEach(row => {
+            const materi = row.session_id || row.category || "unknown";
+            materiCount[materi] = (materiCount[materi] || 0) + 1;
+        });
+
+        const materiFavorit = Object.entries(materiCount)
+            .sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
+
+        // Tampilkan ke UI
         if (statsScore) statsScore.textContent = totalScore;
+        profileStats.innerHTML = `
+            <p><strong>Total Skor:</strong> ${totalScore}</p>
+            <p><strong>Soal Dikerjakan:</strong> ${totalSoal}</p>
+            <p><strong>Level:</strong> ${level}</p>
+            <p><strong>Badge:</strong> ${badge}</p>
+            <p><strong>Materi Favorit:</strong> ${materiFavorit}</p>
+        `;
     } catch (err) {
-        console.error('❌ Exception load total score:', err);
+        console.error('❌ Exception load profile stats:', err);
     }
 }
 
@@ -84,7 +126,7 @@ async function loadProfile() {
 
         if (profile) {
             displayProfileData(profile, user);
-            await loadTotalScore(profile.id); // ← panggil total skor
+            await loadProfileStats(profile.id); // 🔥 ganti loadTotalScore jadi loadProfileStats
         } else {
             displayUnknownProfile();
             profileUsername.textContent = `Pengguna '${username}' Tidak Ditemukan`;
@@ -99,7 +141,7 @@ async function loadProfile() {
 
             if (profile) {
                 displayProfileData(profile, user);
-                await loadTotalScore(profile.id); // ← panggil total skor
+                await loadProfileStats(profile.id); // 🔥 ganti loadTotalScore jadi loadProfileStats
             }
         } else {
             displayUnknownProfile();
