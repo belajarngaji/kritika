@@ -617,101 +617,6 @@ input:checked + .slider:before {
   color: #fff;
 }
 
-/* ================================================ */
-/* === KOLM GENERATE & OUTPUT QUIZ === */
-/* ================================================ */
-
-/* Container tombol generate */
-.ai-actions {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-}
-
-.ai-actions .btn {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 0.5rem;
-  cursor: pointer;
-}
-
-/* Kotak soal / output AI */
-.ai-output {
-  background-color: #f3f4f6; /* abu lembut */
-  padding: 1rem 1.5rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  min-height: 3rem;
-}
-
-/* Blok tiap pertanyaan */
-.question-block {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  border-left: 4px solid #3b82f6; /* indikator visual pertanyaan */
-}
-
-/* Judul pertanyaan */
-.question-block p {
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: #111827;
-}
-
-/* Daftar opsi jawaban */
-.question-block ul.options {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-/* Tombol pilihan jawaban */
-.question-block .option-btn {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.95rem;
-  border-radius: 0.4rem;
-  border: 1px solid #d1d5db;
-  background-color: #f9fafb;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
-}
-
-.question-block .option-btn:hover {
-  background-color: #e0e7ff; /* biru lembut saat hover */
-  border-color: #3b82f6;
-}
-
-/* Feedback jawaban benar/salah */
-.question-block .feedback {
-  margin-top: 0.5rem;
-  font-weight: 600;
-}
-
-/* Ringkasan skor / summary */
-#quizSummary {
-  background-color: #dbeafe; /* biru lembut */
-  padding: 1rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  color: #1e40af;
-  min-height: 3rem;
-}
-
-/* Responsive: tombol opsi full width di mobile */
-@media (max-width: 480px) {
-  .question-block .option-btn {
-    width: 100%;
-  }
-}
 
 /* ================================================ */
 /* === FOOTER === */
@@ -806,29 +711,100 @@ footer {
   color: #fff;
 }
 
-/* AI Output / Koreksi */
+/* ================================================ */
+/* === KOLM GENERATE & OUTPUT QUIZ === */
+/* ================================================ */
+
+/* Container tombol generate */
+.ai-actions {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.ai-actions .btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+/* Kotak soal / output AI */
 .ai-output {
-  background-color: #e5e7eb;
-  padding: 1rem;
+  background-color: #f3f4f6; /* abu lembut */
+  padding: 1rem 1.5rem;
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   min-height: 3rem;
 }
 
-/* Answer Section */
-.answer-section {
+/* Blok tiap pertanyaan */
+.question-block {
   margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  border-left: 4px solid #3b82f6; /* indikator visual pertanyaan */
 }
 
-.answer-section textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
+/* Judul pertanyaan */
+.question-block p {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #111827;
+}
+
+/* Daftar opsi jawaban */
+.question-block ul.options {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Tombol pilihan jawaban */
+.question-block .option-btn {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  border-radius: 0.4rem;
   border: 1px solid #d1d5db;
-  font-family: 'Inter', sans-serif;
-  font-size: 1rem;
-  resize: vertical;
-  margin-bottom: 0.5rem;
+  background-color: #f9fafb;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.question-block .option-btn:hover {
+  background-color: #e0e7ff; /* biru lembut saat hover */
+  border-color: #3b82f6;
+}
+
+/* Feedback jawaban benar/salah */
+.question-block .feedback {
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+/* Ringkasan skor / summary */
+#quizSummary {
+  background-color: #dbeafe; /* biru lembut */
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  color: #1e40af;
+  min-height: 3rem;
+}
+
+/* Responsive: tombol opsi full width di mobile */
+@media (max-width: 480px) {
+  .question-block .option-btn {
+    width: 100%;
+  }
 }
 
 /* Navigasi Bab */
