@@ -197,12 +197,13 @@ async function init() {
           const scorePercent = ((correctCount / total) * 100).toFixed(0);
 
           summary.innerHTML = `
-            <strong>Total Soal:</strong> ${total}<br>
-            <strong>Terjawab:</strong> ${answered}/${total}<br>
-            <strong>Benar:</strong> ${correctCount}<br>
-            <strong>Salah:</strong> ${wrongCount}<br>
-            <strong>Skor:</strong> ${scorePercent}%
-          `;
+  <strong>Total Soal:</strong> ${total}<br>
+  <strong>Terjawab:</strong> ${answered}<br>
+  <strong>Benar:</strong> ${correctCount}<br>
+  <strong>Salah:</strong> ${answered - correctCount}<br>
+  <strong>Nilai:</strong> ${correctCount}<br>
+  <strong>Rate:</strong> ${Math.round((correctCount / total) * 100)}%
+`;
         });
       });
     });
