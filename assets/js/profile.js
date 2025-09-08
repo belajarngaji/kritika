@@ -69,6 +69,7 @@ async function loadProfileStats(userId) {
                 <p>Level: -</p>
                 <p>Badge: -</p>
                 <p>Materi Favorit: -</p>
+                <div class="xp-bar"><div class="xp-progress" style="width:0%"></div></div>
             `;
             return;
         }
@@ -97,6 +98,11 @@ async function loadProfileStats(userId) {
         const materiFavorit = Object.entries(materiCount)
             .sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
 
+        // XP Progress
+        const xpForCurrentLevel = totalScore % 10;   // XP yg sudah dikumpulkan di level ini
+        const xpNeeded = 10;                        // Target XP per level
+        const xpPercent = Math.floor((xpForCurrentLevel / xpNeeded) * 100);
+
         // Tampilkan ke UI
         if (statsScore) statsScore.textContent = totalScore;
         profileStats.innerHTML = `
@@ -105,12 +111,15 @@ async function loadProfileStats(userId) {
             <p><strong>Level:</strong> ${level}</p>
             <p><strong>Badge:</strong> ${badge}</p>
             <p><strong>Materi Favorit:</strong> ${materiFavorit}</p>
+            <div class="xp-bar" style="width:100%; height:15px; background:#ddd; border-radius:8px; margin-top:8px;">
+                <div class="xp-progress" style="width:${xpPercent}%; height:100%; background:#4caf50; border-radius:8px;"></div>
+            </div>
+            <small>XP: ${xpForCurrentLevel} / ${xpNeeded}</small>
         `;
     } catch (err) {
         console.error('❌ Exception load profile stats:', err);
     }
 }
-
 // Fungsi utama untuk memuat profil
 async function loadProfile() {
     const params = new URLSearchParams(window.location.search);
