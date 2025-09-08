@@ -8,6 +8,8 @@ const profileUserid = document.getElementById('profile-userid');
 const profileAvatar = document.getElementById('profile-avatar');
 const profileStats = document.getElementById('profile-stats');
 
+const statsScore = document.getElementById('stats-score'); // ← baru ditambahkan
+
 const avatarInput = document.getElementById('avatar-input');
 const avatarModal = document.getElementById('avatar-modal');
 const modalImage = document.getElementById('modal-image');
@@ -32,7 +34,6 @@ function displayProfileData(profile, user) {
 
     const avatarUrl = profile.avatar_url;
     if (avatarUrl) {
-      // Gunakan Image Transformations untuk menampilkan ukuran 200x200
       profileAvatar.src = `${avatarUrl}?width=200&height=200`;
     } else {
       profileAvatar.src = `https://api.dicebear.com/8.x/initials/svg?seed=${profile.username || '?'}`;
@@ -44,6 +45,27 @@ function displayProfileData(profile, user) {
         profileAvatar.style.cursor = 'pointer';
     } else {
         profileAvatar.style.cursor = 'default';
+    }
+}
+
+// Fungsi untuk menghitung Total Skor dari tabel kritika_attempts
+async function loadTotalScore(userId) {
+    try {
+        const { data, error } = await _supabase
+            .from('kritika_attempts')
+            .select('nilai')
+            .eq('user_id', userId);
+
+        if (error) {
+            console.error('❌ Error fetch total score:', error);
+            return;
+        }
+
+        const totalScore = data?.reduce((sum, row) => sum + (row.nilai || 0), 0) || 0;
+
+        if (statsScore) statsScore.textContent = totalScore;
+    } catch (err) {
+        console.error('❌ Exception load total score:', err);
     }
 }
 
@@ -62,6 +84,7 @@ async function loadProfile() {
 
         if (profile) {
             displayProfileData(profile, user);
+            await loadTotalScore(profile.id); // ← panggil total skor
         } else {
             displayUnknownProfile();
             profileUsername.textContent = `Pengguna '${username}' Tidak Ditemukan`;
@@ -76,6 +99,7 @@ async function loadProfile() {
 
             if (profile) {
                 displayProfileData(profile, user);
+                await loadTotalScore(profile.id); // ← panggil total skor
             }
         } else {
             displayUnknownProfile();
@@ -92,11 +116,10 @@ function uploadAvatar(file) {
 
     avatarModal.style.display = 'none';
 
-    // Kompresi gambar menjadi 100x100 piksel
     new Compressor(file, {
         width: 100,
         height: 100,
-        quality: 0.8, // Kualitas 80%
+        quality: 0.8,
         success(result) {
             handleUpload(result);
         },
@@ -123,9 +146,7 @@ async function handleUpload(compressedFile) {
 
     const { error: uploadError } = await _supabase.storage
         .from('avatars')
-        .upload(filePath, compressedFile, {
-            upsert: true
-        });
+        .upload(filePath, compressedFile, { upsert: true });
 
     if (uploadError) {
         alert('Gagal mengunggah foto: ' + uploadError.message);
@@ -157,11 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (user && currentProfile && user.id === currentProfile.id) {
                 avatarModal.style.display = 'flex';
-                // Hapus string query untuk menampilkan gambar asli di modal
                 modalImage.src = profileAvatar.src.replace(/\?.*$/, '');
                 modalUploadBtn.style.display = 'block';
             } else if (profileAvatar.src && profileAvatar.src.includes('http')) {
-                // Tampilkan modal zoom untuk profil publik
                 avatarModal.style.display = 'flex';
                 modalImage.src = profileAvatar.src.replace(/\?.*$/, '');
                 modalUploadBtn.style.display = 'none';
