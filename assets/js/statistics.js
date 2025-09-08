@@ -1,14 +1,13 @@
-// Impor client Supabase Anda. Pastikan path-nya benar.
-// Anda mungkin perlu membuat file ini jika belum ada.
+// Impor client Supabase dari file terpusat
 import { supabase } from './supabase-client.js';
 
 /**
- * Fungsi utama untuk memuat statistik pengguna dan menggambar chart.
+ * Fungsi utama untuk memuat statistik pengguna dan menggambar radar chart.
  */
 async function loadUserStats() {
-    // Ambil elemen-elemen penting dari halaman HTML
     const chartTitle = document.querySelector('.chart-title');
     const chartCanvas = document.getElementById('radarChart');
+
     if (!chartCanvas) {
         console.error("Elemen canvas dengan id 'radarChart' tidak ditemukan.");
         return;
@@ -21,35 +20,30 @@ async function loadUserStats() {
         if (!user) {
             chartTitle.textContent = "Silakan Login";
             ctx.fillText("Anda harus login untuk melihat statistik.", 10, 50);
-            console.warn("Pengguna belum login.");
             return;
         }
 
         // 2. Panggil endpoint backend Python untuk mengambil data statistik
         const response = await fetch(`https://hmmz-bot01.vercel.app/stats/${user.id}`);
         if (!response.ok) {
-            throw new Error(`Gagal mengambil data dari server (Status: ${response.status})`);
+            throw new Error(`Server merespons dengan status: ${response.status}`);
         }
         const statsData = await response.json();
 
-        // 3. Cek apakah ada data statistik yang dikembalikan
+        // 3. Cek jika data statistik kosong
         if (!statsData || Object.keys(statsData).length === 0) {
             chartTitle.textContent = "Belum Ada Statistik";
             ctx.fillText("Kerjakan beberapa kuis untuk melihat statistik Anda di sini.", 10, 50);
-            console.warn("Statistik tidak ditemukan untuk pengguna ini.");
             return;
         }
 
-        // 4. Proses data untuk Chart.js
-        const labels = Object.keys(statsData);   // -> ["Analisa", "Logika", "Memori", ...]
-        const scores = Object.values(statsData); // -> [80, 95, 60, ...]
-        
-        // Ganti judul kembali jika sebelumnya ada pesan error
+        // 4. Proses data dan gambar chart
         chartTitle.textContent = "Statistik Keahlian Kritis";
-
-        // 5. Konfigurasi dan gambar chart
+        const labels = Object.keys(statsData);
+        const scores = Object.values(statsData);
+        
         new Chart(ctx, {
-            type: 'radar', // Tipe chart adalah 'radar' (pentagon/spider)
+            type: 'radar',
             data: {
                 labels: labels,
                 datasets: [{
@@ -67,32 +61,17 @@ async function loadUserStats() {
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                elements: {
-                    line: {
-                        borderWidth: 3
-                    }
-                },
+                elements: { line: { borderWidth: 3 } },
                 scales: {
-                    r: { // 'r' adalah untuk sumbu radial (nilai)
+                    r: {
                         angleLines: { display: true },
-                        suggestedMin: 0,   // Nilai minimal pada chart
-                        suggestedMax: 100, // Nilai maksimal pada chart
-                        pointLabels: {
-                            font: {
-                                size: 12,
-                                weight: 'bold'
-                            }
-                        },
-                        ticks: {
-                            backdropColor: 'rgba(255, 255, 255, 1)' // Latar belakang angka (0, 25, 50,..)
-                        }
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                        pointLabels: { font: { size: 12, weight: 'bold' } },
+                        ticks: { backdropColor: 'rgba(255, 255, 255, 1)' }
                     }
                 },
-                plugins: {
-                    legend: {
-                        display: false // Menyembunyikan label "Skor Rata-rata (%)" di atas chart
-                    }
-                }
+                plugins: { legend: { display: false } }
             }
         });
 
@@ -103,5 +82,5 @@ async function loadUserStats() {
     }
 }
 
-// Jalankan seluruh fungsi setelah halaman HTML selesai dimuat
+// Jalankan fungsi setelah seluruh halaman siap
 document.addEventListener('DOMContentLoaded', loadUserStats);
