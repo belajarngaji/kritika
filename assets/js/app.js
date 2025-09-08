@@ -158,66 +158,68 @@ async function init() {
     };
 
     parsed.questions.forEach(q => {
-      // simpan original correct
-      const originalCorrect = q.options.find(o => o.key === q.correct_answer);
+  // simpan original jawaban benar
+  const originalCorrect = q.options.find(o => o.key === q.correct_answer);
 
-      // acak opsi
-      let shuffled = shuffle(q.options);
-      const keys = ['A','B','C','D'];
-      shuffled = shuffled.map((opt, i) => ({ key: keys[i], text: opt.text }));
-      const newCorrect = shuffled.find(o => o.text === originalCorrect.text);
+  // acak opsi
+  let shuffled = shuffle(q.options); // acak array options
+  const keys = ['A','B','C','D'];
+  // assign key baru setelah diacak, tanpa mengubah text
+  shuffled = shuffled.map((opt, i) => ({ key: keys[i], text: opt.text }));
 
-      // render
-      const div = document.createElement('div');
-      div.classList.add('question-block');
-      div.dataset.correct = newCorrect.key;
-      div.dataset.category = q.category; // kategori disimpan di DOM
-      div.innerHTML = `
-        <p><strong>${q.id}.</strong> ${q.question}</p>
-        <ul class="options">
-          ${shuffled.map(opt => `
-            <li><button class="option-btn" data-key="${opt.key}">${opt.key}. ${opt.text}</button></li>
-          `).join('')}
-        </ul>
-        <p class="feedback"></p>
-      `;
-      aiOutput.appendChild(div);
+  // cari jawaban yang benar berdasarkan text setelah diacak
+  const newCorrect = shuffled.find(o => o.text === originalCorrect.text);
 
-      // event pilih jawaban
-      div.querySelectorAll('.option-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const user = btn.dataset.key;
-          const correct = div.dataset.correct;
-          const fb = div.querySelector('.feedback');
+  // render pertanyaan
+  const div = document.createElement('div');
+  div.classList.add('question-block');
+  div.dataset.correct = newCorrect.key; // gunakan key yang benar setelah acak
+  div.innerHTML = `
+    <p><strong>${q.id}.</strong> ${q.question}</p>
+    <ul class="options">
+      ${shuffled.map(opt => `
+        <li><button class="option-btn" data-key="${opt.key}">${opt.key}. ${opt.text}</button></li>
+      `).join('')}
+    </ul>
+    <p class="feedback"></p>
+  `;
+  aiOutput.appendChild(div);
 
-          div.querySelectorAll('.option-btn').forEach(b => (b.disabled = true));
+  // event pilih jawaban
+  div.querySelectorAll('.option-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const user = btn.dataset.key;
+      const correct = div.dataset.correct;
+      const fb = div.querySelector('.feedback');
 
-          const isCorrect = (user === correct);
+      div.querySelectorAll('.option-btn').forEach(b => (b.disabled = true));
 
-          if (isCorrect) {
-            correctCount += 1;
-            categoryScores[q.category] += 1; // update score kategori
-            fb.textContent = '✅ Benar';
-            fb.style.color = 'green';
-          } else {
-            fb.textContent = `❌ Salah. Jawaban benar: ${correct}`;
-            fb.style.color = 'red';
-          }
+      const isCorrect = (user === correct);
 
-          answered += 1;
+      if (isCorrect) {
+        correctCount += 1;
+        fb.textContent = '✅ Benar';
+        fb.style.color = 'green';
+      } else {
+        fb.textContent = `❌ Salah. Jawaban benar: ${correct}`;
+        fb.style.color = 'red';
+      }
 
-          // Ringkasan skor
-          summary.innerHTML = `
+      answered += 1;
+
+      // tampilkan ringkasan skor
+      const scorePercent = ((correctCount / total) * 100).toFixed(0);
+      summary.innerHTML = `
 <strong>Total Soal:</strong> ${total}<br>
 <strong>Terjawab:</strong> ${answered}<br>
 <strong>Benar:</strong> ${correctCount}<br>
 <strong>Salah:</strong> ${answered - correctCount}<br>
 <strong>Nilai:</strong> ${correctCount}<br>
-<strong>Rate:</strong> ${Math.round((correctCount / total) * 100)}%
+<strong>Rate:</strong> ${scorePercent}%
 `;
-        });
-      });
     });
+  });
+});
 
     btnGenerate.disabled = false;
     btnGenerate.textContent = 'Generate Soal';
