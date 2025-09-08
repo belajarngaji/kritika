@@ -13,49 +13,38 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const API_URL = 'https://hmmz-bot01.vercel.app/quiz';
 
 /* ==============================
-   Ambil materi dari Supabase
+   Helpers
 ============================== */
+function shuffle(array) {
+  return array
+    .map(v => ({ v, r: Math.random() }))
+    .sort((a,b) => a.r - b.r)
+    .map(x => x.v);
+}
+
 async function getMaterials() {
   try {
     const { data, error } = await supabase.from('materials').select('*').order('id');
-    if (error) {
-      console.error('❌ Error fetch materials:', error);
-      return [];
-    }
+    if (error) { console.error(error); return []; }
     return data;
-  } catch (err) {
-    console.error('❌ Exception fetch materials:', err);
-    return [];
-  }
+  } catch(e) { console.error(e); return []; }
 }
 
-/* ==============================
-   Panggil backend untuk generate soal
-============================== */
 async function generateQuestions(materialText) {
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        materi: materialText,
-        session_id: "jurumiya-bab1"
-      })
+      body: JSON.stringify({ materi: materialText, session_id: "jurumiya-bab1" })
     });
-
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     return data.quiz || null;
-  } catch (err) {
-    console.error('❌ Error generate quiz:', err);
-    return null;
-  }
+  } catch(err) { console.error(err); return null; }
 }
 
-/* ==============================
-   Supabase: Save Attempts
-============================== */
 async function saveAttempt({ user_id, session_id, question_id, category, user_answer, correct_answer, is_correct, score }) {
+  if (!user_id) return { success: false }; // guest/demo tidak simpan
   try {
     const { error } = await supabase.from("kritika_attempts").insert([{
       user_id,
@@ -68,30 +57,13 @@ async function saveAttempt({ user_id, session_id, question_id, category, user_an
       score,
       submitted_at: new Date().toISOString()
     }]);
-
-    if (error) {
-      console.error("❌ Error insert attempt:", error);
-      return { success: false };
-    }
+    if (error) { console.error(error); return { success: false }; }
     return { success: true };
-  } catch (err) {
-    console.error("❌ Exception insert attempt:", err);
-    return { success: false };
-  }
+  } catch(e) { console.error(e); return { success: false }; }
 }
 
 /* ==============================
-   Helpers
-============================== */
-function shuffle(array) {
-  return array
-    .map(v => ({ v, r: Math.random() }))
-    .sort((a,b) => a.r - b.r)
-    .map(x => x.v);
-}
-
-/* ==============================
-   INIT Halaman
+   INIT Halaman Quiz
 ============================== */
 async function init() {
   const materiContent = document.getElementById('materiContent');
@@ -119,7 +91,10 @@ async function init() {
   materiContent.innerHTML = materi ? materi.content : '<p>Materi belum tersedia.</p>';
   if (!materi) return;
 
-  // Event Generate Soal
+  // Ambil user_id dari auth
+  const { data: { user } } = await supabase.auth.getUser();
+  const user_id = user ? user.id : null;
+
   btnGenerate.addEventListener('click', async () => {
     btnGenerate.disabled = true;
     btnGenerate.textContent = 'Loading...';
@@ -134,93 +109,63 @@ async function init() {
       return;
     }
 
-    let parsed = quizData;
-    let total = parsed.questions.length;
+    let total = quizData.questions.length;
     let answered = 0;
     let correctCount = 0;
 
-    // user_id sementara (bisa dari auth Supabase kalau sudah ada login)
-    const { data: { user } } = await supabase.auth.getUser();
-const user_id = user ? user.id : null;  // kalau login pakai UUID, kalau guest null
-    if (user_id) {
-  await saveAttempt({
-    user_id,
-    session_id: "jurumiya-bab1",
-    question_id: q.id,
-    category: q.category,
-    user_answer: user,
-    correct_answer: correct,
-    is_correct: isCorrect,
-    score: isCorrect ? 1 : 0
-  });
-}
- 
-    parsed.questions.forEach(q => {
-  // ambil jawaban benar langsung dari backend (teks)
-  const originalCorrect = q.correct_answer;
+    quizData.questions.forEach(q => {
+      const correctText = q.answer; // jawaban text
+      const shuffledOpts = shuffle(q.options.map(o => o.text));
 
-  // acak opsi
-  let shuffled = shuffle(q.options);
+      const div = document.createElement('div');
+      div.classList.add('question-block');
+      div.dataset.correct = correctText;
+      div.innerHTML = `
+        <p><strong>${q.id}.</strong> [${q.category}] ${q.question}</p>
+        <ul class="options">
+          ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt}">${opt}</button></li>`).join('')}
+        </ul>
+        <p class="feedback"></p>
+      `;
+      aiOutput.appendChild(div);
 
-  // render pertanyaan
-  const div = document.createElement('div');
-  div.classList.add('question-block');
-  div.dataset.correct = originalCorrect;
-  div.innerHTML = `
-    <p><strong>${q.id}.</strong> [${q.category}] ${q.question}</p>
-    <ul class="options">
-      ${shuffled.map(opt => `
-        <li><button class="option-btn" data-text="${opt}">${opt}</button></li>
-      `).join('')}
-    </ul>
-    <p class="feedback"></p>
-  `;
-  aiOutput.appendChild(div);
+      div.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userAnswer = btn.dataset.text;
+          const fb = div.querySelector('.feedback');
 
-  // event pilih jawaban
-  div.querySelectorAll('.option-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const user = btn.dataset.text;
-      const correct = div.dataset.correct;
-      const fb = div.querySelector('.feedback');
+          div.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
 
-      div.querySelectorAll('.option-btn').forEach(b => (b.disabled = true));
+          const isCorrect = (userAnswer === correctText);
+          if (isCorrect) {
+            correctCount += 1;
+            fb.textContent = '✅ Benar';
+            fb.style.color = 'green';
+          } else {
+            fb.textContent = `❌ Salah. Jawaban benar: ${correctText}`;
+            fb.style.color = 'red';
+          }
 
-      const isCorrect = (user === correct);
+          answered += 1;
 
-      if (isCorrect) {
-        correctCount += 1;
-        fb.textContent = '✅ Benar';
-        fb.style.color = 'green';
-      } else {
-        fb.textContent = `❌ Salah. Jawaban benar: ${correct}`;
-        fb.style.color = 'red';
-      }
+          // Simpan attempt
+          const result = await saveAttempt({
+            user_id,
+            session_id: "jurumiya-bab1",
+            question_id: q.id,
+            category: q.category,
+            user_answer: userAnswer,
+            correct_answer: correctText,
+            is_correct: isCorrect,
+            score: isCorrect ? 1 : 0
+          });
 
-      answered += 1;
+          fb.innerHTML += result.success ? " <span style='color:green'>(tersimpan)</span>"
+                                         : " <span style='color:red'>(gagal simpan)</span>";
 
-      // simpan attempt
-      const attemptResult = await saveAttempt({
-        user_id,
-        session_id: "jurumiya-bab1",
-        question_id: q.id,
-        category: q.category,
-        user_answer: user,
-        correct_answer: correct,
-        is_correct: isCorrect,
-        score: isCorrect ? 1 : 0
-      });
-
-      // indikator simpan
-      if (attemptResult.success) {
-        fb.innerHTML += " <span style='color:green'>(tersimpan)</span>";
-      } else {
-        fb.innerHTML += " <span style='color:red'>(gagal simpan)</span>";
-      }
-
-      // tampilkan ringkasan skor global
-      const scorePercent = ((correctCount / total) * 100).toFixed(0);
-      summary.innerHTML = `
+          // Update ringkasan
+          const scorePercent = ((correctCount / total) * 100).toFixed(0);
+          summary.innerHTML = `
 <strong>Total Soal:</strong> ${total}<br>
 <strong>Terjawab:</strong> ${answered}<br>
 <strong>Benar:</strong> ${correctCount}<br>
@@ -228,13 +173,13 @@ const user_id = user ? user.id : null;  // kalau login pakai UUID, kalau guest n
 <strong>Nilai:</strong> ${correctCount}<br>
 <strong>Rate:</strong> ${scorePercent}%
 `;
+        });
+      });
     });
-  });
-});
+
     btnGenerate.disabled = false;
     btnGenerate.textContent = 'Generate Soal';
   });
 }
 
-// start
 init();
