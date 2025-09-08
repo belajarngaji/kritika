@@ -123,8 +123,8 @@ async function init() {
       div.innerHTML = `
         <p><strong>${q.id}.</strong> [${q.category}] ${q.question}</p>
         <ul class="options">
-          ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt}">${opt}</button></li>`).join('')}
-        </ul>
+  ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt.text}">${opt.text}</button></li>`).join('')}
+</ul>
         <p class="feedback"></p>
       `;
       aiOutput.appendChild(div);
