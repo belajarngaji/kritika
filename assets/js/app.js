@@ -53,9 +53,9 @@ async function generateQuestions(materialText) {
 }
 
 /* ==============================
-   Supabase: Save Attempts & Stat
+   Supabase: Save Attempts
 ============================== */
-async function saveAttempt({ user_id, session_id, question_id, category, user_answer, correct_answer, is_correct }) {
+async function saveAttempt({ user_id, session_id, question_id, category, user_answer, correct_answer, is_correct, score }) {
   try {
     const { error } = await supabase.from("kritika_attempts").insert([{
       user_id,
@@ -64,24 +64,19 @@ async function saveAttempt({ user_id, session_id, question_id, category, user_an
       category,
       user_answer,
       correct_answer,
-      is_correct
+      is_correct,
+      score,
+      submitted_at: new Date().toISOString()
     }]);
-    if (error) console.error("❌ Error insert attempt:", error);
+
+    if (error) {
+      console.error("❌ Error insert attempt:", error);
+      return { success: false };
+    }
+    return { success: true };
   } catch (err) {
     console.error("❌ Exception insert attempt:", err);
-  }
-}
-
-async function saveStat({ user_id, category, avg_score }) {
-  try {
-    const { error } = await supabase.from("kritika_stat").insert([{
-      user_id,
-      category,
-      avg_score
-    }]);
-    if (error) console.error("❌ Error insert stat:", error);
-  } catch (err) {
-    console.error("❌ Exception insert stat:", err);
+    return { success: false };
   }
 }
 
@@ -156,7 +151,7 @@ async function init() {
       const keys = ['A','B','C','D'];
       shuffled = shuffled.map((opt, i) => ({ key: keys[i], text: opt.text }));
 
-      // cari jawaban yang benar setelah acak
+      // cari jawaban yang benar setelah diacak
       const newCorrect = shuffled.find(o => o.text === originalCorrect.text);
 
       // render pertanyaan
@@ -197,33 +192,22 @@ async function init() {
           answered += 1;
 
           // simpan attempt
-          await saveAttempt({
+          const attemptResult = await saveAttempt({
             user_id,
             session_id: "jurumiya-bab1",
             question_id: q.id,
             category: q.category,
             user_answer: user,
             correct_answer: correct,
-            is_correct: isCorrect
+            is_correct: isCorrect,
+            score: isCorrect ? 1 : 0
           });
 
-          // kalau semua soal sudah dijawab, simpan stat per kategori
-          if (answered === total) {
-            // hitung skor per kategori
-            const categories = {};
-            parsed.questions.forEach((qq, i) => {
-              if (!categories[qq.category]) categories[qq.category] = { total: 0, correct: 0 };
-              categories[qq.category].total += 1;
-              const userAns = document.querySelector(`[data-correct][data-correct]`)?.dataset.correct;
-              if (qq.correct_answer === userAns) {
-                categories[qq.category].correct += 1;
-              }
-            });
-
-            for (const [cat, stat] of Object.entries(categories)) {
-              const avg_score = Math.round((stat.correct / stat.total) * 100);
-              await saveStat({ user_id, category: cat, avg_score });
-            }
+          // indikator simpan
+          if (attemptResult.success) {
+            fb.innerHTML += " <span style='color:green'>(tersimpan)</span>";
+          } else {
+            fb.innerHTML += " <span style='color:red'>(gagal simpan)</span>";
           }
 
           // tampilkan ringkasan skor global
