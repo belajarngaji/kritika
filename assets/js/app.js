@@ -10,7 +10,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 /* ==============================
    API URL (Backend FastAPI)
 ============================== */
-const API_URL = 'https://hmmz-bot01.vercel.app/quiz';
+const API_URL = 'https://hmmz-bot01.vercel.app/api/quiz';
 
 /* ==============================
    Ambil materi dari Supabase
