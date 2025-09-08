@@ -114,58 +114,58 @@ async function init() {
     let correctCount = 0;
 
     quizData.questions.forEach(q => {
-      const correctText = q.answer; // jawaban text
-      const shuffledOpts = shuffle(q.options.map(o => o.text));
+  const correctText = q.correct_answer;     // jawaban benar
+  const shuffledOpts = shuffle(q.options);  // array string
 
-      const div = document.createElement('div');
-      div.classList.add('question-block');
-      div.dataset.correct = correctText;
-      div.innerHTML = `
-        <p><strong>${q.id.replace('q','')}.</strong> ${q.question}</p>
-        <ul class="options">
-          ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt}">${opt}</button></li>`).join('')}
-        </ul>
-        <p class="feedback"></p>
-      `;
-      aiOutput.appendChild(div);
+  const div = document.createElement('div');
+  div.classList.add('question-block');
+  div.dataset.correct = correctText;
 
-      div.querySelectorAll('.option-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const userAnswer = btn.dataset.text;
-          const fb = div.querySelector('.feedback');
+  // Nomor soal: hapus q1, tampilkan 1..5
+  const questionNumber = q.id.replace(/\D/g, '') || '1';
 
-          div.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  div.innerHTML = `
+    <p><strong>${questionNumber}.</strong> ${q.question}</p>
+    <ul class="options">
+      ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt}">${opt}</button></li>`).join('')}
+    </ul>
+    <p class="feedback"></p>
+  `;
+  aiOutput.appendChild(div);
 
-          const isCorrect = (userAnswer === correctText);
-          if (isCorrect) {
-            correctCount += 1;
-            fb.textContent = '✅ Benar';
-            fb.style.color = 'green';
-          } else {
-            fb.textContent = `❌ Salah. Jawaban benar: ${correctText}`;
-            fb.style.color = 'red';
-          }
+  div.querySelectorAll('.option-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const userAnswer = btn.dataset.text;
+      const fb = div.querySelector('.feedback');
 
-          answered += 1;
+      div.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
 
-          // Simpan attempt
-          const result = await saveAttempt({
-            user_id,
-            session_id: "jurumiya-bab1",
-            question_id: q.id,
-            category: q.category,
-            user_answer: userAnswer,
-            correct_answer: correctText,
-            is_correct: isCorrect,
-            score: isCorrect ? 1 : 0
-          });
+      const isCorrect = (userAnswer === correctText);
+      fb.textContent = isCorrect ? '✅ Benar' : `❌ Salah. Jawaban benar: ${correctText}`;
+      fb.style.color = isCorrect ? 'green' : 'red';
 
-          fb.innerHTML += result.success ? " <span style='color:green'>(tersimpan)</span>"
-                                         : " <span style='color:red'>(gagal simpan)</span>";
+      answered += 1;
+      if (isCorrect) correctCount += 1;
 
-          // Update ringkasan
-          const scorePercent = ((correctCount / total) * 100).toFixed(0);
-          summary.innerHTML = `
+      // Simpan attempt jika ada user_id
+      if (user_id) {
+        const result = await saveAttempt({
+          user_id,
+          session_id: "jurumiya-bab1",
+          question_id: q.id,
+          category: q.category,
+          user_answer: userAnswer,
+          correct_answer: correctText,
+          is_correct: isCorrect,
+          score: isCorrect ? 1 : 0
+        });
+        fb.innerHTML += result.success ? " <span style='color:green'>(tersimpan)</span>"
+                                       : " <span style='color:red'>(gagal simpan)</span>";
+      }
+
+      // Update ringkasan
+      const scorePercent = ((correctCount / total) * 100).toFixed(0);
+      summary.innerHTML = `
 <strong>Total Soal:</strong> ${total}<br>
 <strong>Terjawab:</strong> ${answered}<br>
 <strong>Benar:</strong> ${correctCount}<br>
@@ -173,9 +173,9 @@ async function init() {
 <strong>Nilai:</strong> ${correctCount}<br>
 <strong>Rate:</strong> ${scorePercent}%
 `;
-        });
-      });
     });
+  });
+});
 
     btnGenerate.disabled = false;
     btnGenerate.textContent = 'Generate Soal';
