@@ -40,73 +40,8 @@
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
 
-  <script>
-    // Data untuk statistik (nilai 0-100)
-    const data = {
-      labels: [
-        'Analisis',
-        'Logika',
-        'Evaluasi',
-        'Refleksi',
-        'Konsistensi'
-      ],
-      datasets: [{
-        label: 'Keahlian Berpikir Kritis',
-        data: [80, 65, 75, 90, 70], // Contoh data nilai pengguna
-        fill: true,
-        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-        borderColor: 'rgb(59, 130, 246)',
-        pointBackgroundColor: 'rgb(59, 130, 246)',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgb(59, 130, 246)'
-      }]
-    };
-
-    // Konfigurasi chart
-    const config = {
-      type: 'radar',
-      data: data,
-      options: {
-        responsive: true, // Membuat chart responsif
-        maintainAspectRatio: true, // Menjaga rasio aspek
-        elements: {
-          line: {
-            borderWidth: 3
-          }
-        },
-        scales: {
-          r: {
-            angleLines: {
-              display: true
-            },
-            suggestedMin: 0,
-            suggestedMax: 100,
-            pointLabels: {
-              font: {
-                size: 12, // Ukuran font label (Analisis, Logika, dst)
-                weight: 'bold'
-              }
-            },
-            ticks: {
-              backdropColor: 'rgba(255, 255, 255, 1)' // Memberi latar belakang putih pada angka (0, 20, 40..)
-            }
-          }
-        },
-        plugins: {
-            legend: {
-                display: false // Menyembunyikan label 'Keahlian Berpikir Kritis' di atas
-            }
-        }
-      },
-    };
-
-    // Render chart di canvas
-    const radarChart = new Chart(
-      document.getElementById('radarChart'),
-      config
-    );
-  </script>
+  <!-- Module JS untuk render chart dari Supabase -->
+  <script type="module" src="/kritika/assets/js/statistics.js"></script>
 
 </body>
 </html>
