@@ -1,21 +1,20 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-// ==============================
-// Supabase Config
-// ==============================
+/* ==============================
+   Supabase Config
+============================== */
 const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ==============================
-// API URL
-// ==============================
+/* ==============================
+   API URL
+============================== */
 const API_URL = 'https://hmmz-bot01.vercel.app/chat';
-const CHECK_URL = 'https://hmmz-bot01.vercel.app/check';
 
-// ==============================
-// Ambil semua materi dari Supabase
-// ==============================
+/* ==============================
+   Ambil materi dari Supabase
+============================== */
 async function getMaterials() {
   try {
     const { data, error } = await supabase.from('materials').select('*').order('id');
@@ -30,9 +29,9 @@ async function getMaterials() {
   }
 }
 
-// ==============================
-// Generate soal pilihan ganda AI
-// ==============================
+/* ==============================
+   Generate soal pilihan ganda via AI
+============================== */
 async function generateQuestions(materialText) {
   try {
     const res = await fetch(API_URL, {
@@ -40,7 +39,11 @@ async function generateQuestions(materialText) {
       headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({
         message: `Berdasarkan teks berikut (dan *hanya teks ini*), buatkan 3 soal pilihan ganda.
-- Format output HARUS JSON valid dengan struktur:
+
+⚠️ Aturan:
+- Format output HARUS JSON valid.
+- Jangan tulis kunci jawaban atau penjelasan di luar JSON.
+- Struktur:
 {
   "questions": [
     {
@@ -52,7 +55,7 @@ async function generateQuestions(materialText) {
         {"key": "C", "text": "string"},
         {"key": "D", "text": "string"}
       ],
-      "correct_answer": "A|B|C|D"
+      "correct_answer": "A"
     }
   ]
 }
@@ -66,54 +69,30 @@ ${materialText}`,
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return data.reply || null; // AI balikin string JSON
+    return data.reply || null;
   } catch (err) {
     console.error('❌ Error AI generate:', err);
     return null;
   }
 }
 
-// ==============================
-// Koreksi jawaban user via AI
-// ==============================
-async function checkAnswer(answer, materi) {
-  try {
-    const res = await fetch(CHECK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ 
-        answer, 
-        context: materi, 
-        mode: "check",
-        session_id: "jurumiya-bab1",
-        instruction: `Evaluasi jawaban siswa *hanya berdasarkan teks berikut*:
-
-"${materi}"
-
-Tugas:
-1. Nilai apakah jawaban relevan dengan isi teks.
-2. Berikan skor 0-10 (0 jika sama sekali tidak relevan).
-3. Tulis feedback singkat, jelas, to the point. 
-Jangan tambahkan referensi luar.`
-      })
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json(); // { score, feedback }
-  } catch(err) {
-    console.error('❌ Error AI koreksi:', err);
-    return null;
-  }
+/* ==============================
+   Helpers
+============================== */
+function shuffle(array) {
+  return array
+    .map(v => ({ v, r: Math.random() }))
+    .sort((a,b) => a.r - b.r)
+    .map(x => x.v);
 }
 
-// ==============================
-// INIT Halaman Materi
-// ==============================
+/* ==============================
+   INIT Halaman
+============================== */
 async function init() {
-  // Ambil elemen dari HTML
   const materiContent = document.getElementById('materiContent');
   const btnGenerate = document.getElementById('btnGenerate');
 
-  // ======= Buat aiOutput (hasil generate pertanyaan) =======
   let aiOutput = document.getElementById('aiOutput');
   if (!aiOutput) {
     aiOutput = document.createElement('div');
@@ -122,41 +101,26 @@ async function init() {
     btnGenerate.after(aiOutput);
   }
 
-  // ======= Buat kolom jawaban user =======
-  let answerSection = document.querySelector('.answer-section');
-  if (!answerSection) {
-    answerSection = document.createElement('div');
-    answerSection.classList.add('answer-section');
-    answerSection.innerHTML = `
-      <h3>Jawaban Anda</h3>
-      <textarea id="userAnswer" placeholder="Tulis jawaban Anda di sini..." rows="4"></textarea>
-      <button id="btnCheck" class="btn">Cek Jawaban</button>
-    `;
-    aiOutput.after(answerSection);
+  let summary = document.getElementById('quizSummary');
+  if (!summary) {
+    summary = document.createElement('div');
+    summary.id = 'quizSummary';
+    summary.classList.add('ai-output');
+    aiOutput.after(summary);
   }
 
-  // ======= Buat kolom koreksi AI =======
-  let aiCorrection = document.getElementById('aiCorrection');
-  if (!aiCorrection) {
-    aiCorrection = document.createElement('div');
-    aiCorrection.id = 'aiCorrection';
-    aiCorrection.classList.add('ai-output');
-    aiCorrection.innerHTML = '<p>Koreksi akan ditampilkan di sini setelah dicek.</p>';
-    answerSection.after(aiCorrection);
-  }
-
-  // ======= Ambil materi dari Supabase =======
+  // Ambil materi
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === 'jurumiya-bab1');
   materiContent.innerHTML = materi ? materi.content : '<p>Materi belum tersedia.</p>';
+  if (!materi) return;
 
-  // ======= Event Generate Soal Pilihan Ganda =======
+  // Event Generate Soal
   btnGenerate.addEventListener('click', async () => {
-    if (!materi) return;
-
     btnGenerate.disabled = true;
     btnGenerate.textContent = 'Loading...';
     aiOutput.innerHTML = '';
+    summary.innerHTML = '';
 
     const questionsJson = await generateQuestions(materi.content);
     if (!questionsJson) {
@@ -170,51 +134,84 @@ async function init() {
     try {
       parsed = JSON.parse(questionsJson);
     } catch (err) {
+      console.error('❌ JSON parse error:', err, questionsJson);
       aiOutput.innerHTML = '<p>Format JSON tidak valid.</p>';
       btnGenerate.disabled = false;
       btnGenerate.textContent = 'Generate Soal';
       return;
     }
 
-    aiOutput.innerHTML = '';
+    let total = parsed.questions.length;
+    let answered = 0;
+    let correctCount = 0;
+
     parsed.questions.forEach(q => {
+      // simpan original correct
+      const originalCorrect = q.options.find(o => o.key === q.correct_answer);
+
+      // acak opsi
+      let shuffled = shuffle(q.options);
+      const keys = ['A','B','C','D'];
+      shuffled = shuffled.map((opt, i) => ({ key: keys[i], text: opt.text }));
+      const newCorrect = shuffled.find(o => o.text === originalCorrect.text);
+
+      // render
       const div = document.createElement('div');
       div.classList.add('question-block');
+      div.dataset.correct = newCorrect.key;
       div.innerHTML = `
         <p><strong>${q.id}.</strong> ${q.question}</p>
-        <ul>
-          ${q.options.map(opt => `<li>${opt.key}. ${opt.text}</li>`).join('')}
+        <ul class="options">
+          ${shuffled.map(opt => `
+            <li><button class="option-btn" data-key="${opt.key}">${opt.key}. ${opt.text}</button></li>
+          `).join('')}
         </ul>
-        <p><em>Kunci: ${q.correct_answer}</em></p>
+        <p class="feedback"></p>
       `;
       aiOutput.appendChild(div);
+
+      // event pilih jawaban
+      div.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const user = btn.dataset.key;
+          const correct = div.dataset.correct;
+          const fb = div.querySelector('.feedback');
+
+          div.querySelectorAll('.option-btn').forEach(b => (b.disabled = true));
+
+          const isCorrect = (user === correct);
+
+          if (isCorrect) {
+            correctCount += 1;
+            fb.textContent = '✅ Benar';
+            fb.style.color = 'green';
+          } else {
+            fb.textContent = `❌ Salah. Jawaban benar: ${correct}`;
+            fb.style.color = 'red';
+          }
+
+          answered += 1;
+
+          // tampilkan ringkasan skor
+          const wrongCount = answered - correctCount;
+          const scorePercent = ((correctCount / total) * 100).toFixed(0);
+
+          summary.innerHTML = `
+  <strong>Total Soal:</strong> ${total}<br>
+  <strong>Terjawab:</strong> ${answered}<br>
+  <strong>Benar:</strong> ${correctCount}<br>
+  <strong>Salah:</strong> ${answered - correctCount}<br>
+  <strong>Nilai:</strong> ${correctCount}<br>
+  <strong>Rate:</strong> ${Math.round((correctCount / total) * 100)}%
+`;
+        });
+      });
     });
 
     btnGenerate.disabled = false;
     btnGenerate.textContent = 'Generate Soal';
   });
-
-  // ======= Event Cek Jawaban =======
-  const btnCheck = document.getElementById('btnCheck');
-  const userAnswer = document.getElementById('userAnswer');
-
-  btnCheck.addEventListener('click', async () => {
-    const answerText = userAnswer.value.trim();
-    if (!answerText) return alert('Tulis jawaban dulu!');
-
-    aiCorrection.innerHTML = '<p>Memeriksa jawaban...</p>';
-    const result = await checkAnswer(answerText, materi.content);
-
-    if (result && 'score' in result && 'feedback' in result) {
-      aiCorrection.innerHTML = `
-        <p><strong>Skor:</strong> ${result.score}</p>
-        <p><strong>Feedback:</strong> ${result.feedback}</p>
-      `;
-    } else {
-      aiCorrection.innerHTML = '<p>AI gagal memeriksa jawaban.</p>';
-    }
-  });
 }
 
-// Jalankan init
+// start
 init();
