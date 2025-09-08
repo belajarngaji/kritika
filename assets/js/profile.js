@@ -24,6 +24,55 @@ function displayUnknownProfile() {
     profileStats.style.display = 'none';
 }
 
+// === Fungsi Load Stats User ===
+async function loadProfileStats(userId) {
+    const { data, error } = await _supabase
+        .from('kritika_attempts')
+        .select('score, is_correct, category')
+        .eq('user_id', userId);
+
+    if (error) {
+        console.error('Gagal load stats:', error.message);
+        return;
+    }
+
+    let totalScore = 0;
+    let completed = 0;
+    let categoryCount = {};
+
+    data.forEach(row => {
+        totalScore += row.score || 0;
+        completed++;
+        if (row.category) {
+            categoryCount[row.category] = (categoryCount[row.category] || 0) + 1;
+        }
+    });
+
+    // Materi favorit
+    let favorite = '-';
+    if (Object.keys(categoryCount).length > 0) {
+        favorite = Object.entries(categoryCount).sort((a, b) => b[1] - a[1])[0][0];
+    }
+
+    // Level dan Badge
+    const level = Math.floor(totalScore / 100) + 1;
+    const xpProgress = totalScore % 100;
+    const badge = level >= 5 ? 'Master' : level >= 3 ? 'Intermediate' : 'Beginner';
+
+    // Update HTML
+    document.getElementById('stats-score').textContent = totalScore;
+    document.getElementById('stats-completed').textContent = completed;
+    document.getElementById('stats-favorite').textContent = favorite;
+    document.getElementById('profile-level').textContent = `LV. ${level}`;
+    document.getElementById('profile-badge').textContent = badge;
+
+    // Progress bar
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar) {
+        progressBar.style.width = `${xpProgress}%`;
+    }
+}
+
 // Fungsi untuk menampilkan data profil yang ditemukan
 function displayProfileData(profile, user) {
     currentProfile = profile;
@@ -31,12 +80,9 @@ function displayProfileData(profile, user) {
     profileUserid.textContent = `@${profile.username || 'tidak diketahui'}`;
 
     const avatarUrl = profile.avatar_url;
-    if (avatarUrl) {
-      // Gunakan Image Transformations untuk menampilkan ukuran 200x200
-      profileAvatar.src = `${avatarUrl}?width=200&height=200`;
-    } else {
-      profileAvatar.src = `https://api.dicebear.com/8.x/initials/svg?seed=${profile.username || '?'}`;
-    }
+    profileAvatar.src = avatarUrl
+        ? `${avatarUrl}?width=200&height=200`
+        : `https://api.dicebear.com/8.x/initials/svg?seed=${profile.username || '?'}`;
 
     profileStats.style.display = 'flex';
 
@@ -45,6 +91,9 @@ function displayProfileData(profile, user) {
     } else {
         profileAvatar.style.cursor = 'default';
     }
+
+    // 🚀 Panggil load stats
+    loadProfileStats(profile.id);
 }
 
 // Fungsi utama untuk memuat profil
@@ -85,18 +134,16 @@ async function loadProfile() {
 
 /**
  * Mengunggah file avatar ke Supabase Storage dengan kompresi.
- * @param {File} file - File gambar yang akan diunggah.
  */
 function uploadAvatar(file) {
     if (!file) return;
 
     avatarModal.style.display = 'none';
 
-    // Kompresi gambar menjadi 100x100 piksel
     new Compressor(file, {
         width: 100,
         height: 100,
-        quality: 0.8, // Kualitas 80%
+        quality: 0.8,
         success(result) {
             handleUpload(result);
         },
@@ -106,10 +153,6 @@ function uploadAvatar(file) {
     });
 }
 
-/**
- * Menangani proses unggah ke Supabase setelah kompresi.
- * @param {File} compressedFile - File yang sudah dikompresi.
- */
 async function handleUpload(compressedFile) {
     const { data: { user } } = await _supabase.auth.getUser();
     if (!user) {
@@ -123,9 +166,7 @@ async function handleUpload(compressedFile) {
 
     const { error: uploadError } = await _supabase.storage
         .from('avatars')
-        .upload(filePath, compressedFile, {
-            upsert: true
-        });
+        .upload(filePath, compressedFile, { upsert: true });
 
     if (uploadError) {
         alert('Gagal mengunggah foto: ' + uploadError.message);
@@ -157,11 +198,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (user && currentProfile && user.id === currentProfile.id) {
                 avatarModal.style.display = 'flex';
-                // Hapus string query untuk menampilkan gambar asli di modal
                 modalImage.src = profileAvatar.src.replace(/\?.*$/, '');
                 modalUploadBtn.style.display = 'block';
             } else if (profileAvatar.src && profileAvatar.src.includes('http')) {
-                // Tampilkan modal zoom untuk profil publik
                 avatarModal.style.display = 'flex';
                 modalImage.src = profileAvatar.src.replace(/\?.*$/, '');
                 modalUploadBtn.style.display = 'none';
