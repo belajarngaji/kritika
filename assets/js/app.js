@@ -121,7 +121,7 @@ async function init() {
       div.classList.add('question-block');
       div.dataset.correct = correctText;
       div.innerHTML = `
-        <p><strong>${q.id}.</strong> [${q.category}] ${q.question}</p>
+        <p><strong>${q.id}.</strong> ${q.question}</p>
         <ul class="options">
   ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt.text}">${opt.text}</button></li>`).join('')}
 </ul>
