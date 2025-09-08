@@ -140,8 +140,21 @@ async function init() {
     let correctCount = 0;
 
     // user_id sementara (bisa dari auth Supabase kalau sudah ada login)
-    const user_id = "demo-user"; 
-
+    const { data: { user } } = await supabase.auth.getUser();
+const user_id = user ? user.id : null;  // kalau login pakai UUID, kalau guest null
+    if (user_id) {
+  await saveAttempt({
+    user_id,
+    session_id: "jurumiya-bab1",
+    question_id: q.id,
+    category: q.category,
+    user_answer: user,
+    correct_answer: correct,
+    is_correct: isCorrect,
+    score: isCorrect ? 1 : 0
+  });
+}
+ 
     parsed.questions.forEach(q => {
   // ambil jawaban benar langsung dari backend (teks)
   const originalCorrect = q.correct_answer;
