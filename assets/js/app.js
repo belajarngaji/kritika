@@ -121,10 +121,10 @@ async function init() {
       div.classList.add('question-block');
       div.dataset.correct = correctText;
       div.innerHTML = `
-        <p><strong>${q.id}.</strong> ${q.question}</p>
+        <p><strong>${q.id.replace('q','')}.</strong> ${q.question}</p>
         <ul class="options">
-  ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt.text}">${opt.text}</button></li>`).join('')}
-</ul>
+          ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt}">${opt}</button></li>`).join('')}
+        </ul>
         <p class="feedback"></p>
       `;
       aiOutput.appendChild(div);
