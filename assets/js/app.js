@@ -49,7 +49,7 @@ async function generateQuestions(materialText, slug, category) {
   } catch(err) { console.error(err); return null; }
 }
 
-async function saveAttempt({ user_id, session_id, question_id, category, user_answer, correct_answer, is_correct, score }) {
+async function saveAttempt({ user_id, session_id, question_id, category, dimension, user_answer, correct_answer, is_correct, score }) {
   if (!user_id) return { success: false }; // guest/demo tidak simpan
   try {
     const { error } = await supabase.from("kritika_attempts").insert([{
@@ -57,6 +57,7 @@ async function saveAttempt({ user_id, session_id, question_id, category, user_an
       session_id,
       question_id,
       category,
+      dimension,
       user_answer,
       correct_answer,
       is_correct,
@@ -182,6 +183,7 @@ async function init() {
               session_id: materi.slug, 
               question_id: q.id,
               category: q.category,
+              dimension: q.dimension,
               user_answer: userAnswer,
               correct_answer: correctText,
               is_correct: isCorrect,
