@@ -43,42 +43,42 @@ async function loadUserStats() {
         }
 
         // 4. Gambar chart
-        chartTitle.textContent = "Statistik Keahlian Kritis";
-        const labels = Object.keys(statsData);
-        const scores = Object.values(statsData);
+chartTitle.textContent = "Statistik Keahlian Kritis";
+const labels = statsData.data.map(item => item.dimension);
+const scores = statsData.data.map(item => item.score * 100);
 
-        new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Skor Rata-rata (%)',
-                    data: scores,
-                    fill: true,
-                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                    borderColor: 'rgb(59, 130, 246)',
-                    pointBackgroundColor: 'rgb(59, 130, 246)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgb(59, 130, 246)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                elements: { line: { borderWidth: 3 } },
-                scales: {
-                    r: {
-                        angleLines: { display: true },
-                        suggestedMin: 0,
-                        suggestedMax: 100,
-                        pointLabels: { font: { size: 12, weight: 'bold' } },
-                        ticks: { backdropColor: 'rgba(255, 255, 255, 1)' }
-                    }
-                },
-                plugins: { legend: { display: false } }
+new Chart(ctx, {
+    type: 'radar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Skor Rata-rata (%)',
+            data: scores,
+            fill: true,
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderColor: 'rgb(59, 130, 246)',
+            pointBackgroundColor: 'rgb(59, 130, 246)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(59, 130, 246)'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        elements: { line: { borderWidth: 3 } },
+        scales: {
+            r: {
+                angleLines: { display: true },
+                suggestedMin: 0,
+                suggestedMax: 100,
+                pointLabels: { font: { size: 12, weight: 'bold' } },
+                ticks: { backdropColor: 'rgba(255, 255, 255, 1)' }
             }
-        });
+        },
+        plugins: { legend: { display: false } }
+    }
+});
 
     } catch (error) {
         chartTitle.textContent = "Gagal Memuat Statistik";
