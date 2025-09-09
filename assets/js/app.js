@@ -30,18 +30,12 @@ async function getMaterials() {
   } catch(e) { console.error(e); return []; }
 }
 
-// REVISI: Fungsi ini sekarang menerima slug dan category
 async function generateQuestions(materialText, slug, category) {
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // REVISI: Mengirim slug dan category secara dinamis
-      body: JSON.stringify({ 
-        materi: materialText, 
-        session_id: slug,
-        category: category
-      })
+      body: JSON.stringify({ materi: materialText, session_id: slug, category })
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
@@ -50,7 +44,7 @@ async function generateQuestions(materialText, slug, category) {
 }
 
 async function saveAttempt({ user_id, session_id, question_id, category, dimension, user_answer, correct_answer, is_correct, score, duration_seconds }) {
-  if (!user_id) return { success: false };
+  if (!user_id) return { success: false }; 
   try {
     const { error } = await supabase.from("kritika_attempts").insert([{
       user_id,
@@ -62,29 +56,28 @@ async function saveAttempt({ user_id, session_id, question_id, category, dimensi
       correct_answer,
       is_correct,
       score,
-      duration_seconds,   // << tambahan
+      duration_seconds,
       submitted_at: new Date().toISOString()
     }]);
     if (error) { console.error(error); return { success: false }; }
     return { success: true };
   } catch(e) { console.error(e); return { success: false }; }
 }
+
 /* ==============================
-   INIT Halaman Quiz
+   INIT Quiz Sequential (5 soal)
 ============================== */
 async function init() {
-  // REVISI: Menggunakan ID 'materiContainer' untuk elemen <article>
   const materiContainer = document.getElementById('materiContainer'); 
   const btnGenerate = document.getElementById('btnGenerate');
-  
-  // REVISI: Ambil slug dari URL
+
   const urlParams = new URLSearchParams(window.location.search);
   const slug = urlParams.get('slug');
 
   if (!slug) {
-      materiContainer.innerHTML = "<h1>Error: Slug materi tidak ditemukan di URL. Coba akses dari halaman daftar materi.</h1>";
-      btnGenerate.style.display = 'none';
-      return;
+    materiContainer.innerHTML = "<h1>Error: Slug materi tidak ditemukan.</h1>";
+    btnGenerate.style.display = 'none';
+    return;
   }
 
   let aiOutput = document.getElementById('aiOutput');
@@ -103,18 +96,16 @@ async function init() {
     aiOutput.after(summary);
   }
 
-  // REVISI: Ambil materi berdasarkan slug dari URL
   const materials = await getMaterials();
   const materi = materials.find(m => m.slug === slug);
 
   if (!materi) {
-      materiContainer.innerHTML = `<p>Materi dengan slug "${slug}" tidak ditemukan.</p>`;
-      btnGenerate.style.display = 'none';
-      return;
+    materiContainer.innerHTML = `<p>Materi dengan slug "${slug}" tidak ditemukan.</p>`;
+    btnGenerate.style.display = 'none';
+    return;
   }
-  materiContainer.innerHTML = materi.content; // Memuat konten ke dalam kontainer
+  materiContainer.innerHTML = materi.content;
 
-  // Ambil user_id dari auth
   const { data: { user } } = await supabase.auth.getUser();
   const user_id = user ? user.id : null;
 
@@ -124,112 +115,113 @@ async function init() {
     aiOutput.innerHTML = '';
     summary.innerHTML = '';
 
-    // REVISI: Menambahkan class 'tertutup' untuk menyembunyikan materi
     materiContainer.classList.add('tertutup');
 
-    // REVISI: Mengirim slug dan category materi ke fungsi generateQuestions
     const quizData = await generateQuestions(materi.content, materi.slug, materi.category);
-    
+
     if (!quizData) {
       aiOutput.innerHTML = '<p>AI gagal generate pertanyaan.</p>';
       btnGenerate.disabled = false;
       btnGenerate.textContent = 'Generate Soal';
-      // Jika gagal, tampilkan lagi materinya
       materiContainer.classList.remove('tertutup'); 
       return;
     }
 
-    let total = quizData.questions.length;
+    // hanya ambil 5 soal pertama
+    const questions = quizData.questions.slice(0, 5);
+    let total = questions.length;
     let answered = 0;
     let correctCount = 0;
+    let currentIndex = 0;
 
-    quizData.questions.forEach(q => {
-  const correctText = q.correct_answer;
-  const shuffledOpts = shuffle(q.options);
+    const showQuestion = (q) => {
+      aiOutput.innerHTML = '';
 
-  const div = document.createElement('div');
-  div.classList.add('question-block');
-  div.dataset.correct = correctText;
+      const div = document.createElement('div');
+      div.classList.add('question-block');
+      div.dataset.correct = q.correct_answer;
 
-  const questionNumber = q.id.replace(/\D/g, '') || '1';
+      div.innerHTML = `
+        <p><strong>${currentIndex + 1}.</strong> ${q.question}</p>
+        <ul class="options">
+          ${shuffle(q.options).map(opt => `<li><button class="option-btn" data-text="${opt}">${opt}</button></li>`).join('')}
+        </ul>
+        <p class="feedback"></p>
+      `;
+      aiOutput.appendChild(div);
 
-  div.innerHTML = `
-    <p><strong>${questionNumber}.</strong> ${q.question}</p>
-    <ul class="options">
-      ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt}">${opt}</button></li>`).join('')}
-    </ul>
-    <p class="feedback"></p>
-  `;
-  aiOutput.appendChild(div);
+      let timer;
+      let timeLeft = 30;
+      let startTime = Date.now();
 
-  let startTime = Date.now();
-  let answeredFlag = false;
+      const fb = div.querySelector('.feedback');
+      const optionBtns = div.querySelectorAll('.option-btn');
 
-  // fungsi untuk submit (manual atau timeout)
-  async function handleSubmit(userAnswer, isTimeout = false) {
-    if (answeredFlag) return; 
-    answeredFlag = true;
+      const finishQuestion = async (userAnswer, isCorrect, timeout=false) => {
+        clearInterval(timer);
+        optionBtns.forEach(b => b.disabled = true);
+        answered++;
+        if (isCorrect) correctCount++;
 
-    const usedTime = Math.min(30, Math.floor((Date.now() - startTime) / 1000));
-    const isCorrect = !isTimeout && (userAnswer === correctText);
-    const fb = div.querySelector('.feedback');
+        let duration_seconds = Math.floor((Date.now() - startTime) / 1000);
 
-    div.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+        if (user_id) {
+          await saveAttempt({
+            user_id,
+            session_id: materi.slug,
+            question_id: q.id,
+            category: q.category,
+            dimension: q.dimension,
+            user_answer: userAnswer,
+            correct_answer: q.correct_answer,
+            is_correct: isCorrect,
+            score: isCorrect ? 1 : 0,
+            duration_seconds
+          });
+        }
 
-    if (isTimeout) {
-      fb.textContent = "❌ Time out";
-      fb.style.color = "red";
-    } else {
-      fb.textContent = isCorrect ? '✅ Benar' : `❌ Salah. Jawaban benar: ${correctText}`;
-      fb.style.color = isCorrect ? 'green' : 'red';
-    }
+        fb.textContent = timeout 
+          ? "❌ Time out" 
+          : (isCorrect ? "✅ Benar" : `❌ Salah. Jawaban benar: ${q.correct_answer}`);
 
-    answered += 1;
-    if (isCorrect) correctCount += 1;
+        setTimeout(() => {
+          currentIndex++;
+          if (currentIndex < total) {
+            showQuestion(questions[currentIndex]);
+          } else {
+            // tampilkan summary final
+            summary.innerHTML = `
+              <h3>Hasil Quiz</h3>
+              <strong>Total Soal:</strong> ${total}<br>
+              <strong>Terjawab:</strong> ${answered}<br>
+              <strong>Benar:</strong> ${correctCount}<br>
+              <strong>Salah:</strong> ${answered - correctCount}<br>
+              <strong>Nilai:</strong> ${correctCount}<br>
+              <strong>Rate:</strong> ${((correctCount / total) * 100).toFixed(0)}%
+            `;
+            btnGenerate.disabled = false;
+            btnGenerate.textContent = 'Generate Soal';
+          }
+        }, 1500);
+      };
 
-    if (user_id) {
-      const result = await saveAttempt({
-        user_id,
-        session_id: materi.slug,
-        question_id: q.id,
-        category: q.category,
-        dimension: q.dimension,
-        user_answer: isTimeout ? null : userAnswer,
-        correct_answer: correctText,
-        is_correct: isCorrect,
-        score: isCorrect ? 1 : 0,
-        duration_seconds: usedTime
+      optionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const userAnswer = btn.dataset.text;
+          const isCorrect = (userAnswer === q.correct_answer);
+          finishQuestion(userAnswer, isCorrect, false);
+        });
       });
-      fb.innerHTML += result.success ? " <span style='color:green'>(tersimpan)</span>"
-                                     : " <span style='color:red'>(gagal simpan)</span>";
-    }
 
-    const scorePercent = ((correctCount / total) * 100).toFixed(0);
-    summary.innerHTML = `
-      <strong>Total Soal:</strong> ${total}<br>
-      <strong>Terjawab:</strong> ${answered}<br>
-      <strong>Benar:</strong> ${correctCount}<br>
-      <strong>Salah:</strong> ${answered - correctCount}<br>
-      <strong>Nilai:</strong> ${correctCount}<br>
-      <strong>Rate:</strong> ${scorePercent}%
-    `;
-  }
+      timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          finishQuestion(null, false, true);
+        }
+      }, 1000);
+    };
 
-  // listener klik
-  div.querySelectorAll('.option-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      handleSubmit(btn.dataset.text, false);
-    });
-  });
-
-  // auto timeout 30 detik
-  setTimeout(() => {
-    handleSubmit(null, true);
-  }, 30000);
-});
-
-    btnGenerate.disabled = false;
-    btnGenerate.textContent = 'Generate Soal';
+    showQuestion(questions[currentIndex]);
   });
 }
 
