@@ -1,6 +1,5 @@
 // Impor client Supabase dari file terpusat
-import { supabase } from './supabase-client.js';
-
+import { _supabase } from './supabase-client.js';
 /**
  * Fungsi utama untuk memuat statistik pengguna dan menggambar radar chart.
  */
