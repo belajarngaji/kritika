@@ -44,8 +44,8 @@ async function loadUserStats() {
 
         // 4. Gambar chart
 chartTitle.textContent = "Statistik Keahlian Kritis";
-const labels = statsData.data.map(item => item.dimension);
-const scores = statsData.data.map(item => item.score * 100);
+const labels = Object.keys(statsData);      // ["Analisa", "Logika", "Memori"]
+const scores = Object.values(statsData);    // [80, 95, 60]
 
 new Chart(ctx, {
     type: 'radar',
