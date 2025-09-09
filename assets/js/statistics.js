@@ -1,5 +1,6 @@
-// Impor client Supabase dari file terpusat
-import { _supabase } from './supabase-client.js';
+// Import supabase dari client
+import { supabase } from './supabase-client.js';
+
 /**
  * Fungsi utama untuk memuat statistik pengguna dan menggambar radar chart.
  */
@@ -22,25 +23,25 @@ async function loadUserStats() {
             return;
         }
 
-        // 2. Panggil endpoint backend Python untuk mengambil data statistik
+        // 2. Panggil endpoint backend Python untuk ambil data statistik
         const response = await fetch(`https://hmmz-bot01.vercel.app/stats/${user.id}`);
         if (!response.ok) {
             throw new Error(`Server merespons dengan status: ${response.status}`);
         }
         const statsData = await response.json();
 
-        // 3. Cek jika data statistik kosong
+        // 3. Cek data kosong
         if (!statsData || Object.keys(statsData).length === 0) {
             chartTitle.textContent = "Belum Ada Statistik";
             ctx.fillText("Kerjakan beberapa kuis untuk melihat statistik Anda di sini.", 10, 50);
             return;
         }
 
-        // 4. Proses data dan gambar chart
+        // 4. Gambar chart
         chartTitle.textContent = "Statistik Keahlian Kritis";
         const labels = Object.keys(statsData);
         const scores = Object.values(statsData);
-        
+
         new Chart(ctx, {
             type: 'radar',
             data: {
@@ -81,5 +82,5 @@ async function loadUserStats() {
     }
 }
 
-// Jalankan fungsi setelah seluruh halaman siap
+// Jalankan fungsi setelah halaman siap
 document.addEventListener('DOMContentLoaded', loadUserStats);
