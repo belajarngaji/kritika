@@ -49,8 +49,8 @@ async function generateQuestions(materialText, slug, category) {
   } catch(err) { console.error(err); return null; }
 }
 
-async function saveAttempt({ user_id, session_id, question_id, category, dimension, user_answer, correct_answer, is_correct, score }) {
-  if (!user_id) return { success: false }; // guest/demo tidak simpan
+async function saveAttempt({ user_id, session_id, question_id, category, dimension, user_answer, correct_answer, is_correct, score, duration_seconds }) {
+  if (!user_id) return { success: false };
   try {
     const { error } = await supabase.from("kritika_attempts").insert([{
       user_id,
@@ -62,13 +62,13 @@ async function saveAttempt({ user_id, session_id, question_id, category, dimensi
       correct_answer,
       is_correct,
       score,
+      duration_seconds,   // << tambahan
       submitted_at: new Date().toISOString()
     }]);
     if (error) { console.error(error); return { success: false }; }
     return { success: true };
   } catch(e) { console.error(e); return { success: false }; }
 }
-
 /* ==============================
    INIT Halaman Quiz
 ============================== */
@@ -144,67 +144,89 @@ async function init() {
     let correctCount = 0;
 
     quizData.questions.forEach(q => {
-      const correctText = q.correct_answer;
-      const shuffledOpts = shuffle(q.options);
+  const correctText = q.correct_answer;
+  const shuffledOpts = shuffle(q.options);
 
-      const div = document.createElement('div');
-      div.classList.add('question-block');
-      div.dataset.correct = correctText;
+  const div = document.createElement('div');
+  div.classList.add('question-block');
+  div.dataset.correct = correctText;
 
-      const questionNumber = q.id.replace(/\D/g, '') || '1';
+  const questionNumber = q.id.replace(/\D/g, '') || '1';
 
-      div.innerHTML = `
-        <p><strong>${questionNumber}.</strong> ${q.question}</p>
-        <ul class="options">
-          ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt}">${opt}</button></li>`).join('')}
-        </ul>
-        <p class="feedback"></p>
-      `;
-      aiOutput.appendChild(div);
+  div.innerHTML = `
+    <p><strong>${questionNumber}.</strong> ${q.question}</p>
+    <ul class="options">
+      ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt}">${opt}</button></li>`).join('')}
+    </ul>
+    <p class="feedback"></p>
+  `;
+  aiOutput.appendChild(div);
 
-      div.querySelectorAll('.option-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const userAnswer = btn.dataset.text;
-          const fb = div.querySelector('.feedback');
+  let startTime = Date.now();
+  let answeredFlag = false;
 
-          div.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  // fungsi untuk submit (manual atau timeout)
+  async function handleSubmit(userAnswer, isTimeout = false) {
+    if (answeredFlag) return; 
+    answeredFlag = true;
 
-          const isCorrect = (userAnswer === correctText);
-          fb.textContent = isCorrect ? '✅ Benar' : `❌ Salah. Jawaban benar: ${correctText}`;
-          fb.style.color = isCorrect ? 'green' : 'red';
+    const usedTime = Math.min(30, Math.floor((Date.now() - startTime) / 1000));
+    const isCorrect = !isTimeout && (userAnswer === correctText);
+    const fb = div.querySelector('.feedback');
 
-          answered += 1;
-          if (isCorrect) correctCount += 1;
+    div.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
 
-          if (user_id) {
-            const result = await saveAttempt({
-              user_id,
-              // REVISI: Menggunakan slug dinamis sebagai session_id
-              session_id: materi.slug, 
-              question_id: q.id,
-              category: q.category,
-              dimension: q.dimension,
-              user_answer: userAnswer,
-              correct_answer: correctText,
-              is_correct: isCorrect,
-              score: isCorrect ? 1 : 0
-            });
-            fb.innerHTML += result.success ? " <span style='color:green'>(tersimpan)</span>"
-                                           : " <span style='color:red'>(gagal simpan)</span>";
-          }
-          
-          const scorePercent = ((correctCount / total) * 100).toFixed(0);
-          summary.innerHTML = `
-            <strong>Total Soal:</strong> ${total}<br>
-            <strong>Terjawab:</strong> ${answered}<br>
-            <strong>Benar:</strong> ${correctCount}<br>
-            <strong>Salah:</strong> ${answered - correctCount}<br>
-            <strong>Nilai:</strong> ${correctCount}<br>
-            <strong>Rate:</strong> ${scorePercent}%
-          `;
-        });
+    if (isTimeout) {
+      fb.textContent = "❌ Time out";
+      fb.style.color = "red";
+    } else {
+      fb.textContent = isCorrect ? '✅ Benar' : `❌ Salah. Jawaban benar: ${correctText}`;
+      fb.style.color = isCorrect ? 'green' : 'red';
+    }
+
+    answered += 1;
+    if (isCorrect) correctCount += 1;
+
+    if (user_id) {
+      const result = await saveAttempt({
+        user_id,
+        session_id: materi.slug,
+        question_id: q.id,
+        category: q.category,
+        dimension: q.dimension,
+        user_answer: isTimeout ? null : userAnswer,
+        correct_answer: correctText,
+        is_correct: isCorrect,
+        score: isCorrect ? 1 : 0,
+        duration_seconds: usedTime
       });
+      fb.innerHTML += result.success ? " <span style='color:green'>(tersimpan)</span>"
+                                     : " <span style='color:red'>(gagal simpan)</span>";
+    }
+
+    const scorePercent = ((correctCount / total) * 100).toFixed(0);
+    summary.innerHTML = `
+      <strong>Total Soal:</strong> ${total}<br>
+      <strong>Terjawab:</strong> ${answered}<br>
+      <strong>Benar:</strong> ${correctCount}<br>
+      <strong>Salah:</strong> ${answered - correctCount}<br>
+      <strong>Nilai:</strong> ${correctCount}<br>
+      <strong>Rate:</strong> ${scorePercent}%
+    `;
+  }
+
+  // listener klik
+  div.querySelectorAll('.option-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      handleSubmit(btn.dataset.text, false);
     });
+  });
+
+  // auto timeout 30 detik
+  setTimeout(() => {
+    handleSubmit(null, true);
+  }, 30000);
+});
 
     btnGenerate.disabled = false;
     btnGenerate.textContent = 'Generate Soal';
