@@ -57,10 +57,15 @@ async function loadUserStats() {
       return;
     }
 
-    // 4. Gambar chart radar
+    // Ambil skor + rata2 waktu dari backend
+    const { speed, ...skillScores } = statsData; 
+    // Contoh format dari backend:
+    // { Analisa: 22, Logika: 27, Pemecahan Masalah: 0, Konsentrasi: 0, Memori: 27, speed: 1.4 }
+
+    // 4. Gambar chart radar (hanya skill, tanpa speed)
     chartTitle.textContent = 'Statistik Keahlian Kritis';
-    const labels = Object.keys(statsData);
-    const scores = Object.values(statsData);
+    const labels = Object.keys(skillScores);
+    const scores = Object.values(skillScores);
 
     new Chart(ctx, {
       type: 'radar',
@@ -97,7 +102,7 @@ async function loadUserStats() {
       },
     });
 
-    // 5. Render grid di Slide 1
+    // 5. Render grid di Slide 1 (skill + speed)
     if (statsOverview) {
       statsOverview.innerHTML = ''; // reset isi
 
@@ -111,8 +116,17 @@ async function loadUserStats() {
         `;
         statsOverview.appendChild(div);
       });
-    }
 
+      // Tambahkan speed di akhir grid
+      const speedDiv = document.createElement('div');
+      speedDiv.className = 'stat-item';
+      speedDiv.innerHTML = `
+        <strong>Speed</strong><br>
+        ${speed ? speed + 's' : '-'}
+      `;
+      statsOverview.appendChild(speedDiv);
+    }
+  
     // 6. Sembunyikan slide 2 dst
     const allSlides = document.querySelectorAll('.slide');
     allSlides.forEach((slide, idx) => {
