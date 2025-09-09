@@ -8,11 +8,12 @@ const SUPABASE_KEY =
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /**
- * Fungsi utama untuk memuat statistik pengguna dan menggambar radar chart.
+ * Fungsi utama untuk memuat statistik pengguna dan menggambar radar chart + grid.
  */
 async function loadUserStats() {
   const chartTitle = document.querySelector('.chart-title');
   const chartCanvas = document.getElementById('radarChart');
+  const statsOverview = document.getElementById('statsOverview');
 
   if (!chartCanvas) {
     console.error("Elemen canvas dengan id 'radarChart' tidak ditemukan.");
@@ -27,8 +28,8 @@ async function loadUserStats() {
       error: userError,
     } = await supabase.auth.getUser();
 
-    console.log('User Supabase:', user);
     if (userError) console.error('Supabase Auth Error:', userError);
+    console.log('User Supabase:', user);
 
     if (!user) {
       chartTitle.textContent = 'Silakan Login untuk melihat statistik';
@@ -56,10 +57,10 @@ async function loadUserStats() {
       return;
     }
 
-    // 4. Gambar chart
+    // 4. Gambar chart radar
     chartTitle.textContent = 'Statistik Keahlian Kritis';
-    const labels = Object.keys(statsData); // ["Analisa", "Logika", "Memori"]
-    const scores = Object.values(statsData); // [80, 95, 60]
+    const labels = Object.keys(statsData);
+    const scores = Object.values(statsData);
 
     console.log('Labels:', labels);
     console.log('Scores:', scores);
@@ -98,6 +99,22 @@ async function loadUserStats() {
         plugins: { legend: { display: false } },
       },
     });
+
+    // 5. Render grid di Slide 1
+    if (statsOverview) {
+      statsOverview.innerHTML = ''; // reset isi
+
+      labels.forEach((label, idx) => {
+        const value = scores[idx];
+        const div = document.createElement('div');
+        div.className = 'stat-item';
+        div.innerHTML = `
+          <strong>${label}</strong><br>
+          ${value}%
+        `;
+        statsOverview.appendChild(div);
+      });
+    }
   } catch (error) {
     chartTitle.textContent = 'Gagal Memuat Statistik';
     console.error('Gagal menjalankan fungsi loadUserStats:', error);
