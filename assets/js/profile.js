@@ -1,6 +1,6 @@
 // /kritika/assets/js/profile.js
 
-import { supabase } from './supabase-client.js';
+import { _supabase } from './supabase-client.js';
 
 // Elemen-elemen HTML
 const profileUsername = document.getElementById('profile-username');
