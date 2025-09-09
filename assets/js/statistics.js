@@ -44,14 +44,14 @@ async function loadUserStats() {
 
     // 3. Ambil rata-rata speed langsung dari tabel attempts
     let speed = null;
-    const { data: attempts, error: attemptsError } = await supabase
-      .from('attempts')
+    const { data: kritika_attempts, error: kritika_attemptsError } = await supabase
+      .from('kritika_attempts')
       .select('duration_seconds')
       .eq('user_id', user.id);
 
-    if (!attemptsError && attempts && attempts.length > 0) {
-      const total = attempts.reduce((sum, a) => sum + (a.duration_seconds || 0), 0);
-      speed = (total / attempts.length).toFixed(1);
+    if (!kritika_attemptsError && kritika_attempts && kritika_attempts.length > 0) {
+      const total = kritika_attempts.reduce((sum, a) => sum + (a.duration_seconds || 0), 0);
+      speed = (total / kritika_attempts.length).toFixed(1);
     }
 
     // 4. Pisahkan skill dari statsData (tanpa speed)
