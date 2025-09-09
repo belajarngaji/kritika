@@ -13,79 +13,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const API_URL = 'https://hmmz-bot01.vercel.app/quiz';
 
 /* ==============================
-   Ambil materi dari Supabase
-============================== */
-async function getMaterials() {
-  try {
-    const { data, error } = await supabase.from('materials').select('*').order('id');
-    if (error) {
-      console.error('❌ Error fetch materials:', error);
-      return [];
-    }
-    return data;
-  } catch (err) {
-    console.error('❌ Exception fetch materials:', err);
-    return [];
-  }
-}
-
-/* ==============================
-   Panggil backend untuk generate soal
-============================== */
-async function generateQuestions(materialText) {
-  try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        materi: materialText,
-        session_id: "jurumiya-bab1"
-      })
-    });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    return data.quiz || null;
-  } catch (err) {
-    console.error('❌ Error generate quiz:', err);
-    return null;
-  }
-}
-
-/* ==============================
-   Supabase: Save Attempts & Stat
-============================== */
-async function saveAttempt({ user_id, session_id, question_id, category, user_answer, correct_answer, is_correct }) {
-  try {
-    const { error } = await supabase.from("kritika_attempts").insert([{
-      user_id,
-      session_id,
-      question_id,
-      category,
-      user_answer,
-      correct_answer,
-      is_correct
-    }]);
-    if (error) console.error("❌ Error insert attempt:", error);
-  } catch (err) {
-    console.error("❌ Exception insert attempt:", err);
-  }
-}
-
-async function saveStat({ user_id, category, avg_score }) {
-  try {
-    const { error } = await supabase.from("kritika_stat").insert([{
-      user_id,
-      category,
-      avg_score
-    }]);
-    if (error) console.error("❌ Error insert stat:", error);
-  } catch (err) {
-    console.error("❌ Exception insert stat:", err);
-  }
-}
-
-/* ==============================
    Helpers
 ============================== */
 function shuffle(array) {
@@ -95,12 +22,70 @@ function shuffle(array) {
     .map(x => x.v);
 }
 
+async function getMaterials() {
+  try {
+    const { data, error } = await supabase.from('materials').select('*').order('id');
+    if (error) { console.error(error); return []; }
+    return data;
+  } catch(e) { console.error(e); return []; }
+}
+
+// REVISI: Fungsi ini sekarang menerima slug dan category
+async function generateQuestions(materialText, slug, category) {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      // REVISI: Mengirim slug dan category secara dinamis
+      body: JSON.stringify({ 
+        materi: materialText, 
+        session_id: slug,
+        category: category
+      })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.quiz || null;
+  } catch(err) { console.error(err); return null; }
+}
+
+async function saveAttempt({ user_id, session_id, question_id, category, dimension, user_answer, correct_answer, is_correct, score }) {
+  if (!user_id) return { success: false }; // guest/demo tidak simpan
+  try {
+    const { error } = await supabase.from("kritika_attempts").insert([{
+      user_id,
+      session_id,
+      question_id,
+      category,
+      dimension,
+      user_answer,
+      correct_answer,
+      is_correct,
+      score,
+      submitted_at: new Date().toISOString()
+    }]);
+    if (error) { console.error(error); return { success: false }; }
+    return { success: true };
+  } catch(e) { console.error(e); return { success: false }; }
+}
+
 /* ==============================
-   INIT Halaman
+   INIT Halaman Quiz
 ============================== */
 async function init() {
-  const materiContent = document.getElementById('materiContent');
+  // REVISI: Menggunakan ID 'materiContainer' untuk elemen <article>
+  const materiContainer = document.getElementById('materiContainer'); 
   const btnGenerate = document.getElementById('btnGenerate');
+
+  // REVISI: Ambil slug dari URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const slug = urlParams.get('slug');
+
+  if (!slug) {
+      materiContainer.innerHTML = "<h1>Error: Slug materi tidak ditemukan di URL. Coba akses dari halaman daftar materi.</h1>";
+      btnGenerate.style.display = 'none';
+      return;
+  }
 
   let aiOutput = document.getElementById('aiOutput');
   if (!aiOutput) {
@@ -118,124 +103,105 @@ async function init() {
     aiOutput.after(summary);
   }
 
-  // Ambil materi
+  // REVISI: Ambil materi berdasarkan slug dari URL
   const materials = await getMaterials();
-  const materi = materials.find(m => m.slug === 'jurumiya-bab1');
-  materiContent.innerHTML = materi ? materi.content : '<p>Materi belum tersedia.</p>';
-  if (!materi) return;
+  const materi = materials.find(m => m.slug === slug);
 
-  // Event Generate Soal
+  if (!materi) {
+      materiContainer.innerHTML = `<p>Materi dengan slug "${slug}" tidak ditemukan.</p>`;
+      btnGenerate.style.display = 'none';
+      return;
+  }
+  materiContainer.innerHTML = materi.content; // Memuat konten ke dalam kontainer
+
+  // Ambil user_id dari auth
+  const { data: { user } } = await supabase.auth.getUser();
+  const user_id = user ? user.id : null;
+
   btnGenerate.addEventListener('click', async () => {
     btnGenerate.disabled = true;
     btnGenerate.textContent = 'Loading...';
     aiOutput.innerHTML = '';
     summary.innerHTML = '';
 
-    const quizData = await generateQuestions(materi.content);
+    // REVISI: Menambahkan class 'tertutup' untuk menyembunyikan materi
+    materiContainer.classList.add('tertutup');
+
+    // REVISI: Mengirim slug dan category materi ke fungsi generateQuestions
+    const quizData = await generateQuestions(materi.content, materi.slug, materi.category);
+
     if (!quizData) {
       aiOutput.innerHTML = '<p>AI gagal generate pertanyaan.</p>';
       btnGenerate.disabled = false;
       btnGenerate.textContent = 'Generate Soal';
+      // Jika gagal, tampilkan lagi materinya
+      materiContainer.classList.remove('tertutup'); 
       return;
     }
 
-    let parsed = quizData;
-    let total = parsed.questions.length;
+    let total = quizData.questions.length;
     let answered = 0;
     let correctCount = 0;
 
-    // user_id sementara (bisa dari auth Supabase kalau sudah ada login)
-    const user_id = "demo-user"; 
+    quizData.questions.forEach(q => {
+      const correctText = q.correct_answer;
+      const shuffledOpts = shuffle(q.options);
 
-    parsed.questions.forEach(q => {
-      // ambil jawaban benar dari backend
-      const originalCorrect = q.options.find(o => o.key === q.correct_answer);
-
-      // acak opsi
-      let shuffled = shuffle(q.options);
-      const keys = ['A','B','C','D'];
-      shuffled = shuffled.map((opt, i) => ({ key: keys[i], text: opt.text }));
-
-      // cari jawaban yang benar setelah acak
-      const newCorrect = shuffled.find(o => o.text === originalCorrect.text);
-
-      // render pertanyaan
       const div = document.createElement('div');
       div.classList.add('question-block');
-      div.dataset.correct = newCorrect.key;
+      div.dataset.correct = correctText;
+
+      const questionNumber = q.id.replace(/\D/g, '') || '1';
+
       div.innerHTML = `
-        <p><strong>${q.id}.</strong> [${q.category}] ${q.question}</p>
+        <p><strong>${questionNumber}.</strong> ${q.question}</p>
         <ul class="options">
-          ${shuffled.map(opt => `
-            <li><button class="option-btn" data-key="${opt.key}">${opt.key}. ${opt.text}</button></li>
-          `).join('')}
+          ${shuffledOpts.map(opt => `<li><button class="option-btn" data-text="${opt}">${opt}</button></li>`).join('')}
         </ul>
         <p class="feedback"></p>
       `;
       aiOutput.appendChild(div);
 
-      // event pilih jawaban
       div.querySelectorAll('.option-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
-          const user = btn.dataset.key;
-          const correct = div.dataset.correct;
+          const userAnswer = btn.dataset.text;
           const fb = div.querySelector('.feedback');
 
-          div.querySelectorAll('.option-btn').forEach(b => (b.disabled = true));
+          div.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
 
-          const isCorrect = (user === correct);
-
-          if (isCorrect) {
-            correctCount += 1;
-            fb.textContent = '✅ Benar';
-            fb.style.color = 'green';
-          } else {
-            fb.textContent = `❌ Salah. Jawaban benar: ${correct}`;
-            fb.style.color = 'red';
-          }
+          const isCorrect = (userAnswer === correctText);
+          fb.textContent = isCorrect ? '✅ Benar' : `❌ Salah. Jawaban benar: ${correctText}`;
+          fb.style.color = isCorrect ? 'green' : 'red';
 
           answered += 1;
+          if (isCorrect) correctCount += 1;
 
-          // simpan attempt
-          await saveAttempt({
-            user_id,
-            session_id: "jurumiya-bab1",
-            question_id: q.id,
-            category: q.category,
-            user_answer: user,
-            correct_answer: correct,
-            is_correct: isCorrect
-          });
-
-          // kalau semua soal sudah dijawab, simpan stat per kategori
-          if (answered === total) {
-            // hitung skor per kategori
-            const categories = {};
-            parsed.questions.forEach((qq, i) => {
-              if (!categories[qq.category]) categories[qq.category] = { total: 0, correct: 0 };
-              categories[qq.category].total += 1;
-              const userAns = document.querySelector(`[data-correct][data-correct]`)?.dataset.correct;
-              if (qq.correct_answer === userAns) {
-                categories[qq.category].correct += 1;
-              }
+          if (user_id) {
+            const result = await saveAttempt({
+              user_id,
+              // REVISI: Menggunakan slug dinamis sebagai session_id
+              session_id: materi.slug, 
+              question_id: q.id,
+              category: q.category,
+              dimension: q.dimension,
+              user_answer: userAnswer,
+              correct_answer: correctText,
+              is_correct: isCorrect,
+              score: isCorrect ? 1 : 0
             });
-
-            for (const [cat, stat] of Object.entries(categories)) {
-              const avg_score = Math.round((stat.correct / stat.total) * 100);
-              await saveStat({ user_id, category: cat, avg_score });
-            }
+            fb.innerHTML += result.success ? " <span style='color:green'>(tersimpan)</span>"
+                                           : " <span style='color:red'>(gagal simpan)</span>";
           }
 
-          // tampilkan ringkasan skor global
           const scorePercent = ((correctCount / total) * 100).toFixed(0);
           summary.innerHTML = `
-<strong>Total Soal:</strong> ${total}<br>
-<strong>Terjawab:</strong> ${answered}<br>
-<strong>Benar:</strong> ${correctCount}<br>
-<strong>Salah:</strong> ${answered - correctCount}<br>
-<strong>Nilai:</strong> ${correctCount}<br>
-<strong>Rate:</strong> ${scorePercent}%
-`;
+            <strong>Total Soal:</strong> ${total}<br>
+            <strong>Terjawab:</strong> ${answered}<br>
+            <strong>Benar:</strong> ${correctCount}<br>
+            <strong>Salah:</strong> ${answered - correctCount}<br>
+            <strong>Nilai:</strong> ${correctCount}<br>
+            <strong>Rate:</strong> ${scorePercent}%
+          `;
         });
       });
     });
@@ -245,5 +211,4 @@ async function init() {
   });
 }
 
-// start
 init();
