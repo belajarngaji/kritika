@@ -7,9 +7,6 @@ const SUPABASE_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE'; // anon key
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/**
- * Fungsi utama untuk memuat statistik pengguna dan menggambar radar chart + grid.
- */
 async function loadUserStats() {
   const chartTitle = document.querySelector('.chart-title');
   const chartCanvas = document.getElementById('radarChart');
@@ -22,55 +19,51 @@ async function loadUserStats() {
   const ctx = chartCanvas.getContext('2d');
 
   try {
-    // 1. Ambil data pengguna yang sedang login
+    // 1. Ambil data user
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
 
     if (userError) console.error('Supabase Auth Error:', userError);
-    console.log('User Supabase:', user);
-
     if (!user) {
       chartTitle.textContent = 'Silakan Login untuk melihat statistik';
       return;
     }
 
-    // 2. Panggil endpoint backend Python untuk ambil data statistik
+    // 2. Panggil backend untuk skor dimensi
     const url = `https://hmmz-bot01.vercel.app/stats/${user.id}`;
-    console.log('Fetch URL:', url);
-
     const response = await fetch(url);
-    console.log('Response status:', response.status);
-
-    if (!response.ok) {
-      throw new Error(`Server merespons dengan status: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`Server error: ${response.status}`);
     const statsData = await response.json();
-    console.log('Stats Data:', statsData);
 
-    // 3. Cek jika data statistik kosong
     if (!statsData || Object.keys(statsData).length === 0) {
-      chartTitle.textContent =
-        'Belum Ada Statistik - Kerjakan beberapa kuis terlebih dahulu';
+      chartTitle.textContent = 'Belum Ada Statistik - Kerjakan beberapa kuis terlebih dahulu';
       return;
     }
 
-    // Ambil skor + rata2 waktu dari backend
-    const { speed, ...skillScores } = statsData; 
-    // Contoh format dari backend:
-    // { Analisa: 22, Logika: 27, Pemecahan Masalah: 0, Konsentrasi: 0, Memori: 27, speed: 1.4 }
+    // 3. Ambil rata-rata speed langsung dari tabel attempts
+    let speed = null;
+    const { data: attempts, error: attemptsError } = await supabase
+      .from('attempts')
+      .select('duration_seconds')
+      .eq('user_id', user.id);
 
-    // 4. Gambar chart radar (hanya skill, tanpa speed)
+    if (!attemptsError && attempts && attempts.length > 0) {
+      const total = attempts.reduce((sum, a) => sum + (a.duration_seconds || 0), 0);
+      speed = (total / attempts.length).toFixed(1);
+    }
+
+    // 4. Pisahkan skill dari statsData (tanpa speed)
+    const labels = Object.keys(statsData);
+    const scores = Object.values(statsData);
+
+    // 5. Gambar chart radar
     chartTitle.textContent = 'Statistik Keahlian Kritis';
-    const labels = Object.keys(skillScores);
-    const scores = Object.values(skillScores);
-
     new Chart(ctx, {
       type: 'radar',
       data: {
-        labels: labels,
+        labels,
         datasets: [
           {
             label: 'Skor Rata-rata (%)',
@@ -79,9 +72,6 @@ async function loadUserStats() {
             backgroundColor: 'rgba(59, 130, 246, 0.2)',
             borderColor: 'rgb(59, 130, 246)',
             pointBackgroundColor: 'rgb(59, 130, 246)',
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgb(59, 130, 246)',
           },
         ],
       },
@@ -91,54 +81,40 @@ async function loadUserStats() {
         elements: { line: { borderWidth: 3 } },
         scales: {
           r: {
-            angleLines: { display: true },
             suggestedMin: 0,
             suggestedMax: 100,
-            pointLabels: { font: { size: 12, weight: 'bold' } },
-            ticks: { backdropColor: 'rgba(255, 255, 255, 1)' },
           },
         },
         plugins: { legend: { display: false } },
       },
     });
 
-    // 5. Render grid di Slide 1 (skill + speed)
+    // 6. Render grid skill + speed
     if (statsOverview) {
-      statsOverview.innerHTML = ''; // reset isi
-
+      statsOverview.innerHTML = '';
       labels.forEach((label, idx) => {
-        const value = scores[idx];
         const div = document.createElement('div');
         div.className = 'stat-item';
-        div.innerHTML = `
-          <strong>${label}</strong><br>
-          ${value}%
-        `;
+        div.innerHTML = `<strong>${label}</strong><br>${scores[idx]}%`;
         statsOverview.appendChild(div);
       });
 
-      // Tambahkan speed di akhir grid
+      // Tambahkan speed di grid
       const speedDiv = document.createElement('div');
       speedDiv.className = 'stat-item';
-      speedDiv.innerHTML = `
-        <strong>Speed</strong><br>
-        ${speed ? speed + 's' : '-'}
-      `;
+      speedDiv.innerHTML = `<strong>Speed</strong><br>${speed ? speed + 's' : '-'}`;
       statsOverview.appendChild(speedDiv);
     }
-  
-    // 6. Sembunyikan slide 2 dst
-    const allSlides = document.querySelectorAll('.slide');
+
+    // 7. Sembunyikan slide 2 dst
+    const allSlides = document.querySelectorAll('.swiper-slide');
     allSlides.forEach((slide, idx) => {
-      if (idx !== 0) {
-        slide.style.display = 'none';
-      }
+      if (idx !== 0) slide.style.display = 'none';
     });
   } catch (error) {
     chartTitle.textContent = 'Gagal Memuat Statistik';
-    console.error('Gagal menjalankan fungsi loadUserStats:', error);
+    console.error('Gagal loadUserStats:', error);
   }
 }
 
-// Jalankan fungsi setelah seluruh halaman siap
 document.addEventListener('DOMContentLoaded', loadUserStats);
