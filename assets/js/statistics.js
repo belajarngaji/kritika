@@ -1,5 +1,10 @@
-// Import supabase dari client
-import { supabase } from './supabase-client.js';
+// Impor langsung Supabase SDK dari CDN
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// Inisialisasi client langsung di sini
+const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjMxMjg5OCwiZXhwIjoyMDcxODg4ODk4fQ.1-CFqhW0mXPyv8jFyd-sa4m2FoCkyY4LbgiKGIKwb6I'; // anon key
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /**
  * Fungsi utama untuk memuat statistik pengguna dan menggambar radar chart.
@@ -30,7 +35,7 @@ async function loadUserStats() {
         }
         const statsData = await response.json();
 
-        // 3. Cek data kosong
+        // 3. Cek jika data statistik kosong
         if (!statsData || Object.keys(statsData).length === 0) {
             chartTitle.textContent = "Belum Ada Statistik";
             ctx.fillText("Kerjakan beberapa kuis untuk melihat statistik Anda di sini.", 10, 50);
@@ -82,5 +87,5 @@ async function loadUserStats() {
     }
 }
 
-// Jalankan fungsi setelah halaman siap
+// Jalankan fungsi setelah seluruh halaman siap
 document.addEventListener('DOMContentLoaded', loadUserStats);
