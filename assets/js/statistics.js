@@ -62,9 +62,6 @@ async function loadUserStats() {
     const labels = Object.keys(statsData);
     const scores = Object.values(statsData);
 
-    console.log('Labels:', labels);
-    console.log('Scores:', scores);
-
     new Chart(ctx, {
       type: 'radar',
       data: {
@@ -115,6 +112,14 @@ async function loadUserStats() {
         statsOverview.appendChild(div);
       });
     }
+
+    // 6. Sembunyikan slide 2 dst
+    const allSlides = document.querySelectorAll('.slide');
+    allSlides.forEach((slide, idx) => {
+      if (idx !== 0) {
+        slide.style.display = 'none';
+      }
+    });
   } catch (error) {
     chartTitle.textContent = 'Gagal Memuat Statistik';
     console.error('Gagal menjalankan fungsi loadUserStats:', error);
