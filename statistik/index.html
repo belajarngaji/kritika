@@ -41,24 +41,15 @@
       box-sizing: border-box;
     }
 
+    /* Sembunyikan slide selain pertama */
+    .swiper-slide:not(:first-child) {
+      display: none;
+    }
+
     .swiper-pagination {
       margin-top: 10px;
       text-align: center;
-    }
-
-    .swiper-pagination-bullet {
-      width: 10px;
-      height: 10px;
-      background: #999;
-      opacity: 0.5;
-      border-radius: 50%;
-      margin: 0 5px;
-      cursor: pointer;
-    }
-
-    .swiper-pagination-bullet-active {
-      background: #333;
-      opacity: 1;
+      display: none; /* disembunyikan */
     }
   </style>
 </head>
@@ -72,13 +63,16 @@
   <main class="content">
     <div class="profile-container">
 
+      <!-- Container untuk Chart -->
       <div class="profile-card">
         <h2 class="chart-title">Memuat Statistik...</h2>
         <div class="chart-container">
           <canvas id="radarChart"></canvas>
         </div>
+      </div>
 
-        <!-- 4 slide statistik -->
+      <!-- Container untuk Slide Statistik -->
+      <div class="profile-card">
         <div class="stats-swiper-container">
           <div class="swiper-wrapper">
             <!-- Slide 1 -->
@@ -133,7 +127,7 @@
   <script type="module" src="../assets/js/statistics.js"></script>
 
   <script>
-    // init swiper
+    // init swiper (tapi pagination & slide lain tidak aktif)
     new Swiper(".stats-swiper-container", {
       pagination: {
         el: ".swiper-pagination",
