@@ -170,7 +170,7 @@ async function init() {
             user_id,
             session_id: materi.slug,
             question_id: q.id,
-            category: q.category,
+            category: materi.category,
             dimension: q.dimension,
             user_answer: userAnswer,
             correct_answer: q.correct_answer,
