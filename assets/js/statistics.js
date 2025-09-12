@@ -70,7 +70,7 @@ async function loadUserStats() {
             min: 0,          // Paksa nilai minimum menjadi 10
             max: 100,         // Paksa nilai maksimum menjadi 100
             ticks: {
-              stepSize: 0  // Buat langkahnya per 10 (10, 20, 30...)
+              stepSize: 10  // Buat langkahnya per 10 (10, 20, 30...)
             }
           }
         },
