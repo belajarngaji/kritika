@@ -10,46 +10,25 @@
 
   <!-- CSS tambahan untuk statistik -->
   <style>
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 1rem; }
+    .stat-item { background: #f9f9f9; padding: 0.75rem; border-radius: 10px; font-size: 14px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .stats-swiper-container { width: 100%; margin-top: 10px; } /* Mengurangi margin-top */
+    .swiper-wrapper { display: flex; }
+    .swiper-slide { flex-shrink: 0; width: 100%; box-sizing: border-box; }
+    .swiper-slide:not(:first-child) { display: none; }
+    .swiper-pagination { margin-top: 10px; text-align: center; display: none; }
+    
+    /* STYLE BARU UNTUK WADAH IQ */
+    .iq-container {
+      text-align: center;
       padding: 1rem;
+      border-bottom: 1px solid #eee; /* Garis pemisah */
+      margin-bottom: 10px;
     }
-
-    .stat-item {
-      background: #f9f9f9;
-      padding: 0.75rem;
-      border-radius: 10px;
-      font-size: 14px;
-      text-align: center;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
-
-    .stats-swiper-container {
-      width: 100%;
-      margin-top: 20px;
-    }
-
-    .swiper-wrapper {
-      display: flex;
-    }
-
-    .swiper-slide {
-      flex-shrink: 0;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    /* Sembunyikan slide selain pertama */
-    .swiper-slide:not(:first-child) {
-      display: none;
-    }
-
-    .swiper-pagination {
-      margin-top: 10px;
-      text-align: center;
-      display: none; /* disembunyikan */
+    .iq-score-value {
+      font-size: 2.5rem; /* Ukuran font skor IQ */
+      font-weight: 700;
+      color: #333; /* Warna skor */
     }
   </style>
 </head>
@@ -71,50 +50,38 @@
         </div>
       </div>
 
-      <!-- Container untuk Slide Statistik -->
+      <!-- Container untuk Slide Statistik (Kartu Kedua) -->
       <div class="profile-card">
+        
+        <!-- ================================== -->
+        <!-- WADAH BARU UNTUK SKOR IQ DITARUH DI SINI -->
+        <div id="iqScoreContainer" class="iq-container">
+          <p>Menghitung Skor IQ...</p>
+        </div>
+        <!-- ================================== -->
+
         <div class="stats-swiper-container">
           <div class="swiper-wrapper">
             <!-- Slide 1 -->
             <div class="swiper-slide">
               <div class="stats-grid" id="statsOverview"></div>
             </div>
-            <!-- Slide 2 -->
-            <div class="swiper-slide">
-              <div class="stats-grid">
-                <h3>Slide 2 (nyusul)</h3>
-              </div>
-            </div>
-            <!-- Slide 3 -->
-            <div class="swiper-slide">
-              <div class="stats-grid">
-                <h3>Slide 3 (nyusul)</h3>
-              </div>
-            </div>
-            <!-- Slide 4 -->
-            <div class="swiper-slide">
-              <div class="stats-grid">
-                <h3>Slide 4 (nyusul)</h3>
-              </div>
-            </div>
+            <!-- Slide 2 (dan seterusnya) -->
+            <div class="swiper-slide"><div class="stats-grid"><h3>Slide 2 (nyusul)</h3></div></div>
+            <div class="swiper-slide"><div class="stats-grid"><h3>Slide 3 (nyusul)</h3></div></div>
+            <div class="swiper-slide"><div class="stats-grid"><h3>Slide 4 (nyusul)</h3></div></div>
           </div>
           <div class="swiper-pagination"></div>
         </div>
       </div>
 
-        <nav class="profile-navigation">
-
+      <nav class="profile-navigation">
         <a class="nav-item" onclick="location.replace('/kritika/profil')">Profil</a>
-
         <a class="nav-item" onclick="location.replace('/kritika/statistik/')">Statistik</a>
-
         <a class="nav-item" onclick="location.replace('/kritika/materi/')">Materi</a>
-
         <a class="nav-item" onclick="location.replace('/kritika/riwayat/')">Riwayat</a>
-
         <a class="nav-item" onclick="location.replace('/kritika/akun/')">Akun</a>
-
-        </nav>
+      </nav>
 
     </div>
   </main>
@@ -123,22 +90,12 @@
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
 
-  <!-- Swiper library -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
-  />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
   <script type="module" src="../assets/js/statistics.js"></script>
-
   <script>
-    // init swiper (tapi pagination & slide lain tidak aktif)
     new Swiper(".stats-swiper-container", {
-      pagination: {
-        el: ".swiper-pagination",
-        clickable: true,
-      },
+      pagination: { el: ".swiper-pagination", clickable: true },
       spaceBetween: 20,
     });
   </script>
