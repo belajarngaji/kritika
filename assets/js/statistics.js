@@ -51,7 +51,7 @@ async function loadUserStats() {
       data: {
         labels,
         datasets: [{
-          label: 'Skor Gabungan (%)', 
+          label: 'Skor (%)', 
           data: scores,
           fill: true,
           backgroundColor: 'rgba(59, 130, 246, 0.2)',
@@ -84,7 +84,7 @@ async function loadUserStats() {
     const iqData = await iqResponse.json();
     if (iqData.iqScore && iqScoreContainer) {
       iqScoreContainer.innerHTML = `
-        <h3 class="text-lg font-semibold text-gray-700">Skor Kognitif (IQ Ekuivalen)</h3>
+        <h3 class="text-lg font-semibold text-gray-700">Skor Statistik</h3>
         <div class="iq-score-value">${iqData.iqScore}</div>
       `;
     }
