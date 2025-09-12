@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistik | Kritika</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- CSS tambahan untuk statistik -->
+  <style>
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 1rem;
+    }
+
+    .stat-item {
+      background: #f9f9f9;
+      padding: 0.75rem;
+      border-radius: 10px;
+      font-size: 14px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .stats-swiper-container {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .swiper-wrapper {
+      display: flex;
+    }
+
+    .swiper-slide {
+      flex-shrink: 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Sembunyikan slide selain pertama */
+    .swiper-slide:not(:first-child) {
+      display: none;
+    }
+
+    .swiper-pagination {
+      margin-top: 10px;
+      text-align: center;
+      display: none; /* disembunyikan */
+    }
+  </style>
+</head>
+<body>
+
+  <header class="profile-header">
+    <h1 class="profile-title">Halaman Statistik</h1>
+    <button type="button" onclick="history.back()" class="btn-outline">X</button>
+  </header>
+
+  <main class="content">
+    <div class="profile-container">
+
+      <!-- Container untuk Chart -->
+      <div class="profile-card">
+        <h2 class="chart-title">Memuat Statistik...</h2>
+        <div class="chart-container">
+          <canvas id="radarChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Container untuk Slide Statistik -->
+      <div class="profile-card">
+        <div class="stats-swiper-container">
+          <div class="swiper-wrapper">
+            <!-- Slide 1 -->
+            <div class="swiper-slide">
+              <div class="stats-grid" id="statsOverview"></div>
+            </div>
+            <!-- Slide 2 -->
+            <div class="swiper-slide">
+              <div class="stats-grid">
+                <h3>Slide 2 (nyusul)</h3>
+              </div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="swiper-slide">
+              <div class="stats-grid">
+                <h3>Slide 3 (nyusul)</h3>
+              </div>
+            </div>
+            <!-- Slide 4 -->
+            <div class="swiper-slide">
+              <div class="stats-grid">
+                <h3>Slide 4 (nyusul)</h3>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-pagination"></div>
+        </div>
+      </div>
+
+        <nav class="profile-navigation">
+
+        <a class="nav-item" onclick="location.replace('/kritika/profil')">Profil</a>
+
+        <a class="nav-item" onclick="location.replace('/kritika/statistik/')">Statistik</a>
+
+        <a class="nav-item" onclick="location.replace('/kritika/materi/')">Materi</a>
+
+        <a class="nav-item" onclick="location.replace('/kritika/riwayat/')">Riwayat</a>
+
+        <a class="nav-item" onclick="location.replace('/kritika/akun/')">Akun</a>
+
+        </nav>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Kritika | Belajar Kritis</p>
+  </footer>
+
+  <!-- Swiper library -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  <script type="module" src="../assets/js/statistics.js"></script>
+
+  <script>
+    // init swiper (tapi pagination & slide lain tidak aktif)
+    new Swiper(".stats-swiper-container", {
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+      },
+      spaceBetween: 20,
+    });
+  </script>
+</body>
+</html>
