@@ -6,45 +6,44 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function loadUserStats() {
-  // Ambil semua elemen target dari HTML
+  // Ambil semua elemen target
   const chartTitle = document.querySelector('.chart-title');
   const chartCanvas = document.getElementById('radarChart');
   const statsOverview = document.getElementById('statsOverview');
-  const iqScoreContainer = document.getElementById('iqScoreContainer'); // Ambil elemen IQ baru
+  const iqScoreContainer = document.getElementById('iqScoreContainer');
   
-  if (!chartCanvas) {
-    console.error("Elemen canvas 'radarChart' tidak ditemukan.");
-    return;
-  }
+  if (!chartCanvas) return;
   const ctx = chartCanvas.getContext('2d');
 
   try {
-    // 1. Ambil data user
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      chartTitle.textContent = 'Silakan Login untuk melihat statistik';
+      chartTitle.textContent = 'Silakan Login';
       if (iqScoreContainer) iqScoreContainer.innerHTML = '';
       return;
     }
 
-    // 2. Panggil semua data (stats, iq, dan speed) secara bersamaan untuk efisiensi
+    // Panggil semua data yang dibutuhkan secara bersamaan
     const [statsResponse, iqResponse, speedQuery] = await Promise.all([
-      fetch(`https://hmmz-bot01.vercel.app/stats/${user.id}`),
-      fetch(`https://hmmz-bot01.vercel.app/iq-score/${user.id}`), // Panggil endpoint IQ baru
+      // Pintu 1: Ambil data "Pakem" untuk Chart dan Grid
+      fetch(`https://hmmz-bot01.vercel.app/stats/${user.id}`), 
+      // Pintu 2: Ambil data IQ secara terpisah
+      fetch(`https://hmmz-bot01.vercel.app/iq-score/${user.id}`), 
+      // Ambil speed mentah untuk ditampilkan di grid
       supabase.from('kritika_attempts').select('duration_seconds').eq('user_id', user.id)
     ]);
 
-    // 3. Proses hasil dari /stats untuk chart dan grid
+    // --- LOGIKA UNTUK CHART "PAKEM" ANDA ---
     if (!statsResponse.ok) throw new Error(`Server error [stats]: ${statsResponse.status}`);
     const statsData = await statsResponse.json();
 
     if (!statsData || Object.keys(statsData).length === 0) {
       chartTitle.textContent = 'Belum Ada Statistik';
-      if (iqScoreContainer) iqScoreContainer.innerHTML = '<p>Kerjakan kuis untuk melihat skor IQ.</p>';
+      if (iqScoreContainer) iqScoreContainer.innerHTML = '<p>Kerjakan kuis untuk melihat skor.</p>';
       return;
     }
 
-    // 4. Tampilkan Chart Radar
+    // Tampilkan Chart Radar MENGGUNAKAN DATA PAKEM ANDA
     chartTitle.textContent = 'Statistik Keahlian Kritis';
     const labels = Object.keys(statsData);
     const scores = Object.values(statsData);
@@ -53,7 +52,7 @@ async function loadUserStats() {
       data: {
         labels,
         datasets: [{
-          label: 'Skor Gabungan (%)',
+          label: 'Skor Gabungan (%)', 
           data: scores,
           fill: true,
           backgroundColor: 'rgba(59, 130, 246, 0.2)',
@@ -63,7 +62,7 @@ async function loadUserStats() {
       options: { /* ...opsi chart Anda... */ }
     });
 
-    // 5. Tampilkan Skor IQ di wadah yang baru
+    // --- LOGIKA UNTUK SKOR IQ (TERPISAH) ---
     if (!iqResponse.ok) throw new Error(`Server error [iq]: ${iqResponse.status}`);
     const iqData = await iqResponse.json();
     if (iqData.iqScore && iqScoreContainer) {
@@ -73,7 +72,7 @@ async function loadUserStats() {
       `;
     }
 
-    // 6. Tampilkan Grid Statistik
+    // --- TAMPILKAN GRID STATISTIK ---
     let speed = null;
     if (speedQuery.data && speedQuery.data.length > 0) {
         const total = speedQuery.data.reduce((sum, a) => sum + (a.duration_seconds || 0), 0);
@@ -81,6 +80,7 @@ async function loadUserStats() {
     }
     if (statsOverview) {
       statsOverview.innerHTML = '';
+      // Tampilkan data "Pakem" di grid agar konsisten dengan chart
       labels.forEach((label, idx) => {
         const div = document.createElement('div');
         div.className = 'stat-item';
@@ -92,16 +92,10 @@ async function loadUserStats() {
       speedDiv.innerHTML = `<strong>Speed</strong><br>${speed ? speed + 's' : '-'}`;
       statsOverview.appendChild(speedDiv);
     }
-
-    // 7. Sembunyikan slide lain (logika asli Anda)
-    const allSlides = document.querySelectorAll('.swiper-slide');
-    allSlides.forEach((slide, idx) => {
-      if (idx !== 0) slide.style.display = 'none';
-    });
-
+    
   } catch (error) {
     chartTitle.textContent = 'Gagal Memuat Statistik';
-    if (iqScoreContainer) iqScoreContainer.innerHTML = `<p style="color: red;">Gagal memuat skor IQ.</p>`;
+    if (iqScoreContainer) iqScoreContainer.innerHTML = `<p style="color: red;">Gagal memuat skor.</p>`;
     console.error('Gagal loadUserStats:', error);
   }
 }
