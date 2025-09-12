@@ -2,7 +2,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
+const SUPABASE_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function loadUserStats() {
@@ -25,11 +26,8 @@ async function loadUserStats() {
 
     // Panggil semua data yang dibutuhkan secara bersamaan
     const [statsResponse, iqResponse, speedQuery] = await Promise.all([
-      // Pintu 1: Ambil data "Pakem" untuk Chart dan Grid
       fetch(`https://hmmz-bot01.vercel.app/stats/${user.id}`), 
-      // Pintu 2: Ambil data IQ secara terpisah
       fetch(`https://hmmz-bot01.vercel.app/iq-score/${user.id}`), 
-      // Ambil speed mentah untuk ditampilkan di grid
       supabase.from('kritika_attempts').select('duration_seconds').eq('user_id', user.id)
     ]);
 
@@ -47,6 +45,7 @@ async function loadUserStats() {
     chartTitle.textContent = 'Statistik Keahlian Kritis';
     const labels = Object.keys(statsData);
     const scores = Object.values(statsData);
+    
     new Chart(ctx, {
       type: 'radar',
       data: {
@@ -59,7 +58,25 @@ async function loadUserStats() {
           borderColor: 'rgb(59, 130, 246)',
         }],
       },
-      options: { /* ...opsi chart Anda... */ }
+      // =======================================================
+      // === BAGIAN INI YANG DIPERBAIKI UNTUK SKALA 10-100 ===
+      // =======================================================
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        elements: { line: { borderWidth: 3 } },
+        scales: {
+          r: {
+            min: 10,          // Paksa nilai minimum menjadi 10
+            max: 100,         // Paksa nilai maksimum menjadi 100
+            ticks: {
+              stepSize: 10  // Buat langkahnya per 10 (10, 20, 30...)
+            }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+      // =======================================================
     });
 
     // --- LOGIKA UNTUK SKOR IQ (TERPISAH) ---
@@ -80,7 +97,6 @@ async function loadUserStats() {
     }
     if (statsOverview) {
       statsOverview.innerHTML = '';
-      // Tampilkan data "Pakem" di grid agar konsisten dengan chart
       labels.forEach((label, idx) => {
         const div = document.createElement('div');
         div.className = 'stat-item';
