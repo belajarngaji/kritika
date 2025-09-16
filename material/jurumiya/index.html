@@ -14,59 +14,103 @@
 </head>
 <body class="center-content">
 
-  <header class="profile-header" style="display:flex; align-items:center; gap:12px;">
+  <header class="profile-header" style="display:flex; align-items:center; gap:12px; position:relative;">
   <h1 class="profile-title">Kritika</h1>
 
   <!-- Tombol bookmark -->
-  <button id="bookmarkHeaderBtn" style="background:none; border:none; cursor:pointer;">
-    <i class="fi fi-rr-bookmark" style="font-size:1.8rem; color:white;"></i>
+  <button id="bookmarkHeaderBtn" class="btn-bookmark">
+    <i class="fi fi-rr-bookmark"></i>
   </button>
 
   <!-- Tombol kembali -->
   <button type="button" class="btn-back" onclick="history.back()">
     <i class="fi fi-sr-angle-circle-left"></i>
   </button>
-
 </header>
 
-  <style>
-    .btn-bookmark {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.6rem;
-  color: white;
-}
-.btn-bookmark.active i {
-  color: gold;
-    .btn-back {
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-    .btn-back i {
-      font-size: 1.8rem;
-      color: white;
-    }
-    .btn-back:hover i {
-      color: #ccc;
-    }
-  </style>
-
 <!-- Modal bookmark -->
-<div id="bookmarkModal" style="display:none; position:absolute; top:60px; right:10px; background:#fff; border:1px solid #ccc; border-radius:6px; padding:12px; width:250px; max-height:400px; overflow:auto; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:1000;">
+<div id="bookmarkModal">
   <h3>Bookmarks</h3>
-  <ul id="bookmarkList" style="list-style:none; padding:0; margin:0;"></ul>
+  <ul id="bookmarkList"></ul>
 </div>
 
-  <main class="content">
-    <section class="section-header">
-      <h2>Materi Pelajaran Ilmu Nahwu</h2>
-      <p>Pilih Bab untuk mulai mempelajari isi Materi.</p>
-    </section>
+<style>
+  /* Tombol bookmark */
+  .btn-bookmark {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.8rem;
+    color: white;
+  }
+  .btn-bookmark.active i {
+    color: gold;
+  }
 
-    <section class="card-grid">
+  /* Tombol kembali */
+  .btn-back {
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-back i {
+    font-size: 1.8rem;
+    color: white;
+  }
+  .btn-back:hover i {
+    color: #ccc;
+  }
 
+  /* Modal bookmark */
+  #bookmarkModal {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 10px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 12px;
+    width: 250px;
+    max-height: 400px;
+    overflow: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+  }
+  #bookmarkModal h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+  }
+  #bookmarkModal ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  #bookmarkModal ul li {
+    margin-bottom: 6px;
+    cursor: pointer;
+  }
+
+  /* Header */
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+  }
+</style>
+
+<main class="content">
+
+  <section class="section-header">
+    <h2>Materi Pelajaran Ilmu Nahwu</h2>
+    <p>Pilih Bab untuk mulai mempelajari isi Materi.</p>
+  </section>
+
+  <section class="card-grid">
+
+    <!-- Kartu bab akan dimasukkan di sini -->
 
       <a href="bab1/?slug=jurumiya-bab1" class="card">
         <h3>Bab I</h3>
