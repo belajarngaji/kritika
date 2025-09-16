@@ -8,19 +8,32 @@
   <link rel="stylesheet" href="../../assets/css/style.css">
   <!-- Font modern -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
+
 </head>
-<body>
-  <header>
-    <nav class="navbar">
+<body class="center-content">
 
-      <h1 class="logo">Kritika</h1>
-
-      <button onclick="window.history.back()" class="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-gray-200">
-    <i class="fa-solid fa-arrow-left"></i>
-      </button>
-
-    </nav>
+  <header class="profile-header">
+    <h1 class="profile-title">Pengaturan Akun</h1>
+    <button type="button" class="btn-back" onclick="history.back()">
+      <i class="fi fi-sr-angle-circle-left"></i>
+    </button>
   </header>
+
+  <style>
+    .btn-back {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-back i {
+      font-size: 1.8rem;
+      color: white;
+    }
+    .btn-back:hover i {
+      color: #ccc;
+    }
+  </style>
 
   <main class="content">
     <section class="section-header">
