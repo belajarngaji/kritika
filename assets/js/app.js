@@ -68,21 +68,27 @@ async function saveAttempt({ user_id, session_id, question_id, category, dimensi
    Toast Helper
 ============================== */
 function showToast(message) {
+  const header = document.querySelector(".profile-header");
+
+  // hapus notif lama biar ga numpuk
+  const old = document.querySelector(".bookmark-toast");
+  if (old) old.remove();
+
   const toast = document.createElement("div");
+  toast.className = "bookmark-toast";
   toast.textContent = message;
-  toast.style.position = "fixed";
-  toast.style.bottom = "20px";
-  toast.style.right = "20px";
-  toast.style.padding = "10px 16px";
   toast.style.background = "#333";
   toast.style.color = "#fff";
-  toast.style.borderRadius = "8px";
+  toast.style.padding = "6px 12px";
+  toast.style.marginTop = "8px";
+  toast.style.borderRadius = "6px";
   toast.style.fontSize = "14px";
-  toast.style.zIndex = "9999";
+  toast.style.textAlign = "center";
   toast.style.opacity = "0";
   toast.style.transition = "opacity 0.3s";
 
-  document.body.appendChild(toast);
+  header.appendChild(toast);
+
   requestAnimationFrame(() => (toast.style.opacity = "1"));
 
   setTimeout(() => {
@@ -145,7 +151,7 @@ async function init() {
     const bookmarkBtn = document.createElement("button");
     bookmarkBtn.className = "btn-bookmark";
     bookmarkBtn.innerHTML = `<i class="fi fi-rr-bookmark"></i>`;
-    header.appendChild(bookmarkBtn);
+    header.insertAdjacentElement("beforeend", bookmarkBtn);
 
     // cek apakah sudah ada bookmark
     const { data: existing } = await supabase
