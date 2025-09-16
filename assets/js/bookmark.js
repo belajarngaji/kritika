@@ -1,4 +1,10 @@
-import { _supabase as supabase } from './supabase-client.js';
+ //--- assets/js/bookmark.js ---
+
+const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
+
+export const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const header = document.querySelector('.profile-header');
