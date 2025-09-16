@@ -64,8 +64,30 @@
         background-color: #3cb371;
     }
 
+    /* Header profil */
+    .profile-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px 20px;
+      background: #222;
+      color: white;
+      z-index: 999;
+    }
+    .profile-title {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
     /* Tombol kembali */
     .btn-back {
+      position: absolute;
+      left: 15px;
       background: none;
       border: none;
       cursor: pointer;
@@ -77,15 +99,20 @@
     .btn-back:hover i {
       color: #ccc;
     }
+
+    /* Supaya konten tidak ketutup header */
+    .content {
+      padding-top: 70px;
+    }
   </style>
 </head>
 <body>
 
   <header class="profile-header">
-    <h1 class="profile-title">Halaman Profil</h1>
     <button type="button" class="btn-back" onclick="history.back()">
       <i class="fi fi-sr-angle-circle-left"></i>
     </button>
+    <h1 class="profile-title">Halaman Profil</h1>
   </header>
 
   <main class="content">
