@@ -6,15 +6,66 @@
   <title>Profil Pengguna | Kritika</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.1.1/dist/compressor.min.js"></script>
 
   <link rel="stylesheet" href="/kritika/assets/css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Styling untuk modal zoom */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 35px;
+      color: #f1f1f1;
+      font-size: 40px;
+      font-weight: bold;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    .modal-options {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 15px;
+    }
+    .modal-btn {
+        background-color: #2e8b57;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+    .modal-btn:hover {
+        background-color: #3cb371;
+    }
+  </style>
 </head>
 <body>
 
   <header class="profile-header">
     <h1 class="profile-title">Halaman Profil</h1>
-    <a href="/kritika/index.html" class="close-button">X</a>
+        <button type="button" onclick="history.back()" class="btn-outline">X</button>
   </header>
 
   <main class="content">
@@ -23,6 +74,7 @@
       <div class="profile-card">
         <div class="avatar-wrapper">
           <img src="https://api.dicebear.com/8.x/initials/svg?seed=?" alt="Foto Profil" id="profile-avatar" class="profile-avatar">
+          <input type="file" id="avatar-input" accept="image/*" style="display: none;">
           <div class="badge" id="profile-badge">Memuat...</div>
         </div>
 
@@ -38,23 +90,33 @@
       </div>
 
       <div class="profile-stats" id="profile-stats">
-        <div class="stat-item">
-          <span class="stat-label">Materi Favorit</span>
-          <span class="stat-number" id="stats-favorite">-</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Soal Dikerjakan</span>
-          <span class="stat-number" id="stats-completed">-</span>
-        </div>
-      </div>
+  <div class="stat-item">
+    <span class="stat-label">Materi Favorit</span>
+    <span class="stat-number" id="stats-favorite">-</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">Soal Dikerjakan</span>
+    <span class="stat-number" id="stats-completed">-</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">Total Skor</span>
+    <span class="stat-number" id="stats-score">-</span>
+  </div>
+</div>
 
-      <nav class="profile-navigation">
-        <a href="/kritika/profil/" class="nav-item active">Profil</a>
-        <a href="/kritika/statistik.html" class="nav-item">Statistik</a>
-        <a href="/kritika/materi/" class="nav-item">Materi</a>
-        <a href="#" class="nav-item">Riwayat</a>
-        <a href="/kritika/akun/" class="nav-item">Akun</a>
-      </nav>
+        <nav class="profile-navigation">
+
+        <a class="nav-item" onclick="location.replace('/kritika/profil')">Profil</a>
+
+        <a class="nav-item" onclick="location.replace('/kritika/statistik/')">Statistik</a>
+
+        <a class="nav-item" onclick="location.replace('/kritika/materi/')">Materi</a>
+
+        <a class="nav-item" onclick="location.replace('/kritika/riwayat/')">Riwayat</a>
+
+        <a class="nav-item" onclick="location.replace('/kritika/akun/')">Akun</a>
+
+        </nav>
 
     </div>
   </main>
@@ -63,7 +125,15 @@
     <p>© 2025 Kritika | Belajar Kritis</p>
   </footer>
 
-  <script src="/kritika/assets/js/profile.js"></script>
+  <div id="avatar-modal" class="modal">
+    <span class="modal-close">&times;</span>
+    <img class="modal-content" id="modal-image">
+    <div class="modal-options">
+      <button id="modal-upload-btn" class="modal-btn">Unggah Foto Baru</button>
+    </div>
+  </div>
+
+  <script type="module" src="/kritika/assets/js/profile.js"></script>
 
 </body>
 </html>
