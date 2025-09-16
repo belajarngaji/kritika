@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Materi Jurumiya | Kritika</title>
+  <!-- Link CSS -->
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <!-- Font modern -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css">
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
+
+</head>
+<body>
+
+  <header class="profile-header">
+  <h1 class="profile-title">Kritika</h1>
+
+  <!-- Tombol bookmark -->
+  <button id="bookmarkHeaderBtn" class="btn-bookmark">
+    <i class="fi fi-rr-bookmark"></i>
+  </button>
+
+  <!-- Tombol kembali -->
+  <button type="button" class="btn-back" onclick="history.back()">
+    <i class="fi fi-sr-angle-circle-left"></i>
+  </button>
+</header>
+
+<style>
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* jarak antar elemen lebih rapat */
+    padding: 8px 12px;
+    hight: 80px
+    background-color: #222;
+    color: white;
+    position: relative;
+  }
+
+  .profile-title {
+    flex-grow: 1; /* agar title selalu di kiri */
+    font-size: 1.8rem;
+  }
+
+  .btn-bookmark,
+  .btn-back {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+  }
+
+  .btn-bookmark i,
+  .btn-back i {
+    font-size: 1.8rem;
+    color: white;
+  }
+
+  .btn-bookmark.active i {
+    color: gold;
+  }
+
+  .btn-back:hover i,
+  .btn-bookmark:hover i {
+    color: #ccc;
+  }
+</style>
+
+<!-- Modal bookmark -->
+<div id="bookmarkModal" style="
+  display:none;
+  position:absolute;
+  top:60px;
+  right:10px;
+  background:#fff;
+  border:1px solid #ccc;
+  border-radius:6px;
+  padding:12px;
+  width:250px;
+  max-height:400px;
+  overflow:auto;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  z-index:1000;">
+  <h3>Bookmarks</h3>
+  <ul id="bookmarkList" style="list-style:none; padding:0; margin:0;"></ul>
+</div>
+
+<main class="content">
+
+  <section class="section-header">
+    <h2>Materi Pelajaran Ilmu Nahwu</h2>
+    <p>Pilih Bab untuk mulai mempelajari isi Materi.</p>
+  </section>
+
+  <section class="card-grid">
+
+    <!-- Kartu bab akan dimasukkan di sini -->
+
+      <a href="bab1/?slug=jurumiya-bab1" class="card">
+        <h3>Bab I</h3>
+        <p>Pembahasan Kalam.</p>
+      </a>
+
+      <a href="bab2/?slug=nahwu-bab2" class="card">
+        <h3>Bab II</h3>
+        <p>Pembahasan Kalimah.</p>
+      </a>
+
+      <a href="bab3/?slug=nahwu-bab3" class="card">
+        <h3>Bab III</h3>
+        <p>Pembahasan I'rab dan Bina'.</p>
+      </a>
+
+      <a href="bab4/?slug=nahwu-bab4" class="card">
+        <h3>Bab IV</h3>
+        <p>Pembahasan Amil dan Ma'mul.</p>
+      </a>
+
+      <a href="bab5/?slug=nahwu-bab5" class="card">
+        <h3>Bab V</h3>
+        <p>Pembahasan Isim-isim yang Marfu'.</p>
+      </a>
+
+      <a href="bab6/?slug=nahwu-bab6" class="card">
+        <h3>Bab VI</h3>
+        <p>Pembahasan Isim-isim yang Mansub.</p>
+      </a>
+
+      <a href="bab7/?slug=nahwu-bab7" class="card">
+        <h3>Bab VII</h3>
+        <p>Pembahasan Isim-isim yang Majrur.</p>
+      </a>
+
+      <a href="bab8/?slug=nahwu-bab8" class="card">
+        <h3>Bab VIII</h3>
+        <p>Pembahasan Fi'il-fi'il yang Majzum.</p>
+      </a>
+
+      <a href="bab9/?slug=nahwu-bab9" class="card">
+        <h3>Bab IX</h3>
+        <p>Pembahasan Tawabi'.</p>
+      </a>
+
+      <a href="bab10/?slug=nahwu-bab10" class="card">
+        <h3>Bab X</h3>
+        <p>Pembahasan Kalimat dan jenis-jenisnya.</p>
+      </a>
+
+      <a href="bab11/?slug=nahwu-bab11" class="card">
+        <h3>Bab XI</h3>
+        <p>Pembahasan I'rab dan tanda-tandanya.</p>
+      </a>
+
+      <a href="bab12/?slug=nahwu-bab12" class="card">
+        <h3>Bab XII</h3>
+        <p>Pembahasan Isim-isim yang tidak menerima tanwīn dan kasrah.</p>
+      </a>
+
+      <a href="bab13/?slug=nahwu-bab13" class="card">
+        <h3>Bab XIII</h3>
+        <p>Pembahasan Isim Isyarah dan Isim Mawṣūl.</p>
+      </a>
+
+      <a href="bab14/?slug=nahwu-bab14" class="card">
+        <h3>Bab XIV</h3>
+        <p>Pembahasan Dhamir – Kata Ganti.</p>
+      </a>
+
+      <a href="bab15/?slug=nahwu-bab15" class="card">
+        <h3>Bab XV</h3>
+        <p>Pembahasan Nakīrah dan Ma‘rifah</p>
+      </a>
+
+      <a href="bab16/?slug=nahwu-bab16" class="card">
+        <h3>Bab XVI</h3>
+        <p>Pembahasan Isim Mudhakkar dan Mu’annats</p>
+      </a>
+
+      <a href="bab17/?slug=nahwu-bab17" class="card">
+        <h3>Bab XVII</h3>
+        <p>Pembahasan Tentang Bilangan</p>
+      </a>
+
+      <a href="bab18/?slug=nahwu-bab18" class="card">
+        <h3>Bab XVIII</h3>
+        <p>Pembahasan Isim yang dinisbahkan</p>
+      </a>
+
+      <a href="bab19/?slug=nahwu-bab19" class="card">
+        <h3>Bab XIX</h3>
+        <p>Pembahasan Isim Tasghir — bentuk kecil</p>
+      </a>
+
+      <a href="bab20/?slug=nahwu-bab20" class="card">
+        <h3>Bab XX</h3>
+        <p>Pembahasan Isim yang diringkas dalam panggilan</p>
+      </a>
+
+      <a href="bab21/?slug=nahwu-bab21" class="card">
+        <h3>Bab XXI</h3>
+        <p>Pembahasan Seruan/Vocative</p>
+      </a>
+
+      <a href="bab22/?slug=nahwu-bab22" class="card">
+        <h3>Bab XXII</h3>
+        <p>Pembahasan Ratapan/Seruan Sedih</p>
+      </a>
+
+      <a href="bab23/?slug=nahwu-bab23" class="card">
+        <h3>Bab XXIII</h3>
+        <p>Pembahasan Seruan Memohon Pertolongan</p>
+      </a>
+
+      <a href="bab24/?slug=nahwu-bab24" class="card">
+        <h3>Bab XXIV</h3>
+        <p>Pembahasan Anjuran dan Peringatan</p>
+      </a>
+
+      <a href="bab25/?slug=nahwu-bab25" class="card">
+        <h3>Bab XXV</h3>
+        <p>Pembahasan Isim yang tidak bisa di Tanwin & Tashrif</p>
+      </a>
+
+      <a href="bab26/?slug=nahwu-bab26" class="card">
+        <h3>Bab XXVI</h3>
+        <p>Pembahasan Mudhaf dan Mudhaf ilaih</p>
+      </a>
+
+      <a href="bab27/?slug=nahwu-bab27" class="card">
+        <h3>Bab XXVII</h3>
+        <p>Pembahasan Isim Ta'kid/Penegasan</p>
+      </a>
+
+      <a href="bab28/?slug=nahwu-bab28" class="card">
+        <h3>Bab XXVIII</h3>
+        <p>Pembahasan Badal/Pengganti</p>
+      </a>
+
+      <a href="bab29/?slug=nahwu-bab29" class="card">
+        <h3>Bab XXIX</h3>
+        <p>Pembahasan 'Atf/Penyambung</p>
+      </a>
+
+      <a href="bab30/?slug=nahwu-bab30" class="card">
+        <h3>Bab XXX</h3>
+        <p>Pembahasan Huruf Jar</p>
+      </a>
+
+     <a href="bab31/?slug=nahwu-bab31" class="card">
+        <h3>Bab XXX</h3>
+        <p>Pembahasan Isim Majrur</p>
+      </a>
+
+     <a href="bab32/?slug=nahwu-bab32" class="card">
+        <h3>Bab XXX</h3>
+        <p>Pembahasan Sifat/Tabi'</p>
+      </a>
+
+     <a href="bab33/?slug=nahwu-bab33" class="card">
+        <h3>Bab XXX</h3>
+        <p>Pembahasan Isim Ghairu Munsharif</p>
+      </a>
+
+     <a href="bab34/?slug=nahwu-bab34" class="card">
+        <h3>Bab XXX</h3>
+        <p>Pembahasan Pembagian Fi'il/kata kerja</p>
+      </a>
+
+     <a href="bab35/?slug=nahwu-bab35" class="card">
+        <h3>Bab XXX</h3>
+        <p>Pembahasan Tanda Fi'il</p>
+      </a>
+
+     <a href="bab36/?slug=nahwu-bab36" class="card">
+        <h3>Bab XXX</h3>
+        <p>Pembahasan Fi'il Mudhori'</p>
+      </a>
+
+     <a href="bab37/?slug=nahwu-bab37" class="card">
+        <h3>Bab XXX</h3>
+        <p>Pembahasan Nasb Fi'il Mudhori'</p>
+      </a>
+
+     <a href="bab38/?slug=nahwu-bab38" class="card">
+        <h3>Bab XXX</h3>
+        <p>Pembahasan Jazm Fi'il Mudhori'</p>
+      </a>
+
+     <a href="bab39/?slug=nahwu-bab39" class="card">
+        <h3>Bab XXX</h3>
+        <p>Pembahasan Fi'il yang Mabni dan Mu'rab</p>
+      </a>
+
+     <a href="bab40/?slug=nahwu-bab40" class="card">
+        <h3>Bab XXX</h3>
+        <p>Pembahasan Fi'il/Pelaku Perbuatan</p>
+      </a>
+
+    </section>
+  </main>
+  <script type="module" src="../../assets/js/bookmark.js"></script>
+</body>
+</html>
