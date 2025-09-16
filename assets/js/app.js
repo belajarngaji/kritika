@@ -65,6 +65,33 @@ async function saveAttempt({ user_id, session_id, question_id, category, dimensi
 }
 
 /* ==============================
+   Toast Helper
+============================== */
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.textContent = message;
+  toast.style.position = "fixed";
+  toast.style.bottom = "20px";
+  toast.style.right = "20px";
+  toast.style.padding = "10px 16px";
+  toast.style.background = "#333";
+  toast.style.color = "#fff";
+  toast.style.borderRadius = "8px";
+  toast.style.fontSize = "14px";
+  toast.style.zIndex = "9999";
+  toast.style.opacity = "0";
+  toast.style.transition = "opacity 0.3s";
+
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => (toast.style.opacity = "1"));
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+
+/* ==============================
    INIT Quiz Sequential (5 soal)
 ============================== */
 async function init() {
@@ -115,46 +142,55 @@ async function init() {
   if (user_id) {
     const header = document.querySelector('.profile-header');
 
-    // buat tombol bookmark di header
-    const bookmarkBtn = document.createElement('button');
+    const bookmarkBtn = document.createElement("button");
     bookmarkBtn.className = "btn-bookmark";
-    bookmarkBtn.innerHTML = `<i class="fi fi-sr-bookmark"></i>`;
+    bookmarkBtn.innerHTML = `<i class="fi fi-rr-bookmark"></i>`;
     header.appendChild(bookmarkBtn);
 
     // cek apakah sudah ada bookmark
     const { data: existing } = await supabase
-      .from('kritika_bookmark')
-      .select('id')
-      .eq('user_id', user_id)
-      .eq('material_slug', slug)
+      .from("kritika_bookmark")
+      .select("id")
+      .eq("user_id", user_id)
+      .eq("material_slug", slug)
       .maybeSingle();
 
     let isBookmarked = !!existing;
-    bookmarkBtn.classList.toggle("active", isBookmarked);
+    bookmarkBtn.innerHTML = isBookmarked
+      ? `<i class="fi fi-sr-bookmark"></i>`
+      : `<i class="fi fi-rr-bookmark"></i>`;
 
     // toggle bookmark
-    bookmarkBtn.addEventListener('click', async () => {
+    bookmarkBtn.addEventListener("click", async () => {
       if (isBookmarked) {
-        await supabase
-          .from('kritika_bookmark')
+        const { error } = await supabase
+          .from("kritika_bookmark")
           .delete()
-          .eq('user_id', user_id)
-          .eq('material_slug', slug);
-        isBookmarked = false;
+          .eq("user_id", user_id)
+          .eq("material_slug", slug);
+
+        if (!error) {
+          isBookmarked = false;
+          bookmarkBtn.innerHTML = `<i class="fi fi-rr-bookmark"></i>`;
+          showToast("❌ Bookmark dihapus");
+        }
       } else {
-        await supabase
-          .from('kritika_bookmark')
+        const { error } = await supabase
+          .from("kritika_bookmark")
           .insert([{ user_id, material_slug: slug }]);
-        isBookmarked = true;
+
+        if (!error) {
+          isBookmarked = true;
+          bookmarkBtn.innerHTML = `<i class="fi fi-sr-bookmark"></i>`;
+          showToast("✅ Bookmark ditambahkan");
+        }
       }
-      bookmarkBtn.classList.toggle("active", isBookmarked);
     });
   }
 
   /* ==============================
      Quiz Button
   =============================== */
-
   btnGenerate.addEventListener('click', async () => {
     btnGenerate.disabled = true;
     btnGenerate.textContent = 'Loading...';
@@ -197,7 +233,6 @@ async function init() {
       aiOutput.appendChild(div);
 
       let timer;
-      let timeLeft = 30;
       let startTime = Date.now();
 
       const fb = div.querySelector('.feedback');
@@ -235,7 +270,6 @@ async function init() {
           if (currentIndex < total) {
             showQuestion(questions[currentIndex]);
           } else {
-            // tampilkan summary final
             summary.innerHTML = `
               <h3>Hasil Quiz</h3>
               <strong>Total Soal:</strong> ${total}<br>
@@ -259,12 +293,10 @@ async function init() {
         });
       });
 
-      timer = setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) {
-          finishQuestion(null, false, true);
-        }
-      }, 1000);
+      // auto timeout 30 detik
+      timer = setTimeout(() => {
+        finishQuestion(null, false, true);
+      }, 30000);
     };
 
     showQuestion(questions[currentIndex]);
