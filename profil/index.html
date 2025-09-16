@@ -10,6 +10,10 @@
 
   <link rel="stylesheet" href="/kritika/assets/css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- CDN Flaticon Uicons -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
+
   <style>
     /* Styling untuk modal zoom */
     .modal {
@@ -59,13 +63,20 @@
     .modal-btn:hover {
         background-color: #3cb371;
     }
+    /* Styling ikon tombol kembali */
+    .btn-outline i {
+      font-size: 1.2rem;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
 
   <header class="profile-header">
     <h1 class="profile-title">Halaman Profil</h1>
-        <button type="button" onclick="history.back()" class="btn-outline">X</button>
+    <button type="button" onclick="history.back()" class="btn-outline">
+      <i class="fi fi-sr-arrow-left"></i>
+    </button>
   </header>
 
   <main class="content">
@@ -90,33 +101,27 @@
       </div>
 
       <div class="profile-stats" id="profile-stats">
-  <div class="stat-item">
-    <span class="stat-label">Materi Favorit</span>
-    <span class="stat-number" id="stats-favorite">-</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-label">Soal Dikerjakan</span>
-    <span class="stat-number" id="stats-completed">-</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-label">Total Skor</span>
-    <span class="stat-number" id="stats-score">-</span>
-  </div>
-</div>
+        <div class="stat-item">
+          <span class="stat-label">Materi Favorit</span>
+          <span class="stat-number" id="stats-favorite">-</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Soal Dikerjakan</span>
+          <span class="stat-number" id="stats-completed">-</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Total Skor</span>
+          <span class="stat-number" id="stats-score">-</span>
+        </div>
+      </div>
 
-        <nav class="profile-navigation">
-
+      <nav class="profile-navigation">
         <a class="nav-item" onclick="location.replace('/kritika/profil')">Profil</a>
-
         <a class="nav-item" onclick="location.replace('/kritika/statistik/')">Statistik</a>
-
         <a class="nav-item" onclick="location.replace('/kritika/materi/')">Materi</a>
-
         <a class="nav-item" onclick="location.replace('/kritika/riwayat/')">Riwayat</a>
-
         <a class="nav-item" onclick="location.replace('/kritika/akun/')">Akun</a>
-
-        </nav>
+      </nav>
 
     </div>
   </main>
