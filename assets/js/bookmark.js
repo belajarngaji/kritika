@@ -56,6 +56,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  // --- Fungsi mapping slug ke folder bab ---
+  function slugToBabFolder(slug) {
+    const parts = slug.split('-');
+    return parts[parts.length - 1]; // ambil bagian terakhir, misal "bab1"
+  }
+
   // --- Fungsi untuk memuat bookmark dari DB ---
   async function loadBookmarks() {
     const { data: bookmarks, error } = await _supabase
@@ -81,9 +87,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         li.style.cursor = 'pointer';
         li.style.marginBottom = '6px';
 
-        // URL langsung ke bab, tanpa query string
+        // URL menuju folder bab yang benar
         li.addEventListener('click', () => {
-          window.location.href = `/kritika/material/jurumiya/${slug}/`;
+          const babFolder = slugToBabFolder(slug);
+          window.location.href = `/kritika/material/jurumiya/${babFolder}/?slug=${slug}`;
         });
 
         bookmarkList.appendChild(li);
