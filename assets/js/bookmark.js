@@ -11,7 +11,6 @@ const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ==============================
 // DOMContentLoaded
 // ==============================
-
 document.addEventListener('DOMContentLoaded', async () => {
   const bookmarkBtn = document.getElementById('bookmarkHeaderBtn');
   const bookmarkModal = document.getElementById('bookmarkModal');
@@ -24,29 +23,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     bookmarkModal.style.display = bookmarkModal.style.display === 'none' ? 'block' : 'none';
   });
 
-  // Ambil user
-  const { data: { user } } = await _supabase.auth.getUser();
-  if (!user) return;
+  // Ambil user dari Supabase
+  const { data: { user }, error: userError } = await _supabase.auth.getUser();
+  if (userError || !user) {
+    console.error('User not found or not logged in');
+    return;
+  }
 
-  // Load bookmarks dari DB
+  // Fungsi untuk memuat bookmark dari DB
   async function loadBookmarks() {
     const { data: bookmarks, error } = await _supabase
       .from('kritika_bookmark')
       .select(`material_slug, materials(title)`)
       .eq('user_id', user.id);
 
-    if (error) { console.error(error); return; }
-
-    bookmarkList.innerHTML = '';
-    for (let b of bookmarks) {
-      const li = document.createElement('li');
-      li.textContent = b.materials?.title || b.material_slug;
-      li.addEventListener('click', () => {
-        window.location.href = `/kritika/material/jurumiya/${b.material_slug}/?slug=${b.material_slug}`;
-      });
-      bookmarkList.appendChild(li);
+    if (error) {
+      console.error(error);
+      return;
     }
+
+    // Hapus semua elemen sebelumnya
+    bookmarkList.innerHTML = '';
+
+    // Tambahkan bookmark baru, pastikan tidak duplikat
+    bookmarks.forEach(b => {
+      const slug = b.material_slug;
+      if (!document.getElementById(`bookmark-${slug}`)) {
+        const li = document.createElement('li');
+        li.id = `bookmark-${slug}`; // ID unik
+        li.textContent = b.materials?.title || slug;
+        li.style.cursor = 'pointer';
+        li.style.marginBottom = '6px';
+
+        li.addEventListener('click', () => {
+          window.location.href = `/kritika/material/jurumiya/${slug}/?slug=${slug}`;
+        });
+
+        bookmarkList.appendChild(li);
+      }
+    });
   }
 
+  // Panggil loadBookmarks
   await loadBookmarks();
 });
