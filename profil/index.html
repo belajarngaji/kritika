@@ -63,11 +63,19 @@
     .modal-btn:hover {
         background-color: #3cb371;
     }
-    /* Styling ikon tombol kembali */
-    .btn-outline i {
-      font-size: 1.2rem;
-      vertical-align: middle;
-      color: white
+
+    /* Tombol kembali */
+    .btn-back {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-back i {
+      font-size: 1.8rem;
+      color: white;
+    }
+    .btn-back:hover i {
+      color: #ccc;
     }
   </style>
 </head>
@@ -75,7 +83,7 @@
 
   <header class="profile-header">
     <h1 class="profile-title">Halaman Profil</h1>
-    <button type="button" onclick="history.back()">
+    <button type="button" class="btn-back" onclick="history.back()">
       <i class="fi fi-sr-angle-circle-left"></i>
     </button>
   </header>
