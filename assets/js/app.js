@@ -109,6 +109,52 @@ async function init() {
   const { data: { user } } = await supabase.auth.getUser();
   const user_id = user ? user.id : null;
 
+  /* ==============================
+     Bookmark Button
+  =============================== */
+  if (user_id) {
+    const header = document.querySelector('.profile-header');
+
+    // buat tombol bookmark di header
+    const bookmarkBtn = document.createElement('button');
+    bookmarkBtn.className = "btn-bookmark";
+    bookmarkBtn.innerHTML = `<i class="fi fi-sr-bookmark"></i>`;
+    header.appendChild(bookmarkBtn);
+
+    // cek apakah sudah ada bookmark
+    const { data: existing } = await supabase
+      .from('kritika_bookmark')
+      .select('id')
+      .eq('user_id', user_id)
+      .eq('material_slug', slug)
+      .maybeSingle();
+
+    let isBookmarked = !!existing;
+    bookmarkBtn.classList.toggle("active", isBookmarked);
+
+    // toggle bookmark
+    bookmarkBtn.addEventListener('click', async () => {
+      if (isBookmarked) {
+        await supabase
+          .from('kritika_bookmark')
+          .delete()
+          .eq('user_id', user_id)
+          .eq('material_slug', slug);
+        isBookmarked = false;
+      } else {
+        await supabase
+          .from('kritika_bookmark')
+          .insert([{ user_id, material_slug: slug }]);
+        isBookmarked = true;
+      }
+      bookmarkBtn.classList.toggle("active", isBookmarked);
+    });
+  }
+
+  /* ==============================
+     Quiz Button
+  =============================== */
+
   btnGenerate.addEventListener('click', async () => {
     btnGenerate.disabled = true;
     btnGenerate.textContent = 'Loading...';
