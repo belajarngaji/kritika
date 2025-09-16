@@ -14,7 +14,7 @@
 </head>
 <body>
 
-  <header class="profile-header">
+  <<header class="profile-header">
   <h1 class="profile-title">Kritika</h1>
   <button type="button" class="btn-bookmark" id="bookmarkBtn">
     <i class="fi fi-rr-bookmark"></i>
@@ -22,12 +22,12 @@
 </header>
 
 <style>
-  /* Header tetap di atas */
+  /* Header tetap di atas dan rapi */
   .profile-header {
     display: flex;
     align-items: center;
     justify-content: space-between; /* judul kiri, tombol kanan */
-    padding: 0 12px;
+    padding: 8px 12px;
     height: 60px;
     background-color: #222;
     color: white;
@@ -41,10 +41,8 @@
   .profile-title {
     font-size: 1.8rem;
     font-weight: 600;
-    margin: 0;
   }
 
-  /* Tombol bookmark */
   .btn-bookmark {
     background: none;
     border: none;
@@ -58,7 +56,7 @@
   .btn-bookmark i {
     font-size: 1.8rem;
     color: white;
-    transition: color 0.3s ease;
+    transition: color 0.3s;
   }
 
   .btn-bookmark.active i {
@@ -67,6 +65,39 @@
 
   .btn-bookmark:hover i {
     color: #ccc;
+  }
+
+  /* Konten di bawah header */
+  main.content {
+    padding-top: 70px; /* agar konten tidak tertutup header */
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #333;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(20px);
+    z-index: 9999;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toast-success {
+    background: #2ecc71;
+  }
+
+  .toast-error {
+    background: #e74c3c;
   }
 </style>
 
