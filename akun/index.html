@@ -7,13 +7,33 @@
 
   <link rel="stylesheet" href="/kritika/assets/css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Tambahkan CDN Flaticon Uicons di bagian <head> -->
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
+
 </head>
 <body class="center-content">
 
   <header class="profile-header">
     <h1 class="profile-title">Pengaturan Akun</h1>
-    <button type="button" onclick="history.back()" class="btn-outline">X</button>
+    <button type="button" class="btn-back" onclick="history.back()">
+      <i class="fi fi-sr-angle-circle-left"></i>
+    </button>
   </header>
+
+  <style>
+    .btn-back {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-back i {
+      font-size: 1.8rem;
+      color: white;
+    }
+    .btn-back:hover i {
+      color: #ccc;
+    }
+  </style>
 
   <main class="content">
     <div class="profile-container">
