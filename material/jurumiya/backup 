@@ -29,23 +29,24 @@
 </header>
 
 <style>
+  /* Header tetap di atas */
   .profile-header {
     display: flex;
     align-items: center;
-    gap: 8px; /* jarak antar elemen lebih rapat */
+    gap: 8px;
     padding: 8px 12px;
-    height: 80px;
+    height: 60px; /* pastikan benar */
     background-color: #222;
     color: white;
     position: fixed; /* tetap di atas */
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1000; /* agar selalu di atas konten */
+    z-index: 1000;
   }
 
   .profile-title {
-    flex-grow: 1; /* agar title selalu di kiri */
+    flex-grow: 1;
     font-size: 1.8rem;
   }
 
@@ -75,27 +76,31 @@
     color: #ccc;
   }
 
-  /* Beri jarak konten bawah header agar tidak tertutup */
+  /* Konten tidak tertutup header */
   main.content {
-    padding-top: 90px; /* lebih tinggi dari header */
+    padding-top: 70px; /* > tinggi header */
+  }
+
+  /* Modal bookmark menempel header */
+  #bookmarkModal {
+    display: none;
+    position: fixed; /* tetap di atas layar */
+    top: 60px; /* tepat di bawah header */
+    right: 10px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 12px;
+    width: 250px;
+    max-height: 400px;
+    overflow: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1001;
   }
 </style>
 
 <!-- Modal bookmark -->
-<div id="bookmarkModal" style="
-  display:none;
-  position:absolute;
-  top:80px; /* tepat di bawah header */
-  right:10px;
-  background:#fff;
-  border:1px solid #ccc;
-  border-radius:6px;
-  padding:12px;
-  width:250px;
-  max-height:400px;
-  overflow:auto;
-  box-shadow:0 4px 12px rgba(0,0,0,0.15);
-  z-index:1001;">
+<div id="bookmarkModal">
   <h3>Bookmarks</h3>
   <ul id="bookmarkList" style="list-style:none; padding:0; margin:0;"></ul>
 </div>
