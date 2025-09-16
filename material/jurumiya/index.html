@@ -13,12 +13,19 @@
 </head>
 <body class="center-content">
 
-  <header class="profile-header">
-    <h1 class="profile-title">Kritika</h1>
-    <button type="button" class="btn-back" onclick="history.back()">
-      <i class="fi fi-sr-angle-circle-left"></i>
-    </button>
-  </header>
+  <header class="profile-header" style="display:flex; align-items:center; gap:12px;">
+  <h1 class="profile-title">Kritika</h1>
+
+  <!-- Tombol kembali -->
+  <button type="button" class="btn-back" onclick="history.back()">
+    <i class="fi fi-sr-angle-circle-left"></i>
+  </button>
+
+  <!-- Tombol bookmark -->
+  <button id="bookmarkHeaderBtn" style="background:none; border:none; cursor:pointer;">
+    <i class="fi fi-rr-bookmark" style="font-size:1.8rem; color:white;"></i>
+  </button>
+</header>
 
   <style>
     .btn-back {
