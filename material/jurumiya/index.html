@@ -14,7 +14,7 @@
 </head>
 <body>
 
-  <header class="profile-header" style="display:flex; align-items:center; gap:12px; position:relative;">
+  <<header class="profile-header">
   <h1 class="profile-title">Kritika</h1>
 
   <!-- Tombol bookmark -->
@@ -28,78 +28,67 @@
   </button>
 </header>
 
-<!-- Modal bookmark -->
-<div id="bookmarkModal">
-  <h3>Bookmarks</h3>
-  <ul id="bookmarkList"></ul>
-</div>
-
 <style>
-  /* Tombol bookmark */
-  .btn-bookmark {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.8rem;
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* jarak antar elemen lebih rapat */
+    padding: 8px 12px;
+    background-color: #333;
     color: white;
-  }
-  .btn-bookmark.active i {
-    color: gold;
+    position: relative;
   }
 
-  /* Tombol kembali */
+  .profile-title {
+    flex-grow: 1; /* agar title selalu di kiri */
+    font-size: 1.6rem;
+  }
+
+  .btn-bookmark,
   .btn-back {
     background: none;
     border: none;
     cursor: pointer;
-  }
-  .btn-back i {
-    font-size: 1.8rem;
-    color: white;
-  }
-  .btn-back:hover i {
-    color: #ccc;
-  }
-
-  /* Modal bookmark */
-  #bookmarkModal {
-    display: none;
-    position: absolute;
-    top: 60px;
-    right: 10px;
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 12px;
-    width: 250px;
-    max-height: 400px;
-    overflow: auto;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 1000;
-  }
-  #bookmarkModal h3 {
-    margin-top: 0;
-    margin-bottom: 8px;
-    font-size: 1.1rem;
-  }
-  #bookmarkModal ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  #bookmarkModal ul li {
-    margin-bottom: 6px;
-    cursor: pointer;
-  }
-
-  /* Header */
-  .profile-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    position: relative;
+    justify-content: center;
+    padding: 4px;
+  }
+
+  .btn-bookmark i,
+  .btn-back i {
+    font-size: 1.6rem;
+    color: white;
+  }
+
+  .btn-bookmark.active i {
+    color: gold;
+  }
+
+  .btn-back:hover i,
+  .btn-bookmark:hover i {
+    color: #ccc;
   }
 </style>
+
+<!-- Modal bookmark -->
+<div id="bookmarkModal" style="
+  display:none;
+  position:absolute;
+  top:60px;
+  right:10px;
+  background:#fff;
+  border:1px solid #ccc;
+  border-radius:6px;
+  padding:12px;
+  width:250px;
+  max-height:400px;
+  overflow:auto;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  z-index:1000;">
+  <h3>Bookmarks</h3>
+  <ul id="bookmarkList" style="list-style:none; padding:0; margin:0;"></ul>
+</div>
 
 <main class="content">
 
