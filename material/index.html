@@ -13,28 +13,61 @@
 </head>
 <body>
 
+  </head>
+<body>
+
   <header class="profile-header">
-    <h1 class="profile-title">Kritika</h1>
-    <button type="button" class="btn-back" onclick="history.back()">
-      <i class="fi fi-sr-angle-circle-left"></i>
-    </button>
-  </header>
+  <h1 class="profile-title">Kritika</h1>
 
-  <style>
-    .btn-back {
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-    .btn-back i {
-      font-size: 1.8rem;
-      color: white;
-    }
-    .btn-back:hover i {
-      color: #ccc;
-    }
-  </style>
+  <!-- Tombol kembali -->
+  <button type="button" class="btn-back" onclick="history.back()">
+    <i class="fi fi-sr-angle-circle-left"></i>
+  </button>
+</header>
 
+<style>
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* jarak antar elemen lebih rapat */
+    padding: 8px 12px;
+    hight: 80px
+    background-color: #222;
+    color: white;
+    position: relative;
+  }
+
+  .profile-title {
+    flex-grow: 1; /* agar title selalu di kiri */
+    font-size: 1.8rem;
+  }
+
+  .btn-bookmark,
+  .btn-back {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+  }
+
+  .btn-bookmark i,
+  .btn-back i {
+    font-size: 1.8rem;
+    color: white;
+  }
+
+  .btn-bookmark.active i {
+    color: gold;
+  }
+
+  .btn-back:hover i,
+  .btn-bookmark:hover i {
+    color: #ccc;
+  }
+</style>
   <main class="content">
     <section class="section-header">
       <h2>Daftar Materi</h2>
