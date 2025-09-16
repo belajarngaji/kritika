@@ -126,18 +126,25 @@
       }
 
       // Cek username
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username)
-        .single();
+      // ...
+const { data: existingProfile } = await supabase
+  .from('profiles')
+  .select('username')
+  .eq('username', username)
+  .single();
 
-      if (existingProfile) {
-        showMessage('Pendaftaran Gagal', 'Nama pengguna ini sudah digunakan.');
-        submitButton.disabled = false;
-        submitButton.textContent = 'Daftar';
-        return;
-      }
+if (existingProfile) {
+  // --- UBAH TEKS DI BAWAH INI ---
+  showMessage(
+    'Pendaftaran Gagal', 
+    'Nama pengguna ini sudah terdaftar di salah satu layanan kami. Silakan pilih username lain.'
+  );
+  
+  submitButton.disabled = false;
+  submitButton.textContent = 'Daftar';
+  return;
+}
+// ...
 
       // Proses pendaftaran ke Supabase Auth
       const { data, error } = await supabase.auth.signUp({
