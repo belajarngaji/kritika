@@ -181,6 +181,7 @@ header {
 }
 
 .profile-header .close-button {
+  display: flex;
   color: #d1d5db;
   font-size: 1.8rem;
   text-decoration: none;
