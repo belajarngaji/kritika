@@ -81,8 +81,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         li.style.cursor = 'pointer';
         li.style.marginBottom = '6px';
 
+        // URL langsung ke bab, tanpa query string
         li.addEventListener('click', () => {
-          window.location.href = `/kritika/material/jurumiya/${slug}/?slug=${slug}`;
+          window.location.href = `/kritika/material/jurumiya/${slug}/`;
         });
 
         bookmarkList.appendChild(li);
