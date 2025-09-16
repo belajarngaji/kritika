@@ -6,12 +6,26 @@
   <title>Kritika - Belajar Kritis</title>
   <link rel="stylesheet" href="/kritika/assets/css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CDN Flaticon Uicons -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
+
+  <!-- CSS tambahan langsung di HTML -->
+  <style>
+    .profile-icon i {
+      font-size: 1.5rem; /* ukuran ikon */
+      color: inherit;    /* ikuti warna teks/link */
+      vertical-align: middle; /* biar sejajar rapi */
+    }
+  </style>
 </head>
 <body>
   <header>
     <nav class="navbar">
       <h1 class="logo">Kritika</h1>
-      <a href="profil/" class="profile-icon">👤</a>
+      <a href="profil/" class="profile-icon">
+        <i class="fi fi-sr-user"></i>
+      </a>
     </nav>
   </header>
 
