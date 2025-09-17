@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Materi Jurumiya | Kritika</title>
+  <!-- Link CSS -->
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <!-- Font modern -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css">
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
+
+</head>
+<body>
+
+  <header class="profile-header">
+  <h1 class="profile-title">Kritika</h1>
+
+  <!-- Tombol bookmark -->
+  <button id="bookmarkHeaderBtn" class="btn-bookmark">
+    <i class="fi fi-rr-bookmark"></i>
+  </button>
+
+  <!-- Tombol kembali ke lokasi tertentu -->
+  <button type="button" class="btn-back" onclick="window.location.href='/kritika/material/'">
+    <i class="fi fi-sr-angle-circle-left"></i>
+  </button>
+</header>
+
+<style>
+  /* Header tetap di atas */
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    height: 60px; /* pastikan benar */
+    background-color: #222;
+    color: white;
+    position: fixed; /* tetap di atas */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+  }
+
+  .profile-title {
+    flex-grow: 1;
+    font-size: 1.8rem;
+  }
+
+  .btn-bookmark,
+  .btn-back {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+  }
+
+  .btn-bookmark i,
+  .btn-back i {
+    font-size: 1.8rem;
+    color: white;
+  }
+
+  .btn-bookmark.active i {
+    color: gold;
+  }
+
+  .btn-back:hover i,
+  .btn-bookmark:hover i {
+    color: #ccc;
+  }
+
+  /* Konten tidak tertutup header */
+  main.content {
+    padding-top: 70px; /* > tinggi header */
+  }
+
+  /* Modal bookmark menempel header */
+  #bookmarkModal {
+    display: none;
+    position: fixed; /* tetap di atas layar */
+    top: 60px; /* tepat di bawah header */
+    right: 10px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 12px;
+    width: 250px;
+    max-height: 400px;
+    overflow: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1001;
+  }
+</style>
+
+<!-- Modal bookmark -->
+<div id="bookmarkModal">
+  <h3>Bookmarks</h3>
+  <ul id="bookmarkList" style="list-style:none; padding:0; margin:0;"></ul>
+</div>
+
+<main class="content">
+
+  <section class="section-header">
+    <h2>Materi Pelajaran Ilmu Nahwu</h2>
+    <p>Pilih Bab untuk mulai mempelajari isi Materi.</p>
+  </section>
+  </main>
+  <script type="module" src="../../assets/js/bookmark.js"></script>
+</body>
+</html>
