@@ -1,24 +1,20 @@
-<!-- /kritika/material/sintaksis/index.html --->
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Materi Jurumiya | Kritika</title>
+  
   <!-- Font modern -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css">
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
 
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      background: #fafafa;
-    }
+    /* Global */
+    body { font-family: 'Inter', sans-serif; margin: 0; background: #fafafa; }
 
-    /* Header tetap di atas */
+    /* Header */
     .profile-header {
       display: flex;
       align-items: center;
@@ -33,14 +29,8 @@
       right: 0;
       z-index: 1000;
     }
-
-    .profile-title {
-      flex-grow: 1;
-      font-size: 1.8rem;
-    }
-
-    .btn-bookmark,
-    .btn-back {
+    .profile-title { flex-grow: 1; font-size: 1.8rem; }
+    .btn-bookmark, .btn-back {
       background: none;
       border: none;
       cursor: pointer;
@@ -49,28 +39,14 @@
       justify-content: center;
       padding: 4px;
     }
+    .btn-bookmark i, .btn-back i { font-size: 1.8rem; color: white; }
+    .btn-bookmark.active i { color: gold; }
+    .btn-back:hover i, .btn-bookmark:hover i { color: #ccc; }
 
-    .btn-bookmark i,
-    .btn-back i {
-      font-size: 1.8rem;
-      color: white;
-    }
+    /* Main content */
+    main.content { padding: 70px 16px 40px; }
 
-    .btn-bookmark.active i {
-      color: gold;
-    }
-
-    .btn-back:hover i,
-    .btn-bookmark:hover i {
-      color: #ccc;
-    }
-
-    /* Konten tidak tertutup header */
-    main.content {
-      padding: 70px 16px 40px;
-    }
-
-    /* Modal bookmark */
+    /* Bookmark modal */
     #bookmarkModal {
       display: none;
       position: fixed;
@@ -94,7 +70,6 @@
       gap: 16px;
       margin-top: 20px;
     }
-
     .bab-card {
       display: block;
       background: #fff;
@@ -105,95 +80,44 @@
       color: #222;
       transition: 0.2s ease;
     }
-
-    .bab-card:hover {
-      background: #f0f0f0;
-      transform: translateY(-2px);
-    }
-
-    .bab-card h3 {
-      margin: 0 0 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .bab-card p {
-      margin: 0;
-      font-size: 0.9rem;
-      color: #555;
-    }
+    .bab-card:hover { background: #f0f0f0; transform: translateY(-2px); }
+    .bab-card h3 { margin: 0 0 8px; font-size: 1.1rem; font-weight: 600; color: #333; }
+    .bab-card p { margin: 0; font-size: 0.9rem; color: #555; }
   </style>
 </head>
 <body>
 
+  <!-- Header -->
   <header class="profile-header">
     <h1 class="profile-title">Kritika</h1>
-
-    <!-- Tombol bookmark -->
-    <button id="bookmarkHeaderBtn" class="btn-bookmark">
-      <i class="fi fi-rr-bookmark"></i>
-    </button>
-
-    <!-- Tombol kembali -->
+    <button id="bookmarkHeaderBtn" class="btn-bookmark"><i class="fi fi-rr-bookmark"></i></button>
     <button type="button" class="btn-back" onclick="window.location.href='/kritika/material/'">
       <i class="fi fi-sr-angle-circle-left"></i>
     </button>
   </header>
 
-  <!-- Modal bookmark -->
+  <!-- Bookmark modal -->
   <div id="bookmarkModal">
     <h3>Bookmarks</h3>
     <ul id="bookmarkList" style="list-style:none; padding:0; margin:0;"></ul>
   </div>
 
+  <!-- Main content -->
   <main class="content">
     <section class="section-header">
       <h2>Materi Pelajaran Ilmu Nahwu</h2>
       <p>Pilih Bab untuk mulai mempelajari isi Materi.</p>
     </section>
 
-    <section class="card-grid" id="babList">
-      <!-- Daftar bab akan muncul otomatis dari Supabase -->
-    </section>
+    <!-- Daftar bab otomatis -->
+    <section class="card-grid" id="babList"></section>
   </main>
 
   <!-- Script bookmark -->
   <script type="module" src="../../assets/js/bookmark.js"></script>
 
   <!-- Script load daftar bab -->
-  <script type="module">
-    import { supabase } from "../../assets/js/supabase-client.js";
+  <script type="module" src="../../assets/js/material-list.js"></script>
 
-    async function loadBabNahwu() {
-      const { data, error } = await supabase
-        .from("materials")
-        .select("id, title, slug, category, order")
-        .ilike("category", "Nahwu%")
-        .order("order", { ascending: true });
-
-      if (error) {
-        console.error("Error ambil data:", error.message);
-        return;
-      }
-
-      const babList = document.getElementById("babList");
-      babList.innerHTML = "";
-
-      data.forEach((bab) => {
-        const card = document.createElement("a");
-        // langsung ke folder slug, tanpa index.html
-        card.href = `/kritika/material/${bab.slug}/`;
-        card.className = "bab-card";
-        card.innerHTML = `
-          <h3>${bab.category}</h3>
-          <p>${bab.title}</p>
-        `;
-        babList.appendChild(card);
-      });
-    }
-
-    loadBabNahwu();
-  </script>
 </body>
 </html>
