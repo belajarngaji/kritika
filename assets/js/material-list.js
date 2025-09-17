@@ -44,4 +44,20 @@ async function tampilkanDaftarMateri() {
     // Loop melalui setiap data materi dan buat elemen HTML-nya
     materials.forEach(materi => {
       const link = document.createElement('a');
-      // A
+      // Arahkan ke halaman template materi yang dinamis
+      link.href = `/kritika/material/?slug=${materi.slug}`;
+      link.className = 'bab-card'; // Gunakan class CSS Anda
+
+      link.innerHTML = `<h3>${materi.title}</h3>`;
+      
+      container.appendChild(link);
+    });
+
+  } catch (error) {
+    container.innerHTML = `<p>Gagal memuat materi. Silakan coba lagi nanti.</p>`;
+    console.error('Error saat mengambil materi:', error.message);
+  }
+}
+
+// Jalankan fungsi utama saat halaman selesai dimuat
+document.addEventListener('DOMContentLoaded', tampilkanDaftarMateri);
