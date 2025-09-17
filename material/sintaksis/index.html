@@ -168,8 +168,9 @@
     async function loadBabNahwu() {
       const { data, error } = await supabase
         .from("materials")
-        .select("id, title, slug, category")
-        .ilike("category", "Nahwu%");
+        .select("id, title, slug, category, order")
+        .ilike("category", "Nahwu%")
+        .order("order", { ascending: true });
 
       if (error) {
         console.error("Error ambil data:", error.message);
