@@ -1,30 +1,47 @@
-import { supabase } from './supabase-client.js';
+import { supabase } from './supabase-client.js'; // Pastikan path ini benar
 
-async function tesKoneksiTabel() {
+async function tampilkanDaftarMateri() {
   const container = document.getElementById('babList');
   if (!container) {
-    alert('Error: Elemen dengan ID "babList" tidak ditemukan di HTML.');
+    console.error('Error: Wadah dengan ID "babList" tidak ditemukan di HTML.');
     return;
   }
-  
-  container.innerHTML = '<p>Menjalankan tes koneksi ke tabel "materials"...</p>';
-  console.log("Memulai tes...");
 
-  // Hanya mencoba mengambil 5 baris dari 'materials' tanpa filter apa pun
-  const { data, error } = await supabase
-    .from('materials')
-    .select('*') // Ambil semua kolom
-    .limit(5);   // Ambil 5 baris saja untuk tes
-
-  if (error) {
-    console.error("TES GAGAL:", error);
-    container.innerHTML = `<p style="color: red;"><strong>Tes Gagal.</strong> Koneksi ke tabel 'materials' bermasalah. Silakan periksa tab Console (F12) untuk melihat detail error.</p>`;
-  } else {
-    console.log("TES BERHASIL:", data);
-    container.innerHTML = `<p style="color: green;"><strong>Tes Berhasil.</strong> Koneksi ke tabel 'materials' berhasil dan ditemukan ${data.length} data.</p>`;
-    // Menampilkan data mentah untuk verifikasi
-    container.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+  // Baca kategori dari atribut `data-category` di HTML (contoh: "Nahwu")
+  const kategori = container.dataset.category;
+  if (!kategori) {
+    console.error("Error: Atribut 'data-category' tidak ditemukan di elemen #babList.");
+    container.innerHTML = "<p>Konfigurasi halaman salah.</p>";
+    return;
   }
-}
 
-document.addEventListener('DOMContentLoaded', tesKoneksiTabel);
+  container.innerHTML = `<p>Memuat materi...</p>`;
+
+  try {
+    // Ambil data dari Supabase dengan filter dan urutan yang benar
+    const { data: materials, error } = await supabase
+      .from('materials')
+      .select('title, slug')
+      // Menggunakan .ilike() agar lebih fleksibel, cocok untuk "Nahwu Bab I", dll.
+      .ilike('category', `${kategori}%`) 
+      // Mengurutkan berdasarkan kolom 'order' yang sudah Anda konfirmasi
+      .order('order', { ascending: true }); 
+
+    if (error) {
+      // Jika ada error dari Supabase, lempar error untuk ditangkap oleh 'catch'
+      throw error;
+    }
+
+    // Kosongkan container dari pesan "Memuat..."
+    container.innerHTML = '';
+
+    // Periksa jika tidak ada materi yang ditemukan
+    if (materials.length === 0) {
+      container.innerHTML = `<p>Belum ada materi untuk kategori ini.</p>`;
+      return;
+    }
+
+    // Loop melalui setiap data materi dan buat elemen HTML-nya
+    materials.forEach(materi => {
+      const link = document.createElement('a');
+      // A
