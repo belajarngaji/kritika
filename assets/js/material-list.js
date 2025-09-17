@@ -1,46 +1,46 @@
-import { supabase } from "./supabase-client.js";
+import { supabase } from './supabase-client.js'; // Pastikan path ini benar
 
-// Fungsi ini sekarang menjadi global dan bisa dipakai di mana saja
-async function loadMateriByCategory() {
-  const babListContainer = document.getElementById("babList");
-  if (!babListContainer) return;
+async function tampilkanDaftarMateri() {
+  const container = document.getElementById('babList'); // Pastikan ID di HTML adalah "babList"
+  if (!container) return;
 
-  // 1. Baca kategori dari atribut data-category di HTML
-  const kategori = babListContainer.dataset.category;
-
+  // Baca kategori dari atribut data-category di HTML
+  const kategori = container.dataset.category;
   if (!kategori) {
     console.error("Atribut 'data-category' tidak ditemukan di elemen #babList");
-    return;
-  }
-  
-  // 2. Gunakan variabel 'kategori' untuk memfilter data di Supabase
-  const { data, error } = await supabase
-    .from("materials")
-    .select("id, title, slug, category, description, order") // Ambil kolom yang Anda butuhkan
-    .ilike("category", `${kategori}%`) // Filter dinamis
-    .order("order", { ascending: true });
-
-  if (error) {
-    console.error("Error ambil data:", error.message);
-    babListContainer.innerHTML = "<p>Gagal memuat materi.</p>";
+    container.innerHTML = "<p>Konfigurasi halaman salah.</p>";
     return;
   }
 
-  babListContainer.innerHTML = ""; // Kosongkan container
+  container.innerHTML = `<p>Memuat materi...</p>`;
 
-  data.forEach((bab) => {
-    const card = document.createElement("a");
-    
-    // PENTING: Gunakan struktur link ke halaman template dinamis
-    card.href = `/kritika/material/?slug=${bab.slug}`;
-    card.className = "bab-card";
-    card.innerHTML = `
-      <h3>${bab.title}</h3>
-      <p>${bab.description}</p>
-    `;
-    babListContainer.appendChild(card);
-  });
+  try {
+    const { data: materials, error } = await supabase
+      .from('materials')
+      .select('title, slug, description')
+      .eq('category', kategori) // Filter berdasarkan kategori dari HTML
+      .order('chapter_order', { ascending: true }); // Mengurutkan berdasarkan 'chapter_order'
+
+    if (error) throw error;
+
+    container.innerHTML = ''; // Kosongkan container
+
+    materials.forEach(materi => {
+      const link = document.createElement('a');
+      link.href = `/kritika/material/?slug=${materi.slug}`; // Sesuaikan path ke halaman materi
+      link.className = 'bab-card'; // Gunakan class CSS Anda
+
+      link.innerHTML = `
+        <h3>${materi.title}</h3>
+        <p>${materi.description}</p>
+      `;
+      container.appendChild(link);
+    });
+
+  } catch (error) {
+    container.innerHTML = `<p>Gagal memuat materi. Silakan coba lagi nanti.</p>`;
+    console.error('Error saat mengambil materi:', error.message);
+  }
 }
 
-// Panggil fungsi saat halaman dimuat
-loadMateriByCategory();
+document.addEventListener('DOMContentLoaded', tampilkanDaftarMateri);
