@@ -181,7 +181,8 @@
 
       data.forEach((bab) => {
         const card = document.createElement("a");
-        card.href = `../${bab.slug}/index.html`;
+        // langsung ke folder slug, tanpa index.html
+        card.href = `/kritika/material/${bab.slug}/`;
         card.className = "bab-card";
         card.innerHTML = `
           <h3>${bab.category}</h3>
