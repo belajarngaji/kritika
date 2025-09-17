@@ -62,22 +62,38 @@ function populateContent(materi) {
  * Mengatur tombol navigasi dinamis
  */
 async function setupNavigation(materi) {
-    const categorySlug = materi.category.toLowerCase().split(' ')[0];
-    btnKembaliEl.onclick = () => { window.location.href = `/kritika/${categorySlug}/`; };
+  const btnKembaliEl = document.getElementById('btnKembali');
+  const btnLanjutEl = document.getElementById('btnLanjut');
 
-    const { data: nextMateri } = await supabase
-        .from('materials')
-        .select('slug')
-        .eq('category', materi.category)
-        .eq('order', materi.order + 1)
-        .single();
+  // --- LOGIKA TOMBOL KEMBALI ---
+  // 1. Ambil nama kategori dari data materi (misal: "Sintaksis")
+  const categorySlug = materi.category.toLowerCase().split(' ')[0];
 
-    if (nextMateri) {
-        btnLanjutEl.onclick = () => window.location.href = `?slug=${nextMateri.slug}`;
-    } else {
-        btnLanjutEl.disabled = true;
-        btnLanjutEl.textContent = "Ini Bab Terakhir";
-    }
+  // 2. Atur link tombol kembali ke halaman daftar bab yang sesuai
+  btnKembaliEl.onclick = () => {
+      // Pastikan path ini sesuai dengan struktur folder Anda
+      window.location.href = `/kritika/material/${categorySlug}/`;
+  };
+  // Pastikan tombolnya selalu aktif
+  btnKembaliEl.disabled = false;
+  btnKembaliEl.textContent = "← Kembali ke Daftar Bab";
+
+
+  // --- LOGIKA TOMBOL LANJUT ---
+  // (logika untuk tombol lanjut tetap sama)
+  const { data: nextMateri } = await supabase
+    .from('materials')
+    .select('slug')
+    .eq('category', materi.category)
+    .eq('order', materi.order + 1)
+    .single();
+
+  if (nextMateri) {
+    btnLanjutEl.style.display = 'inline-block';
+    btnLanjutEl.onclick = () => window.location.href = `?slug=${nextMateri.slug}`;
+  } else {
+    btnLanjutEl.style.display = 'none'; // Sembunyikan jika bab terakhir
+  }
 }
 
 /**
