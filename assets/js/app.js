@@ -61,26 +61,11 @@ function populateContent(materi) {
 /**
  * Mengatur tombol navigasi dinamis
  */
-async function setupNavigation(materi) {
-  const btnKembaliEl = document.getElementById('btnKembali');
+async function setupLanjutButton(materi) {
   const btnLanjutEl = document.getElementById('btnLanjut');
+  if (!btnLanjutEl) return; // Pengaman jika tombol tidak ada
 
-  // --- LOGIKA TOMBOL KEMBALI ---
-  // 1. Ambil nama kategori dari data materi (misal: "Sintaksis")
-  const categorySlug = materi.category.toLowerCase().split(' ')[0];
-
-  // 2. Atur link tombol kembali ke halaman daftar bab yang sesuai
-  btnKembaliEl.onclick = () => {
-      // Pastikan path ini sesuai dengan struktur folder Anda
-      window.location.href = `/kritika/material/sintaksis/`;
-  };
-  // Pastikan tombolnya selalu aktif
-  btnKembaliEl.disabled = false;
-  btnKembaliEl.textContent = "← Kembali ke Daftar Bab";
-
-
-  // --- LOGIKA TOMBOL LANJUT ---
-  // (logika untuk tombol lanjut tetap sama)
+  // Cari bab berikutnya di database
   const { data: nextMateri } = await supabase
     .from('materials')
     .select('slug')
@@ -89,10 +74,16 @@ async function setupNavigation(materi) {
     .single();
 
   if (nextMateri) {
-    btnLanjutEl.style.display = 'inline-block';
+    // Jika ada bab selanjutnya, link ke bab tersebut
+    btnLanjutEl.textContent = "Bab Selanjutnya →";
     btnLanjutEl.onclick = () => window.location.href = `?slug=${nextMateri.slug}`;
   } else {
-    btnLanjutEl.style.display = 'none'; // Sembunyikan jika bab terakhir
+    // Jika ini bab terakhir, link kembali ke daftar bab
+    btnLanjutEl.textContent = "Selesai (Kembali ke Daftar Bab)";
+    const categorySlug = materi.category.toLowerCase().split(' ')[0];
+    btnLanjutEl.onclick = () => {
+        window.location.href = `/kritika/material/${categorySlug}/`;
+    };
   }
 }
 
