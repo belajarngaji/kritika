@@ -17,8 +17,9 @@ async function loadBabNahwu() {
 
   data.forEach((bab) => {
     const card = document.createElement("a");
-    // Mengarah ke folder slug, tanpa index.html
-    card.href = `/kritika/material/sintaksis/${bab.slug}/`;
+
+    // langsung menuju folder slug
+    card.href = `/kritika/material/${bab.slug}/`;
     card.className = "bab-card";
     card.innerHTML = `
       <h3>${bab.category}</h3>
@@ -28,5 +29,4 @@ async function loadBabNahwu() {
   });
 }
 
-// Load daftar bab saat halaman dibuka
 loadBabNahwu();
