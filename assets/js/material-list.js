@@ -26,7 +26,7 @@ async function tampilkanDaftarMateri() {
 
     materials.forEach(materi => {
       const link = document.createElement('a');
-      link.href = `/kritika/material/?slug=${materi.slug}`;
+      link.href = `/kritika/learning/?slug=${materi.slug}`;
       link.className = 'bab-card';
 
       // --- PERUBAHAN LOGIKA DI SINI ---
