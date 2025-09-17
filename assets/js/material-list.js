@@ -1,31 +1,32 @@
 import { supabase } from "./supabase-client.js";
 
-const babList = document.getElementById("babList");
-
-async function loadMaterials() {
+async function loadBabNahwu() {
   const { data, error } = await supabase
     .from("materials")
-    .select("id, title, slug, order, category")
-    .eq("category", "sintaksis") // filter sesuai folder/category
-    .order("order", { ascending: true });
+    .select("id, title, slug, category, order")
+    .ilike("category", "Nahwu%")
+    .order("order", { ascending: true }); // urutkan berdasarkan kolom order
 
   if (error) {
-    babList.innerHTML = `<p style="color:red">Gagal memuat data.</p>`;
-    console.error(error);
+    console.error("Error ambil data:", error.message);
     return;
   }
 
+  const babList = document.getElementById("babList");
   babList.innerHTML = "";
+
   data.forEach((bab) => {
     const card = document.createElement("a");
-    card.href = `bab${bab.order}/?slug=${bab.slug}`;
-    card.className = "card";
+    // Mengarah ke folder slug, tanpa index.html
+    card.href = `/kritika/material/${bab.slug}/`;
+    card.className = "bab-card";
     card.innerHTML = `
-      <h3>Bab ${bab.order}</h3>
+      <h3>${bab.category}</h3>
       <p>${bab.title}</p>
     `;
     babList.appendChild(card);
   });
 }
 
-loadMaterials();
+// Load daftar bab saat halaman dibuka
+loadBabNahwu();
