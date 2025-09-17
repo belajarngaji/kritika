@@ -1,45 +1,30 @@
-import { supabase } from './supabase-client.js'; // Pastikan path ini benar
+import { supabase } from './supabase-client.js';
 
-async function tampilkanDaftarMateri() {
+async function tesKoneksiTabel() {
   const container = document.getElementById('babList');
   if (!container) {
-    console.error('Wadah "babList" tidak ditemukan.');
+    alert('Error: Elemen dengan ID "babList" tidak ditemukan di HTML.');
     return;
   }
+  
+  container.innerHTML = '<p>Menjalankan tes koneksi ke tabel "materials"...</p>';
+  console.log("Memulai tes...");
 
-  const kategori = container.dataset.category;
-  if (!kategori) {
-    console.error("Atribut 'data-category' tidak ditemukan.");
-    container.innerHTML = "<p>Konfigurasi halaman salah.</p>";
-    return;
-  }
+  // Hanya mencoba mengambil 5 baris dari 'materials' tanpa filter apa pun
+  const { data, error } = await supabase
+    .from('materials')
+    .select('*') // Ambil semua kolom
+    .limit(5);   // Ambil 5 baris saja untuk tes
 
-  container.innerHTML = `<p>Memuat materi...</p>`;
-
-  try {
-    // Mengambil data berdasarkan izin publik yang sudah ada
-    const { data: materials, error } = await supabase
-      .from('materials')
-      .select('title, slug')
-      .eq('category', kategori)
-      .order('order', { ascending: true }); // Menggunakan kolom 'order'
-
-    if (error) throw error;
-
-    container.innerHTML = ''; // Kosongkan container
-
-    materials.forEach(materi => {
-      const link = document.createElement('a');
-      link.href = `/kritika/material/?slug=${materi.slug}`;
-      link.className = 'bab-card';
-      link.innerHTML = `<h3>${materi.title}</h3>`;
-      container.appendChild(link);
-    });
-
-  } catch (error) {
-    container.innerHTML = `<p>Gagal memuat materi. Silakan coba lagi nanti.</p>`;
-    console.error('Error saat mengambil materi:', error.message);
+  if (error) {
+    console.error("TES GAGAL:", error);
+    container.innerHTML = `<p style="color: red;"><strong>Tes Gagal.</strong> Koneksi ke tabel 'materials' bermasalah. Silakan periksa tab Console (F12) untuk melihat detail error.</p>`;
+  } else {
+    console.log("TES BERHASIL:", data);
+    container.innerHTML = `<p style="color: green;"><strong>Tes Berhasil.</strong> Koneksi ke tabel 'materials' berhasil dan ditemukan ${data.length} data.</p>`;
+    // Menampilkan data mentah untuk verifikasi
+    container.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
   }
 }
 
-document.addEventListener('DOMContentLoaded', tampilkanDaftarMateri);
+document.addEventListener('DOMContentLoaded', tesKoneksiTabel);
