@@ -1,13 +1,15 @@
 import { supabase } from './supabase-client.js'; // Pastikan path ini benar
 
 async function tampilkanDaftarMateri() {
-  const container = document.getElementById('babList'); // Pastikan ID di HTML adalah "babList"
-  if (!container) return;
+  const container = document.getElementById('babList');
+  if (!container) {
+    console.error('Wadah "babList" tidak ditemukan.');
+    return;
+  }
 
-  // Baca kategori dari atribut data-category di HTML
   const kategori = container.dataset.category;
   if (!kategori) {
-    console.error("Atribut 'data-category' tidak ditemukan di elemen #babList");
+    console.error("Atribut 'data-category' tidak ditemukan.");
     container.innerHTML = "<p>Konfigurasi halaman salah.</p>";
     return;
   }
@@ -15,12 +17,12 @@ async function tampilkanDaftarMateri() {
   container.innerHTML = `<p>Memuat materi...</p>`;
 
   try {
+    // Mengambil data berdasarkan izin publik yang sudah ada
     const { data: materials, error } = await supabase
       .from('materials')
       .select('title, slug')
-      .eq('category', kategori) // Filter berdasarkan kategori dari HTML
-      // --- PERBAIKAN DI SINI ---
-      .order('order', { ascending: true }); // Mengurutkan berdasarkan kolom 'order'
+      .eq('category', kategori)
+      .order('order', { ascending: true }); // Menggunakan kolom 'order'
 
     if (error) throw error;
 
@@ -28,12 +30,9 @@ async function tampilkanDaftarMateri() {
 
     materials.forEach(materi => {
       const link = document.createElement('a');
-      link.href = `/kritika/material/?slug=${materi.slug}`; // Sesuaikan path ke halaman materi
-      link.className = 'bab-card'; // Gunakan class CSS Anda
-
-      link.innerHTML = `
-        <h3>${materi.title}</h3>
-      `;
+      link.href = `/kritika/material/?slug=${materi.slug}`;
+      link.className = 'bab-card';
+      link.innerHTML = `<h3>${materi.title}</h3>`;
       container.appendChild(link);
     });
 
