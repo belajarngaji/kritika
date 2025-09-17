@@ -41,7 +41,7 @@ async function initPage() {
 
     populateContent(materi);
     setupNavigation(materi);
-    setupQuiz(materi, user); // Memindahkan semua logika kuis ke sini
+    setupQuiz(materi, user);
     if (user) {
         setupBookmark(materi, user);
     } else {
@@ -112,6 +112,7 @@ function setupQuiz(materi, user) {
         btnGenerateEl.textContent = 'Membuat soal...';
         aiOutputEl.innerHTML = '';
         quizSummaryEl.innerHTML = '';
+        containerEl.classList.add('tertutup'); // PERBAIKAN: Materi ditutup
 
         try {
             const res = await fetch(API_URL, {
@@ -123,7 +124,7 @@ function setupQuiz(materi, user) {
             const quizData = await res.json();
             if (!quizData || !quizData.quiz) throw new Error('Format respons AI tidak valid.');
 
-            // --- LOGIKA KUIS LENGKAP DIMULAI DI SINI ---
+            // --- Logika Kuis Lengkap Anda Dimulai ---
             const questions = quizData.quiz.questions.slice(0, 5);
             let total = questions.length;
             let correctCount = 0;
@@ -132,6 +133,7 @@ function setupQuiz(materi, user) {
             const showQuestion = (q) => {
                 aiOutputEl.innerHTML = '';
                 const div = document.createElement('div');
+                div.classList.add('question-block'); // PERBAIKAN: Menambah kelas untuk CSS
                 div.innerHTML = `
                     <p><strong>${currentIndex + 1}.</strong> ${q.question}</p>
                     <ul class="options">
@@ -148,6 +150,11 @@ function setupQuiz(materi, user) {
                         const isCorrect = (userAnswer === q.correct_answer);
                         if (isCorrect) correctCount++;
                         
+                        saveAttempt({
+                            user_id, session_id: materi.slug, question_id: q.id, category: materi.category, dimension: q.dimension,
+                            user_answer: userAnswer, correct_answer: q.correct_answer, is_correct: isCorrect, score: isCorrect ? 1 : 0
+                        });
+                        
                         div.querySelector('.feedback').textContent = isCorrect ? "✅ Benar" : `❌ Salah. Jawaban: ${q.correct_answer}`;
                         
                         setTimeout(() => {
@@ -159,6 +166,7 @@ function setupQuiz(materi, user) {
                                     <h3>Hasil Kuis</h3>
                                     <p><strong>Benar:</strong> ${correctCount} dari ${total}</p>
                                     <p><strong>Skor:</strong> ${((correctCount / total) * 100).toFixed(0)}%</p>`;
+                                containerEl.classList.remove('tertutup'); // PERBAIKAN: Materi ditampilkan lagi
                                 btnGenerateEl.disabled = false;
                                 btnGenerateEl.textContent = 'Coba Lagi';
                             }
@@ -167,15 +175,21 @@ function setupQuiz(materi, user) {
                 });
             };
             showQuestion(questions[currentIndex]);
-            // --- AKHIR DARI LOGIKA KUIS ---
 
         } catch (err) {
             console.error(err);
             aiOutputEl.innerHTML = '<p style="color:red;">AI gagal membuat pertanyaan.</p>';
+            containerEl.classList.remove('tertutup'); // PERBAIKAN: Tampilkan materi jika gagal
             btnGenerateEl.disabled = false;
             btnGenerateEl.textContent = 'Generate Soal';
         }
     });
+}
+
+// Helper function untuk menyimpan hasil
+async function saveAttempt(attemptData) {
+    if (!attemptData.user_id) return;
+    await supabase.from("kritika_attempts").insert([attemptData]);
 }
 
 // =================================================
