@@ -1,17 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Materi</title>
-    </head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Materi | Kritika</title>
+  <link rel="stylesheet" href="../assets/css/style.css"> 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
+</head>
 <body>
-    <main class="content">
-        <h2 id="judul-bab">Memuat...</h2>
-        <article id="materiContainer"></article>
-        <div class="lesson-nav">
-            <button id="btnKembali">← Bab Sebelumnya</button>
-            <button id="btnLanjut">Bab Selanjutnya →</button>
-        </div>
-        </main>
-    <script type="module" src="../assets/js/learning.js"></script>
+
+  <header class="profile-header">
+    <h1 class="profile-title">Kritika</h1>
+    </header>
+
+  <main class="content">
+    <section class="section-header">
+      <h2 id="judul-bab">Memuat Judul...</h2>
+    </section>
+
+    <div class="lesson-card">
+      <article class="lesson materi-container" id="materiContainer">
+        <p>Memuat materi...</p>
+      </article>
+      <div class="ai-actions">
+        <button id="btnGenerate" class="btn">Generate Soal</button>
+      </div>
+    </div>
+
+    <div id="aiOutput" class="ai-output"></div>
+    <div id="quizSummary" class="ai-output"></div>
+
+    <div class="lesson-nav">
+      <button id="btnKembali" class="btn-outline">← Bab Sebelumnya</button>
+      <button id="btnLanjut" class="btn">Bab Selanjutnya →</button>
+    </div>
+  </main>
+
+  <script type="module" src="../assets/js/app.js"></script>
+
 </body>
 </html>
