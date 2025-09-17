@@ -1,6 +1,6 @@
 // /kritika/assets/js/profile.js
 
-import { _supabase } from './supabase-client.js';
+import { supabase } from './supabase-client.js';
 
 // Elemen-elemen HTML
 const profileUsername = document.getElementById('profile-username');
@@ -26,7 +26,7 @@ function displayUnknownProfile() {
 
 // === Fungsi Load Stats User ===
 async function loadProfileStats(userId) {
-    const { data, error } = await _supabase
+    const { data, error } = await supabase
         .from('kritika_attempts')
         .select('score, is_correct, category')
         .eq('user_id', userId);
@@ -100,10 +100,10 @@ function displayProfileData(profile, user) {
 async function loadProfile() {
     const params = new URLSearchParams(window.location.search);
     const username = params.get('user');
-    const { data: { user } } = await _supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (username) {
-        const { data: profile } = await _supabase
+        const { data: profile } = await supabase
             .from('profiles')
             .select('id, username, full_name, avatar_url')
             .eq('username', username)
@@ -117,7 +117,7 @@ async function loadProfile() {
         }
     } else {
         if (user) {
-            const { data: profile } = await _supabase
+            const { data: profile } = await supabase
                 .from('profiles')
                 .select('id, username, full_name, avatar_url')
                 .eq('id', user.id)
@@ -154,7 +154,7 @@ function uploadAvatar(file) {
 }
 
 async function handleUpload(compressedFile) {
-    const { data: { user } } = await _supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         alert('Anda harus login untuk mengunggah foto profil.');
         return;
@@ -164,7 +164,7 @@ async function handleUpload(compressedFile) {
     const newFilename = `${user.id}.${fileExt}`;
     const filePath = `avatars/${newFilename}`;
 
-    const { error: uploadError } = await _supabase.storage
+    const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, compressedFile, { upsert: true });
 
@@ -173,9 +173,9 @@ async function handleUpload(compressedFile) {
         return;
     }
 
-    const { data: publicUrl } = _supabase.storage.from('avatars').getPublicUrl(filePath);
+    const { data: publicUrl } = supabase.storage.from('avatars').getPublicUrl(filePath);
 
-    const { error: updateError } = await _supabase
+    const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl.publicUrl, updated_at: new Date() })
         .eq('id', user.id);
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (profileAvatar) {
         profileAvatar.addEventListener('click', async () => {
-            const { data: { user } } = await _supabase.auth.getUser();
+            const { data: { user } } = await supabase.auth.getUser();
 
             if (user && currentProfile && user.id === currentProfile.id) {
                 avatarModal.style.display = 'flex';
