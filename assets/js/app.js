@@ -1,234 +1,274 @@
-import { supabase } from './supabase-client.js';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-// =================================================
-// ELEMEN-ELEMEN DOM
-// =================================================
-const judulEl = document.getElementById('judul-bab');
-const containerEl = document.getElementById('materiContainer');
-const btnGenerateEl = document.getElementById('btnGenerate');
-const btnKembaliEl = document.getElementById('btnKembali');
-const btnLanjutEl = document.getElementById('btnLanjut');
-const bookmarkBtnEl = document.getElementById('headerBookmarkBtn');
-const aiOutputEl = document.getElementById('aiOutput');
-const quizSummaryEl = document.getElementById('quizSummary');
+/* ==============================
+   Supabase Config
+============================== */
+const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// =================================================
-// FUNGSI UTAMA
-// =================================================
+/* ==============================
+   API URL (Backend FastAPI)
+============================== */
+const API_URL = 'https://hmmz-bot01.vercel.app/quiz';
 
-/**
- * Fungsi utama yang dipanggil saat halaman dimuat
- */
-async function initPage() {
-    const slug = new URLSearchParams(window.location.search).get('slug');
-    if (!slug) {
-        judulEl.textContent = "Materi tidak ditemukan (slug tidak ada)";
-        return;
-    }
-
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: materi, error } = await supabase
-        .from('materials')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-
-    if (error || !materi) {
-        judulEl.textContent = "Gagal Memuat Konten";
-        console.error("Error mengambil materi:", error);
-        return;
-    }
-
-    populateContent(materi);
-    setupNavigation(materi);
-    setupQuiz(materi, user);
-    if (user) {
-        setupBookmark(materi, user);
-    } else {
-        bookmarkBtnEl.style.display = 'none';
-    }
+/* ==============================
+   Helpers
+============================== */
+function shuffle(array) {
+  return array
+    .map(v => ({ v, r: Math.random() }))
+    .sort((a,b) => a.r - b.r)
+    .map(x => x.v);
 }
 
-/**
- * Mengisi konten utama halaman
- */
-function populateContent(materi) {
-    document.title = `${materi.title} | Kritika`;
-    judulEl.textContent = materi.title;
-    containerEl.innerHTML = materi.content;
+async function getMaterials() {
+  try {
+    const { data, error } = await supabase.from('materials').select('*').order('id');
+    if (error) { console.error(error); return []; }
+    return data;
+  } catch(e) { console.error(e); return []; }
 }
 
-/**
- * Mengatur tombol navigasi dinamis
- */
-async function setupNavigation(materi) {
-    const btnKembaliEl = document.getElementById('btnKembali');
-    const btnLanjutEl = document.getElementById('btnLanjut');
-    
-    console.log("--- MEMULAI INVESTIGASI NAVIGASI ---");
-
-    // 1. Cek data materi yang diterima oleh fungsi ini
-    console.log("Data 'materi' yang diterima:", materi);
-
-    // 2. Cek variabel kunci dari objek 'materi'
-    const kategori = materi.category;
-    const urutanSekarang = materi.order;
-    console.log(`Kategori terdeteksi: '${kategori}' (Tipe data: ${typeof kategori})`);
-    console.log(`Urutan saat ini: ${urutanSekarang} (Tipe data: ${typeof urutanSekarang})`);
-
-    // 3. Pastikan variabelnya ada dan benar
-    if (!kategori || urutanSekarang === undefined || urutanSekarang === null) {
-        console.error("INVESTIGASI GAGAL: Properti 'category' atau 'order' tidak ditemukan atau null di objek materi.");
-        console.log("--- INVESTIGASI SELESAI ---");
-        return;
-    }
-    
-    const urutanBerikutnya = urutanSekarang + 1;
-    console.log(`Mencari bab selanjutnya dengan 'order': ${urutanBerikutnya}`);
-
-    // 4. Lakukan query untuk bab selanjutnya
-    const { data: nextMateri, error } = await supabase
-        .from('materials')
-        .select('slug, order')
-        .eq('category', kategori)
-        .eq('order', urutanBerikutnya)
-        .single();
-
-    // 5. Tampilkan hasil query
-    if (error) {
-        console.error("Error saat query bab selanjutnya:", error);
-    } else {
-        console.log("Hasil pencarian bab selanjutnya:", nextMateri);
-    }
-    
-    console.log("--- INVESTIGASI SELESAI ---");
-}
-
-/**
- * Mengatur logika tombol bookmark
- */
-async function setupBookmark(materi, user) {
-    bookmarkBtnEl.style.display = 'flex';
-    const { data: existingBookmark } = await supabase.from('kritika_bookmark').select('id').eq('user_id', user.id).eq('material_slug', materi.slug).maybeSingle();
-    let isBookmarked = !!existingBookmark;
-    bookmarkBtnEl.classList.toggle("active", isBookmarked);
-
-    bookmarkBtnEl.addEventListener('click', async () => {
-        isBookmarked = !isBookmarked;
-        bookmarkBtnEl.classList.toggle("active", isBookmarked);
-        if (isBookmarked) {
-            await supabase.from('kritika_bookmark').insert([{ user_id: user.id, material_slug: materi.slug, title: materi.title }]);
-        } else {
-            await supabase.from('kritika_bookmark').delete().eq('user_id', user.id).eq('material_slug', materi.slug);
-        }
+async function generateQuestions(materialText, slug, category) {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ materi: materialText, session_id: slug, category })
     });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.quiz || null;
+  } catch(err) { console.error(err); return null; }
 }
 
-/**
- * Menyiapkan tombol "Generate Soal" dan seluruh logika kuisnya
- */
-function setupQuiz(materi, user) {
-    const API_URL = 'https://hmmz-bot01.vercel.app/quiz';
-    const user_id = user ? user.id : null;
+async function saveAttempt({ user_id, session_id, question_id, category, dimension, user_answer, correct_answer, is_correct, score, duration_seconds }) {
+  if (!user_id) return { success: false }; 
+  try {
+    const { error } = await supabase.from("kritika_attempts").insert([{
+      user_id,
+      session_id,
+      question_id,
+      category,
+      dimension,
+      user_answer,
+      correct_answer,
+      is_correct,
+      score,
+      duration_seconds,
+      submitted_at: new Date().toISOString()
+    }]);
+    if (error) { console.error(error); return { success: false }; }
+    return { success: true };
+  } catch(e) { console.error(e); return { success: false }; }
+}
 
-    btnGenerateEl.addEventListener('click', async () => {
-        btnGenerateEl.disabled = true;
-        btnGenerateEl.textContent = 'Membuat soal...';
-        aiOutputEl.innerHTML = '';
-        quizSummaryEl.innerHTML = '';
-        containerEl.classList.add('tertutup');
+/* ==============================
+   INIT Quiz Sequential (5 soal)
+============================== */
+async function init() {
+  const materiContainer = document.getElementById('materiContainer'); 
+  const btnGenerate = document.getElementById('btnGenerate');
 
-        try {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ materi: materi.content, session_id: materi.slug, category: materi.category })
-            });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const quizData = await res.json();
-            if (!quizData || !quizData.quiz) throw new Error('Format respons AI tidak valid.');
+  const urlParams = new URLSearchParams(window.location.search);
+  const slug = urlParams.get('slug');
 
-            // --- Logika Kuis Lengkap ---
-            startQuiz(quizData.quiz.questions, materi, user_id);
+  if (!slug) {
+    materiContainer.innerHTML = "<h1>Error: Slug materi tidak ditemukan.</h1>";
+    btnGenerate.style.display = 'none';
+    return;
+  }
 
-        } catch (err) {
-            console.error(err);
-            aiOutputEl.innerHTML = '<p style="color:red;">AI gagal membuat pertanyaan.</p>';
-            containerEl.classList.remove('tertutup');
-            btnGenerateEl.disabled = false;
-            btnGenerateEl.textContent = 'Generate Soal';
-        }
+  let aiOutput = document.getElementById('aiOutput');
+  if (!aiOutput) {
+    aiOutput = document.createElement('div');
+    aiOutput.id = 'aiOutput';
+    aiOutput.classList.add('ai-output');
+    btnGenerate.after(aiOutput);
+  }
+
+  let summary = document.getElementById('quizSummary');
+  if (!summary) {
+    summary = document.createElement('div');
+    summary.id = 'quizSummary';
+    summary.classList.add('ai-output');
+    aiOutput.after(summary);
+  }
+
+  const materials = await getMaterials();
+  const materi = materials.find(m => m.slug === slug);
+
+  if (!materi) {
+    materiContainer.innerHTML = `<p>Materi dengan slug "${slug}" tidak ditemukan.</p>`;
+    btnGenerate.style.display = 'none';
+    return;
+  }
+  materiContainer.innerHTML = materi.content;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const user_id = user ? user.id : null;
+
+  /* ==============================
+     Bookmark Button
+  =============================== */
+  if (user_id) {
+    const header = document.querySelector('.profile-header');
+
+    // buat tombol bookmark di header
+    const bookmarkBtn = document.createElement('button');
+    bookmarkBtn.className = "btn-bookmark";
+    bookmarkBtn.innerHTML = `<i class="fi fi-sr-bookmark"></i>`;
+    header.appendChild(bookmarkBtn);
+
+    // cek apakah sudah ada bookmark
+    const { data: existing } = await supabase
+      .from('kritika_bookmark')
+      .select('id')
+      .eq('user_id', user_id)
+      .eq('material_slug', slug)
+      .maybeSingle();
+
+    let isBookmarked = !!existing;
+    bookmarkBtn.classList.toggle("active", isBookmarked);
+
+    // toggle bookmark
+    bookmarkBtn.addEventListener('click', async () => {
+      if (isBookmarked) {
+        await supabase
+          .from('kritika_bookmark')
+          .delete()
+          .eq('user_id', user_id)
+          .eq('material_slug', slug);
+        isBookmarked = false;
+      } else {
+        await supabase
+          .from('kritika_bookmark')
+          .insert([{ user_id, material_slug: slug }]);
+        isBookmarked = true;
+      }
+      bookmarkBtn.classList.toggle("active", isBookmarked);
     });
-}
+  }
 
-/**
- * Menjalankan alur kuis
- */
-function startQuiz(questions, materi, user_id) {
-    const questionsToShow = questions.slice(0, 5);
+  /* ==============================
+     Quiz Button
+  =============================== */
+
+  btnGenerate.addEventListener('click', async () => {
+    btnGenerate.disabled = true;
+    btnGenerate.textContent = 'Loading...';
+    aiOutput.innerHTML = '';
+    summary.innerHTML = '';
+
+    materiContainer.classList.add('tertutup');
+
+    const quizData = await generateQuestions(materi.content, materi.slug, materi.category);
+
+    if (!quizData) {
+      aiOutput.innerHTML = '<p>AI gagal generate pertanyaan.</p>';
+      btnGenerate.disabled = false;
+      btnGenerate.textContent = 'Generate Soal';
+      materiContainer.classList.remove('tertutup'); 
+      return;
+    }
+
+    // hanya ambil 5 soal pertama
+    const questions = quizData.questions.slice(0, 5);
+    let total = questions.length;
+    let answered = 0;
     let correctCount = 0;
     let currentIndex = 0;
 
     const showQuestion = (q) => {
-        aiOutputEl.innerHTML = '';
-        const div = document.createElement('div');
-        div.classList.add('question-block');
-        div.innerHTML = `
-            <p><strong>${currentIndex + 1}.</strong> ${q.question}</p>
-            <ul class="options">
-                ${[...q.options].sort(() => Math.random() - 0.5).map(opt => `<li><button class="option-btn">${opt}</button></li>`).join('')}
-            </ul>
-            <p class="feedback"></p>`;
-        aiOutputEl.appendChild(div);
+      aiOutput.innerHTML = '';
 
-        const optionBtns = div.querySelectorAll('.option-btn');
-        optionBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                optionBtns.forEach(b => b.disabled = true);
-                const userAnswer = btn.textContent;
-                const isCorrect = (userAnswer === q.correct_answer);
-                if (isCorrect) correctCount++;
-                
-                saveAttempt({
-                    user_id, session_id: materi.slug, question_id: q.id, category: materi.category, dimension: q.dimension,
-                    user_answer: userAnswer, correct_answer: q.correct_answer, is_correct: isCorrect, score: isCorrect ? 1 : 0
-                });
-                
-                div.querySelector('.feedback').textContent = isCorrect ? "✅ Benar" : `❌ Salah. Jawaban: ${q.correct_answer}`;
-                
-                setTimeout(() => {
-                    currentIndex++;
-                    if (currentIndex < questionsToShow.length) {
-                        showQuestion(questionsToShow[currentIndex]);
-                    } else {
-                        quizSummaryEl.innerHTML = `
-                            <h3>Hasil Kuis</h3>
-                            <p><strong>Benar:</strong> ${correctCount} dari ${questionsToShow.length}</p>
-                            <p><strong>Skor:</strong> ${((correctCount / questionsToShow.length) * 100).toFixed(0)}%</p>`;
-                        containerEl.classList.remove('tertutup');
-                        btnGenerateEl.disabled = false;
-                        btnGenerateEl.textContent = 'Coba Lagi';
-                    }
-                }, 1500);
-            });
+      const div = document.createElement('div');
+      div.classList.add('question-block');
+      div.dataset.correct = q.correct_answer;
+
+      div.innerHTML = `
+        <p><strong>${currentIndex + 1}.</strong> ${q.question}</p>
+        <ul class="options">
+          ${shuffle(q.options).map(opt => `<li><button class="option-btn" data-text="${opt}">${opt}</button></li>`).join('')}
+        </ul>
+        <p class="feedback"></p>
+      `;
+      aiOutput.appendChild(div);
+
+      let timer;
+      let timeLeft = 30;
+      let startTime = Date.now();
+
+      const fb = div.querySelector('.feedback');
+      const optionBtns = div.querySelectorAll('.option-btn');
+
+      const finishQuestion = async (userAnswer, isCorrect, timeout=false) => {
+        clearInterval(timer);
+        optionBtns.forEach(b => b.disabled = true);
+        answered++;
+        if (isCorrect) correctCount++;
+
+        let duration_seconds = Math.floor((Date.now() - startTime) / 1000);
+
+        if (user_id) {
+          await saveAttempt({
+            user_id,
+            session_id: materi.slug,
+            question_id: q.id,
+            category: materi.category,
+            dimension: q.dimension,
+            user_answer: userAnswer,
+            correct_answer: q.correct_answer,
+            is_correct: isCorrect,
+            score: isCorrect ? 1 : 0,
+            duration_seconds
+          });
+        }
+
+        fb.textContent = timeout 
+          ? "❌ Time out" 
+          : (isCorrect ? "✅ Benar" : `❌ Salah. Jawaban benar: ${q.correct_answer}`);
+
+        setTimeout(() => {
+          currentIndex++;
+          if (currentIndex < total) {
+            showQuestion(questions[currentIndex]);
+          } else {
+            // tampilkan summary final
+            summary.innerHTML = `
+              <h3>Hasil Quiz</h3>
+              <strong>Total Soal:</strong> ${total}<br>
+              <strong>Terjawab:</strong> ${answered}<br>
+              <strong>Benar:</strong> ${correctCount}<br>
+              <strong>Salah:</strong> ${answered - correctCount}<br>
+              <strong>Nilai:</strong> ${correctCount}<br>
+              <strong>Rate:</strong> ${((correctCount / total) * 100).toFixed(0)}%
+            `;
+            btnGenerate.disabled = false;
+            btnGenerate.textContent = 'Generate Soal';
+          }
+        }, 1500);
+      };
+
+      optionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const userAnswer = btn.dataset.text;
+          const isCorrect = (userAnswer === q.correct_answer);
+          finishQuestion(userAnswer, isCorrect, false);
         });
+      });
+
+      timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          finishQuestion(null, false, true);
+        }
+      }, 1000);
     };
-    showQuestion(questionsToShow[currentIndex]);
+
+    showQuestion(questions[currentIndex]);
+  });
 }
 
-/**
- * Helper function untuk menyimpan hasil percobaan kuis
- */
-async function saveAttempt(attemptData) {
-    if (!attemptData.user_id) return;
-    try {
-        await supabase.from("kritika_attempts").insert([attemptData]);
-    } catch (e) {
-        console.error("Gagal menyimpan hasil kuis:", e);
-    }
-}
-
-// =================================================
-// INISIALISASI
-// =================================================
-document.addEventListener('DOMContentLoaded', initPage);
+init();
