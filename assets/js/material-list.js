@@ -17,10 +17,10 @@ async function tampilkanDaftarMateri() {
   try {
     const { data: materials, error } = await supabase
       .from('materials')
-      // PERBAIKAN 1: Hapus 'description' dari select
       .select('title, slug')
       .eq('category', kategori) // Filter berdasarkan kategori dari HTML
-      .order('chapter_order', { ascending: true }); // Mengurutkan berdasarkan 'chapter_order'
+      // --- PERBAIKAN DI SINI ---
+      .order('order', { ascending: true }); // Mengurutkan berdasarkan kolom 'order'
 
     if (error) throw error;
 
@@ -31,7 +31,6 @@ async function tampilkanDaftarMateri() {
       link.href = `/kritika/material/?slug=${materi.slug}`; // Sesuaikan path ke halaman materi
       link.className = 'bab-card'; // Gunakan class CSS Anda
 
-      // PERBAIKAN 2: Hapus paragraf untuk deskripsi
       link.innerHTML = `
         <h3>${materi.title}</h3>
       `;
