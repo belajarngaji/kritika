@@ -61,30 +61,28 @@ function populateContent(materi) {
 /**
  * Mengatur tombol navigasi dinamis
  */
-async function setupLanjutButton(materi) {
-  const btnLanjutEl = document.getElementById('btnLanjut');
-  if (!btnLanjutEl) return; // Pengaman jika tombol tidak ada
-
-  // Cari bab berikutnya di database
-  const { data: nextMateri } = await supabase
-    .from('materials')
-    .select('slug')
-    .eq('category', materi.category)
-    .eq('order', materi.order + 1)
-    .single();
-
-  if (nextMateri) {
-    // Jika ada bab selanjutnya, link ke bab tersebut
-    btnLanjutEl.textContent = "Bab Selanjutnya →";
-    btnLanjutEl.onclick = () => window.location.href = `?slug=${nextMateri.slug}`;
-  } else {
-    // Jika ini bab terakhir, link kembali ke daftar bab
-    btnLanjutEl.textContent = "Selesai (Kembali ke Daftar Bab)";
+async function setupNavigation(materi) {
     const categorySlug = materi.category.toLowerCase().split(' ')[0];
-    btnLanjutEl.onclick = () => {
+    btnKembaliEl.onclick = () => {
         window.location.href = `/kritika/material/${categorySlug}/`;
     };
-  }
+
+    const { data: nextMateri } = await supabase
+        .from('materials')
+        .select('slug')
+        .eq('category', materi.category)
+        .eq('order', materi.order + 1)
+        .single();
+
+    if (nextMateri) {
+        btnLanjutEl.textContent = "Bab Selanjutnya →";
+        btnLanjutEl.onclick = () => window.location.href = `?slug=${nextMateri.slug}`;
+    } else {
+        btnLanjutEl.textContent = "Selesai (Kembali ke Daftar Bab)";
+        btnLanjutEl.onclick = () => {
+            window.location.href = `/kritika/material/${categorySlug}/`;
+        };
+    }
 }
 
 /**
@@ -119,7 +117,7 @@ function setupQuiz(materi, user) {
         btnGenerateEl.textContent = 'Membuat soal...';
         aiOutputEl.innerHTML = '';
         quizSummaryEl.innerHTML = '';
-        containerEl.classList.add('tertutup'); // PERBAIKAN: Materi ditutup
+        containerEl.classList.add('tertutup');
 
         try {
             const res = await fetch(API_URL, {
@@ -131,72 +129,84 @@ function setupQuiz(materi, user) {
             const quizData = await res.json();
             if (!quizData || !quizData.quiz) throw new Error('Format respons AI tidak valid.');
 
-            // --- Logika Kuis Lengkap Anda Dimulai ---
-            const questions = quizData.quiz.questions.slice(0, 5);
-            let total = questions.length;
-            let correctCount = 0;
-            let currentIndex = 0;
-
-            const showQuestion = (q) => {
-                aiOutputEl.innerHTML = '';
-                const div = document.createElement('div');
-                div.classList.add('question-block'); // PERBAIKAN: Menambah kelas untuk CSS
-                div.innerHTML = `
-                    <p><strong>${currentIndex + 1}.</strong> ${q.question}</p>
-                    <ul class="options">
-                        ${[...q.options].sort(() => Math.random() - 0.5).map(opt => `<li><button class="option-btn">${opt}</button></li>`).join('')}
-                    </ul>
-                    <p class="feedback"></p>`;
-                aiOutputEl.appendChild(div);
-
-                const optionBtns = div.querySelectorAll('.option-btn');
-                optionBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        optionBtns.forEach(b => b.disabled = true);
-                        const userAnswer = btn.textContent;
-                        const isCorrect = (userAnswer === q.correct_answer);
-                        if (isCorrect) correctCount++;
-                        
-                        saveAttempt({
-                            user_id, session_id: materi.slug, question_id: q.id, category: materi.category, dimension: q.dimension,
-                            user_answer: userAnswer, correct_answer: q.correct_answer, is_correct: isCorrect, score: isCorrect ? 1 : 0
-                        });
-                        
-                        div.querySelector('.feedback').textContent = isCorrect ? "✅ Benar" : `❌ Salah. Jawaban: ${q.correct_answer}`;
-                        
-                        setTimeout(() => {
-                            currentIndex++;
-                            if (currentIndex < questions.length) {
-                                showQuestion(questions[currentIndex]);
-                            } else {
-                                quizSummaryEl.innerHTML = `
-                                    <h3>Hasil Kuis</h3>
-                                    <p><strong>Benar:</strong> ${correctCount} dari ${total}</p>
-                                    <p><strong>Skor:</strong> ${((correctCount / total) * 100).toFixed(0)}%</p>`;
-                                containerEl.classList.remove('tertutup'); // PERBAIKAN: Materi ditampilkan lagi
-                                btnGenerateEl.disabled = false;
-                                btnGenerateEl.textContent = 'Coba Lagi';
-                            }
-                        }, 1500);
-                    });
-                });
-            };
-            showQuestion(questions[currentIndex]);
+            // --- Logika Kuis Lengkap ---
+            startQuiz(quizData.quiz.questions, materi, user_id);
 
         } catch (err) {
             console.error(err);
             aiOutputEl.innerHTML = '<p style="color:red;">AI gagal membuat pertanyaan.</p>';
-            containerEl.classList.remove('tertutup'); // PERBAIKAN: Tampilkan materi jika gagal
+            containerEl.classList.remove('tertutup');
             btnGenerateEl.disabled = false;
             btnGenerateEl.textContent = 'Generate Soal';
         }
     });
 }
 
-// Helper function untuk menyimpan hasil
+/**
+ * Menjalankan alur kuis
+ */
+function startQuiz(questions, materi, user_id) {
+    const questionsToShow = questions.slice(0, 5);
+    let correctCount = 0;
+    let currentIndex = 0;
+
+    const showQuestion = (q) => {
+        aiOutputEl.innerHTML = '';
+        const div = document.createElement('div');
+        div.classList.add('question-block');
+        div.innerHTML = `
+            <p><strong>${currentIndex + 1}.</strong> ${q.question}</p>
+            <ul class="options">
+                ${[...q.options].sort(() => Math.random() - 0.5).map(opt => `<li><button class="option-btn">${opt}</button></li>`).join('')}
+            </ul>
+            <p class="feedback"></p>`;
+        aiOutputEl.appendChild(div);
+
+        const optionBtns = div.querySelectorAll('.option-btn');
+        optionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                optionBtns.forEach(b => b.disabled = true);
+                const userAnswer = btn.textContent;
+                const isCorrect = (userAnswer === q.correct_answer);
+                if (isCorrect) correctCount++;
+                
+                saveAttempt({
+                    user_id, session_id: materi.slug, question_id: q.id, category: materi.category, dimension: q.dimension,
+                    user_answer: userAnswer, correct_answer: q.correct_answer, is_correct: isCorrect, score: isCorrect ? 1 : 0
+                });
+                
+                div.querySelector('.feedback').textContent = isCorrect ? "✅ Benar" : `❌ Salah. Jawaban: ${q.correct_answer}`;
+                
+                setTimeout(() => {
+                    currentIndex++;
+                    if (currentIndex < questionsToShow.length) {
+                        showQuestion(questionsToShow[currentIndex]);
+                    } else {
+                        quizSummaryEl.innerHTML = `
+                            <h3>Hasil Kuis</h3>
+                            <p><strong>Benar:</strong> ${correctCount} dari ${questionsToShow.length}</p>
+                            <p><strong>Skor:</strong> ${((correctCount / questionsToShow.length) * 100).toFixed(0)}%</p>`;
+                        containerEl.classList.remove('tertutup');
+                        btnGenerateEl.disabled = false;
+                        btnGenerateEl.textContent = 'Coba Lagi';
+                    }
+                }, 1500);
+            });
+        });
+    };
+    showQuestion(questionsToShow[currentIndex]);
+}
+
+/**
+ * Helper function untuk menyimpan hasil percobaan kuis
+ */
 async function saveAttempt(attemptData) {
     if (!attemptData.user_id) return;
-    await supabase.from("kritika_attempts").insert([attemptData]);
+    try {
+        await supabase.from("kritika_attempts").insert([attemptData]);
+    } catch (e) {
+        console.error("Gagal menyimpan hasil kuis:", e);
+    }
 }
 
 // =================================================
