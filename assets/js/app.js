@@ -72,7 +72,7 @@ async function setupNavigation(materi) {
   // 2. Atur link tombol kembali ke halaman daftar bab yang sesuai
   btnKembaliEl.onclick = () => {
       // Pastikan path ini sesuai dengan struktur folder Anda
-      window.location.href = `/kritika/material/${categorySlug}/`;
+      window.location.href = `/kritika/material/sintaksis/`;
   };
   // Pastikan tombolnya selalu aktif
   btnKembaliEl.disabled = false;
