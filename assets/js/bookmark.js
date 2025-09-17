@@ -1,103 +1,79 @@
-// --- assets/js/bookmark.js ---
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { supabase } from './supabase-client.js'; // Menggunakan client terpusat
 
-// ==============================
-// Supabase Client
-// ==============================
-const SUPABASE_URL = 'https://jpxtbdawajjyrvqrgijd.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweHRiZGF3YWpqeXJ2cXJnaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTI4OTgsImV4cCI6MjA3MTg4ODg5OH0.vEqCzHYBByFZEXeLIBqx6b40x6-tjSYa3Il_b2mI9NE';
-const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+// Fungsi ini akan berjalan setelah seluruh halaman dimuat
+async function initBookmarks() {
+    const bookmarkBtn = document.getElementById('headerBookmarkBtn');
+    const bookmarkModal = document.getElementById('bookmarkModal');
+    const bookmarkList = document.getElementById('bookmarkList');
 
-// ==============================
-// DOMContentLoaded
-// ==============================
-
-document.addEventListener('DOMContentLoaded', async () => {
-  const header = document.querySelector('.profile-header');
-  if (!header) return;
-
-  // --- Buat tombol bookmark di header ---
-  let bookmarkBtn = document.getElementById('bookmarkHeaderBtn');
-  if (!bookmarkBtn) {
-    bookmarkBtn = document.createElement('button');
-    bookmarkBtn.id = 'bookmarkHeaderBtn';
-    bookmarkBtn.style = 'background:none; border:none; cursor:pointer; margin-left:8px;';
-    bookmarkBtn.innerHTML = `<i class="fi fi-rr-bookmark" style="font-size:1.8rem; color:white;"></i>`;
-    header.appendChild(bookmarkBtn);
-  }
-
-  // --- Buat modal bookmark ---
-  let bookmarkModal = document.getElementById('bookmarkModal');
-  if (!bookmarkModal) {
-    bookmarkModal = document.createElement('div');
-    bookmarkModal.id = 'bookmarkModal';
-    bookmarkModal.style = `
-      display:none; position:absolute; top:60px; right:10px;
-      background:#fff; border:1px solid #ccc; border-radius:6px;
-      padding:12px; width:250px; max-height:400px; overflow:auto;
-      box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:1000;
-    `;
-    bookmarkModal.innerHTML = `<h3>Bookmarks</h3><ul id="bookmarkList" style="list-style:none; padding:0; margin:0;"></ul>`;
-    document.body.appendChild(bookmarkModal);
-  }
-
-  const bookmarkList = document.getElementById('bookmarkList');
-  if (!bookmarkList) return;
-
-  // --- Toggle modal ---
-  bookmarkBtn.addEventListener('click', () => {
-    bookmarkModal.style.display = bookmarkModal.style.display === 'none' ? 'block' : 'none';
-  });
-
-  // --- Ambil user dari Supabase ---
-  const { data: { user }, error: userError } = await _supabase.auth.getUser();
-  if (userError || !user) {
-    console.error('User not found or not logged in');
-    return;
-  }
-
-  // --- Fungsi mapping slug ke folder bab ---
-  function slugToBabFolder(slug) {
-    const parts = slug.split('-');
-    return parts[parts.length - 1]; // ambil bagian terakhir, misal "bab1"
-  }
-
-  // --- Fungsi untuk memuat bookmark dari DB ---
-  async function loadBookmarks() {
-    const { data: bookmarks, error } = await _supabase
-      .from('kritika_bookmark')
-      .select(`material_slug, materials(title)`)
-      .eq('user_id', user.id);
-
-    if (error) {
-      console.error(error);
-      return;
+    // Jika elemen-elemen penting tidak ditemukan, hentikan fungsi
+    if (!bookmarkBtn || !bookmarkModal || !bookmarkList) {
+        console.warn("Elemen bookmark tidak ditemukan, fungsionalitas bookmark tidak aktif.");
+        return;
     }
 
-    // Hapus semua elemen sebelumnya
-    bookmarkList.innerHTML = '';
+    // Logika untuk menampilkan/menyembunyikan modal
+    bookmarkBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Mencegah klik menyebar ke elemen lain
+        bookmarkModal.style.display = bookmarkModal.style.display === 'none' ? 'block' : 'none';
+    });
 
-    // Tambahkan bookmark baru tanpa duplikat
-    bookmarks.forEach(b => {
-      const slug = b.material_slug;
-      if (!document.getElementById(`bookmark-${slug}`)) {
+    // Sembunyikan modal jika klik di luar
+    document.addEventListener('click', (e) => {
+        if (!bookmarkModal.contains(e.target) && !bookmarkBtn.contains(e.target)) {
+            bookmarkModal.style.display = 'none';
+        }
+    });
+
+    // Ambil data pengguna yang sedang login
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        bookmarkBtn.style.display = 'none'; // Sembunyikan tombol jika tidak ada user
+        return;
+    }
+
+    // Muat daftar bookmark dari database
+    await loadBookmarks(user.id, bookmarkList);
+}
+
+/**
+ * Mengambil dan menampilkan daftar bookmark untuk pengguna
+ * @param {string} userId - ID pengguna yang sedang login
+ * @param {HTMLElement} listElement - Elemen <ul> untuk menampilkan daftar
+ */
+async function loadBookmarks(userId, listElement) {
+    const { data: bookmarks, error } = await supabase
+        .from('kritika_bookmark')
+        .select('material_slug, title')
+        .eq('user_id', userId);
+
+    if (error) {
+        console.error("Gagal memuat bookmark:", error);
+        return;
+    }
+
+    listElement.innerHTML = ''; // Kosongkan daftar
+
+    if (bookmarks.length === 0) {
+        listElement.innerHTML = '<li>Belum ada bookmark.</li>';
+        return;
+    }
+
+    bookmarks.forEach(bookmark => {
         const li = document.createElement('li');
-        li.id = `bookmark-${slug}`;
-        li.textContent = b.materials?.title || slug;
+        li.textContent = bookmark.title || bookmark.material_slug;
         li.style.cursor = 'pointer';
-        li.style.marginBottom = '6px';
+        li.style.padding = '4px 0';
+        li.style.borderBottom = '1px solid #eee';
 
-        // URL menuju folder bab yang benar
+        // PERBAIKAN UTAMA: URL sekarang selalu mengarah ke halaman template dinamis
         li.addEventListener('click', () => {
-          const babFolder = slugToBabFolder(slug);
-          window.location.href = `/kritika/material/jurumiya/${babFolder}/?slug=${slug}`;
+            window.location.href = `/kritika/learning/?slug=${bookmark.material_slug}`;
         });
 
-        bookmarkList.appendChild(li);
-      }
+        listElement.appendChild(li);
     });
-  }
+}
 
-  // --- Panggil loadBookmarks ---
-  await loadBookmarks();
-});
+// Jalankan fungsi inisialisasi
+document.addEventListener('DOMContentLoaded', initBookmarks);
