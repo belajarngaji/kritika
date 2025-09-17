@@ -62,27 +62,46 @@ function populateContent(materi) {
  * Mengatur tombol navigasi dinamis
  */
 async function setupNavigation(materi) {
-    const categorySlug = materi.category.toLowerCase().split(' ')[0];
-    btnKembaliEl.onclick = () => {
-        window.location.href = `/kritika/material/${categorySlug}/`;
-    };
+    const btnKembaliEl = document.getElementById('btnKembali');
+    const btnLanjutEl = document.getElementById('btnLanjut');
+    
+    console.log("--- MEMULAI INVESTIGASI NAVIGASI ---");
 
-    const { data: nextMateri } = await supabase
+    // 1. Cek data materi yang diterima oleh fungsi ini
+    console.log("Data 'materi' yang diterima:", materi);
+
+    // 2. Cek variabel kunci dari objek 'materi'
+    const kategori = materi.category;
+    const urutanSekarang = materi.order;
+    console.log(`Kategori terdeteksi: '${kategori}' (Tipe data: ${typeof kategori})`);
+    console.log(`Urutan saat ini: ${urutanSekarang} (Tipe data: ${typeof urutanSekarang})`);
+
+    // 3. Pastikan variabelnya ada dan benar
+    if (!kategori || urutanSekarang === undefined || urutanSekarang === null) {
+        console.error("INVESTIGASI GAGAL: Properti 'category' atau 'order' tidak ditemukan atau null di objek materi.");
+        console.log("--- INVESTIGASI SELESAI ---");
+        return;
+    }
+    
+    const urutanBerikutnya = urutanSekarang + 1;
+    console.log(`Mencari bab selanjutnya dengan 'order': ${urutanBerikutnya}`);
+
+    // 4. Lakukan query untuk bab selanjutnya
+    const { data: nextMateri, error } = await supabase
         .from('materials')
-        .select('slug')
-        .eq('category', materi.category)
-        .eq('order', materi.order + 1)
+        .select('slug, order')
+        .eq('category', kategori)
+        .eq('order', urutanBerikutnya)
         .single();
 
-    if (nextMateri) {
-        btnLanjutEl.textContent = "Bab Selanjutnya →";
-        btnLanjutEl.onclick = () => window.location.href = `?slug=${nextMateri.slug}`;
+    // 5. Tampilkan hasil query
+    if (error) {
+        console.error("Error saat query bab selanjutnya:", error);
     } else {
-        btnLanjutEl.textContent = "Selesai (Kembali ke Daftar Bab)";
-        btnLanjutEl.onclick = () => {
-            window.location.href = `/kritika/material/${categorySlug}/`;
-        };
+        console.log("Hasil pencarian bab selanjutnya:", nextMateri);
     }
+    
+    console.log("--- INVESTIGASI SELESAI ---");
 }
 
 /**
