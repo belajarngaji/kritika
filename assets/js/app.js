@@ -138,41 +138,56 @@ async function init() {
   const user_id = user ? user.id : null;
 
   /* ==============================
-     1) Bookmark Button (perbaikan)
-  =============================== */
-  if (user_id) {
-    // gunakan elemen bookmark yang sudah ada
-    const bookmarkBtn = document.getElementById('bookmarkBtn');
-
-    if (bookmarkBtn) {
-      const { data: existing } = await supabase
+   1) Bookmark Button (perbaikan final)
+============================== */
+if (user_id) {
+  const bookmarkBtn = document.getElementById('bookmarkBtn');
+  if (bookmarkBtn) {
+    try {
+      // cek apakah sudah ada bookmark
+      const { data: existing, error: checkErr } = await supabase
         .from('kritika_bookmark')
         .select('id')
         .eq('user_id', user_id)
         .eq('material_slug', slug)
         .maybeSingle();
 
+      if (checkErr) console.error('Bookmark check error:', checkErr);
+
       let isBookmarked = !!existing;
-      bookmarkBtn.classList.toggle("active", isBookmarked);
+      bookmarkBtn.classList.toggle('active', isBookmarked);
 
       bookmarkBtn.addEventListener('click', async () => {
-        if (isBookmarked) {
-          await supabase
-            .from('kritika_bookmark')
-            .delete()
-            .eq('user_id', user_id)
-            .eq('material_slug', slug);
-          isBookmarked = false;
-        } else {
-          await supabase
-            .from('kritika_bookmark')
-            .insert([{ user_id, material_slug: slug }]);
-          isBookmarked = true;
+        bookmarkBtn.disabled = true; // cegah double click
+        try {
+          if (isBookmarked) {
+            const { error: delErr } = await supabase
+              .from('kritika_bookmark')
+              .delete()
+              .eq('user_id', user_id)
+              .eq('material_slug', slug);
+            if (delErr) throw delErr;
+            isBookmarked = false;
+          } else {
+            const { error: insErr } = await supabase
+              .from('kritika_bookmark')
+              .insert([{ user_id, material_slug: slug }]);
+            if (insErr) throw insErr;
+            isBookmarked = true;
+          }
+          bookmarkBtn.classList.toggle('active', isBookmarked);
+        } catch (e) {
+          console.error('Bookmark toggle error:', e);
+          alert('Gagal memperbarui bookmark. Coba lagi.');
+        } finally {
+          bookmarkBtn.disabled = false;
         }
-        bookmarkBtn.classList.toggle("active", isBookmarked);
       });
+    } catch (e) {
+      console.error('Bookmark init error:', e);
     }
   }
+}
 
   /* ==============================
      Quiz Button
