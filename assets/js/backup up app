@@ -71,6 +71,24 @@ async function init() {
   const materiContainer = document.getElementById('materiContainer'); 
   const btnGenerate = document.getElementById('btnGenerate');
 
+  /* ===================================================
+     ▼ 3) Tombol Navigasi (Kembali & Lanjut)
+  =================================================== */
+  const btnKembali = document.getElementById('btnKembali');
+  const btnLanjut  = document.getElementById('btnLanjut');
+
+  if (btnKembali) {
+    btnKembali.addEventListener('click', () => {
+      window.location.href = '/#materi';
+    });
+  }
+  if (btnLanjut) {
+    btnLanjut.addEventListener('click', () => {
+      alert('Fitur "Lanjut" belum diimplementasikan.');
+    });
+  }
+  /* =================================================== */
+
   const urlParams = new URLSearchParams(window.location.search);
   const slug = urlParams.get('slug');
 
@@ -104,57 +122,61 @@ async function init() {
     btnGenerate.style.display = 'none';
     return;
   }
+
+  /* ===================================================
+     ▼ 2) Update Judul Materi Secara Dinamis
+  =================================================== */
+  const judulBabEl = document.getElementById('judul-bab');
+  if (judulBabEl) {
+    judulBabEl.textContent = materi.title;
+  }
+  /* =================================================== */
+
   materiContainer.innerHTML = materi.content;
 
   const { data: { user } } = await supabase.auth.getUser();
   const user_id = user ? user.id : null;
 
   /* ==============================
-     Bookmark Button
+     1) Bookmark Button (perbaikan)
   =============================== */
   if (user_id) {
-    const header = document.querySelector('.profile-header');
+    // gunakan elemen bookmark yang sudah ada
+    const bookmarkBtn = document.getElementById('bookmarkBtn');
 
-    // buat tombol bookmark di header
-    const bookmarkBtn = document.createElement('button');
-    bookmarkBtn.className = "btn-bookmark";
-    bookmarkBtn.innerHTML = `<i class="fi fi-sr-bookmark"></i>`;
-    header.appendChild(bookmarkBtn);
+    if (bookmarkBtn) {
+      const { data: existing } = await supabase
+        .from('kritika_bookmark')
+        .select('id')
+        .eq('user_id', user_id)
+        .eq('material_slug', slug)
+        .maybeSingle();
 
-    // cek apakah sudah ada bookmark
-    const { data: existing } = await supabase
-      .from('kritika_bookmark')
-      .select('id')
-      .eq('user_id', user_id)
-      .eq('material_slug', slug)
-      .maybeSingle();
-
-    let isBookmarked = !!existing;
-    bookmarkBtn.classList.toggle("active", isBookmarked);
-
-    // toggle bookmark
-    bookmarkBtn.addEventListener('click', async () => {
-      if (isBookmarked) {
-        await supabase
-          .from('kritika_bookmark')
-          .delete()
-          .eq('user_id', user_id)
-          .eq('material_slug', slug);
-        isBookmarked = false;
-      } else {
-        await supabase
-          .from('kritika_bookmark')
-          .insert([{ user_id, material_slug: slug }]);
-        isBookmarked = true;
-      }
+      let isBookmarked = !!existing;
       bookmarkBtn.classList.toggle("active", isBookmarked);
-    });
+
+      bookmarkBtn.addEventListener('click', async () => {
+        if (isBookmarked) {
+          await supabase
+            .from('kritika_bookmark')
+            .delete()
+            .eq('user_id', user_id)
+            .eq('material_slug', slug);
+          isBookmarked = false;
+        } else {
+          await supabase
+            .from('kritika_bookmark')
+            .insert([{ user_id, material_slug: slug }]);
+          isBookmarked = true;
+        }
+        bookmarkBtn.classList.toggle("active", isBookmarked);
+      });
+    }
   }
 
   /* ==============================
      Quiz Button
   =============================== */
-
   btnGenerate.addEventListener('click', async () => {
     btnGenerate.disabled = true;
     btnGenerate.textContent = 'Loading...';
@@ -235,7 +257,6 @@ async function init() {
           if (currentIndex < total) {
             showQuestion(questions[currentIndex]);
           } else {
-            // tampilkan summary final
             summary.innerHTML = `
               <h3>Hasil Quiz</h3>
               <strong>Total Soal:</strong> ${total}<br>
