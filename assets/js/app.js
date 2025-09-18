@@ -79,24 +79,14 @@ async function init() {
 
   if (btnKembali) {
     btnKembali.addEventListener('click', () => {
-      window.location.href = '/kritika/material/sintaksis/';
+      window.location.href = '/#materi';
     });
   }
   if (btnLanjut) {
-  btnLanjut.addEventListener('click', async () => {
-    // ambil semua materi dan cari posisi materi sekarang
-    const materialsAll = await getMaterials();
-    const idx = materialsAll.findIndex(m => m.slug === slug);
-    if (idx !== -1 && idx + 1 < materialsAll.length) {
-      const nextSlug = materialsAll[idx + 1].slug;
-      // arahkan ke halaman materi berikut
-      window.location.href =
-        `https://belajarngaji.github.io/kritika/learning/?slug=${nextSlug}`;
-    } else {
-      alert('Tidak ada materi selanjutnya.');
-    }
-  });
-}
+    btnLanjut.addEventListener('click', () => {
+      alert('Fitur "Lanjut" belum diimplementasikan.');
+    });
+  }
   /* =================================================== */
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -150,34 +140,39 @@ async function init() {
   /* ==============================
      1) Bookmark Button (perbaikan)
   =============================== */
+  if (user_id) {
     // gunakan elemen bookmark yang sudah ada
     const bookmarkBtn = document.getElementById('bookmarkBtn');
-if (bookmarkBtn && user_id) {
-  const { data: existing } = await supabase
-    .from('kritika_bookmark')
-    .select('id')
-    .eq('user_id', user_id)
-    .eq('material_slug', slug)
-    .maybeSingle();
 
-  let isBookmarked = !!existing;
-  bookmarkBtn.classList.toggle('active', isBookmarked);
-
-  bookmarkBtn.addEventListener('click', async () => {
-    if (isBookmarked) {
-      await supabase.from('kritika_bookmark')
-        .delete()
+    if (bookmarkBtn) {
+      const { data: existing } = await supabase
+        .from('kritika_bookmark')
+        .select('id')
         .eq('user_id', user_id)
-        .eq('material_slug', slug);
-      isBookmarked = false;
-    } else {
-      await supabase.from('kritika_bookmark')
-        .insert([{ user_id, material_slug: slug }]);
-      isBookmarked = true;
+        .eq('material_slug', slug)
+        .maybeSingle();
+
+      let isBookmarked = !!existing;
+      bookmarkBtn.classList.toggle("active", isBookmarked);
+
+      bookmarkBtn.addEventListener('click', async () => {
+        if (isBookmarked) {
+          await supabase
+            .from('kritika_bookmark')
+            .delete()
+            .eq('user_id', user_id)
+            .eq('material_slug', slug);
+          isBookmarked = false;
+        } else {
+          await supabase
+            .from('kritika_bookmark')
+            .insert([{ user_id, material_slug: slug }]);
+          isBookmarked = true;
+        }
+        bookmarkBtn.classList.toggle("active", isBookmarked);
+      });
     }
-    bookmarkBtn.classList.toggle('active', isBookmarked);
-  });
-}
+  }
 
   /* ==============================
      Quiz Button
