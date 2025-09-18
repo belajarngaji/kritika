@@ -71,23 +71,6 @@ async function init() {
   const materiContainer = document.getElementById('materiContainer'); 
   const btnGenerate = document.getElementById('btnGenerate');
 
-    // ===================================================
-    // ▼▼▼ TAMBAHKAN KODE BARU DI SINI ▼▼▼
-    const btnKembali = document.getElementById('btnKembali');
-    const btnLanjut = document.getElementById('btnLanjut');
-
-    btnKembali.addEventListener('click', () => {
-        // Contoh: Kembali ke halaman daftar materi
-        window.location.href = '/kritika/sintaksis/'; 
-    });
-
-    btnLanjut.addEventListener('click', () => {
-        // Contoh: Pindah ke materi selanjutnya (logika ini perlu disesuaikan)
-        alert('Fitur "Lanjut" belum diimplementasikan.');
-        // Anda perlu logika untuk mencari slug materi selanjutnya
-    });
-    // ===================================================
-
   const urlParams = new URLSearchParams(window.location.search);
   const slug = urlParams.get('slug');
 
@@ -121,12 +104,6 @@ async function init() {
     btnGenerate.style.display = 'none';
     return;
   }
-
-// ===================================================
-// ▼▼▼ TAMBAHKAN KODE BARU DI SINI ▼▼▼
-  document.getElementById('judul-bab').textContent = materi.title;
-// ===================================================
-
   materiContainer.innerHTML = materi.content;
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -134,21 +111,15 @@ async function init() {
 
   /* ==============================
      Bookmark Button
-=============================== */
-if (user_id) {
-    // KODE LAMA (dan salah)
-    // const header = document.querySelector('.profile-header');
-    // const bookmarkBtn = document.createElement('button');
-    // bookmarkBtn.className = "btn-bookmark";
-    // bookmarkBtn.innerHTML = `<i class="fi fi-sr-bookmark"></i>`;
-    // header.appendChild(bookmarkBtn);
+  =============================== */
+  if (user_id) {
+    const header = document.querySelector('.profile-header');
 
-    // KODE BARU (yang benar)
-    const bookmarkBtn = document.getElementById('bookmarkBtn');
-    
-    // ... sisa logika bookmark Anda tetap sama ...
-}
-
+    // buat tombol bookmark di header
+    const bookmarkBtn = document.createElement('button');
+    bookmarkBtn.className = "btn-bookmark";
+    bookmarkBtn.innerHTML = `<i class="fi fi-sr-bookmark"></i>`;
+    header.appendChild(bookmarkBtn);
 
     // cek apakah sudah ada bookmark
     const { data: existing } = await supabase
