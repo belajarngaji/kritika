@@ -147,7 +147,7 @@ async function init() {
   =================================================== */
   const judulBabEl = document.getElementById('judul-bab');
   if (judulBabEl) {
-    judulBabEl.textContent = materi.title;
+    judulBabEl.textContent = materi.category;
   }
 
   materiContainer.innerHTML = materi.content;
