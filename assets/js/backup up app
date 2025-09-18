@@ -72,7 +72,7 @@ async function init() {
   const btnGenerate = document.getElementById('btnGenerate');
 
   /* ===================================================
-     ▼ 3) Tombol Navigasi (Kembali & Lanjut)
+     ▼ Tombol Navigasi (Kembali & Lanjut)
   =================================================== */
   const btnKembali = document.getElementById('btnKembali');
   const btnLanjut  = document.getElementById('btnLanjut');
@@ -83,11 +83,20 @@ async function init() {
     });
   }
   if (btnLanjut) {
-    btnLanjut.addEventListener('click', () => {
-      alert('Fitur "Lanjut" belum diimplementasikan.');
-    });
-  }
-  /* =================================================== */
+  btnLanjut.addEventListener('click', async () => {
+    // ambil semua materi dan cari posisi materi sekarang
+    const materialsAll = await getMaterials();
+    const idx = materialsAll.findIndex(m => m.slug === slug);
+    if (idx !== -1 && idx + 1 < materialsAll.length) {
+      const nextSlug = materialsAll[idx + 1].slug;
+      // arahkan ke halaman materi berikut
+      window.location.href =
+        `https://belajarngaji.github.io/kritika/learning/?slug=${nextSlug}`;
+    } else {
+      alert('Tidak ada materi selanjutnya.');
+    }
+  });
+}
 
   const urlParams = new URLSearchParams(window.location.search);
   const slug = urlParams.get('slug');
@@ -124,13 +133,12 @@ async function init() {
   }
 
   /* ===================================================
-     ▼ 2) Update Judul Materi Secara Dinamis
+     Update Judul Materi Secara Dinamis
   =================================================== */
   const judulBabEl = document.getElementById('judul-bab');
   if (judulBabEl) {
     judulBabEl.textContent = materi.title;
   }
-  /* =================================================== */
 
   materiContainer.innerHTML = materi.content;
 
@@ -138,39 +146,54 @@ async function init() {
   const user_id = user ? user.id : null;
 
   /* ==============================
-     1) Bookmark Button (perbaikan)
+     Bookmark Button (perbaikan final)
   =============================== */
   if (user_id) {
-    // gunakan elemen bookmark yang sudah ada
     const bookmarkBtn = document.getElementById('bookmarkBtn');
-
     if (bookmarkBtn) {
-      const { data: existing } = await supabase
-        .from('kritika_bookmark')
-        .select('id')
-        .eq('user_id', user_id)
-        .eq('material_slug', slug)
-        .maybeSingle();
+      try {
+        // cek apakah sudah ada bookmark
+        const { data: existing, error: checkErr } = await supabase
+          .from('kritika_bookmark')
+          .select('id')
+          .eq('user_id', user_id)
+          .eq('material_slug', slug)
+          .maybeSingle();
 
-      let isBookmarked = !!existing;
-      bookmarkBtn.classList.toggle("active", isBookmarked);
+        if (checkErr) console.error('Bookmark check error:', checkErr);
 
-      bookmarkBtn.addEventListener('click', async () => {
-        if (isBookmarked) {
-          await supabase
-            .from('kritika_bookmark')
-            .delete()
-            .eq('user_id', user_id)
-            .eq('material_slug', slug);
-          isBookmarked = false;
-        } else {
-          await supabase
-            .from('kritika_bookmark')
-            .insert([{ user_id, material_slug: slug }]);
-          isBookmarked = true;
-        }
-        bookmarkBtn.classList.toggle("active", isBookmarked);
-      });
+        let isBookmarked = !!existing;
+        bookmarkBtn.classList.toggle('active', isBookmarked);
+
+        bookmarkBtn.addEventListener('click', async () => {
+          bookmarkBtn.disabled = true; // cegah double click
+          try {
+            if (isBookmarked) {
+              const { error: delErr } = await supabase
+                .from('kritika_bookmark')
+                .delete()
+                .eq('user_id', user_id)
+                .eq('material_slug', slug);
+              if (delErr) throw delErr;
+              isBookmarked = false;
+            } else {
+              const { error: insErr } = await supabase
+                .from('kritika_bookmark')
+                .insert([{ user_id, material_slug: slug }]);
+              if (insErr) throw insErr;
+              isBookmarked = true;
+            }
+            bookmarkBtn.classList.toggle('active', isBookmarked);
+          } catch (e) {
+            console.error('Bookmark toggle error:', e);
+            alert('Gagal memperbarui bookmark. Coba lagi.');
+          } finally {
+            bookmarkBtn.disabled = false;
+          }
+        });
+      } catch (e) {
+        console.error('Bookmark init error:', e);
+      }
     }
   }
 
@@ -219,7 +242,6 @@ async function init() {
       aiOutput.appendChild(div);
 
       let timer;
-      let timeLeft = 30;
       let startTime = Date.now();
 
       const fb = div.querySelector('.feedback');
@@ -280,6 +302,8 @@ async function init() {
         });
       });
 
+      // timer hitung mundur (optional, 30 detik)
+      let timeLeft = 30;
       timer = setInterval(() => {
         timeLeft--;
         if (timeLeft <= 0) {
