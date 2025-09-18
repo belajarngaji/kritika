@@ -150,7 +150,6 @@ async function init() {
   /* ==============================
      1) Bookmark Button (perbaikan)
   =============================== */
-  if (user_id) {
     // gunakan elemen bookmark yang sudah ada
     const bookmarkBtn = document.getElementById('bookmarkBtn');
 if (bookmarkBtn && user_id) {
