@@ -83,10 +83,20 @@ async function init() {
     });
   }
   if (btnLanjut) {
-    btnLanjut.addEventListener('click', () => {
-      alert('Fitur "Lanjut" belum diimplementasikan.');
-    });
-  }
+  btnLanjut.addEventListener('click', async () => {
+    // ambil semua materi dan cari posisi materi sekarang
+    const materialsAll = await getMaterials();
+    const idx = materialsAll.findIndex(m => m.slug === slug);
+    if (idx !== -1 && idx + 1 < materialsAll.length) {
+      const nextSlug = materialsAll[idx + 1].slug;
+      // arahkan ke halaman materi berikut
+      window.location.href =
+        `https://belajarngaji.github.io/kritika/learning/?slug=${nextSlug}`;
+    } else {
+      alert('Tidak ada materi selanjutnya.');
+    }
+  });
+}
 
   const urlParams = new URLSearchParams(window.location.search);
   const slug = urlParams.get('slug');
