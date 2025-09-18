@@ -24,10 +24,20 @@ function shuffle(array) {
 
 async function getMaterials() {
   try {
-    const { data, error } = await supabase.from('materials').select('*').order('id');
-    if (error) { console.error(error); return []; }
-    return data;
-  } catch(e) { console.error(e); return []; }
+    const { data, error } = await supabase
+      .from('materials')
+      .select('*')
+      .order('order', { ascending: true }); // ✅ urut sesuai kolom "order"
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return [];
+    }
+    return data ?? [];
+  } catch (e) {
+    console.error('Unexpected error:', e);
+    return [];
+  }
 }
 
 async function generateQuestions(materialText, slug, category) {
