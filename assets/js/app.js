@@ -153,36 +153,32 @@ async function init() {
   if (user_id) {
     // gunakan elemen bookmark yang sudah ada
     const bookmarkBtn = document.getElementById('bookmarkBtn');
+if (bookmarkBtn && user_id) {
+  const { data: existing } = await supabase
+    .from('kritika_bookmark')
+    .select('id')
+    .eq('user_id', user_id)
+    .eq('material_slug', slug)
+    .maybeSingle();
 
-    if (bookmarkBtn) {
-      const { data: existing } = await supabase
-        .from('kritika_bookmark')
-        .select('id')
+  let isBookmarked = !!existing;
+  bookmarkBtn.classList.toggle('active', isBookmarked);
+
+  bookmarkBtn.addEventListener('click', async () => {
+    if (isBookmarked) {
+      await supabase.from('kritika_bookmark')
+        .delete()
         .eq('user_id', user_id)
-        .eq('material_slug', slug)
-        .maybeSingle();
-
-      let isBookmarked = !!existing;
-      bookmarkBtn.classList.toggle("active", isBookmarked);
-
-      bookmarkBtn.addEventListener('click', async () => {
-        if (isBookmarked) {
-          await supabase
-            .from('kritika_bookmark')
-            .delete()
-            .eq('user_id', user_id)
-            .eq('material_slug', slug);
-          isBookmarked = false;
-        } else {
-          await supabase
-            .from('kritika_bookmark')
-            .insert([{ user_id, material_slug: slug }]);
-          isBookmarked = true;
-        }
-        bookmarkBtn.classList.toggle("active", isBookmarked);
-      });
+        .eq('material_slug', slug);
+      isBookmarked = false;
+    } else {
+      await supabase.from('kritika_bookmark')
+        .insert([{ user_id, material_slug: slug }]);
+      isBookmarked = true;
     }
-  }
+    bookmarkBtn.classList.toggle('active', isBookmarked);
+  });
+}
 
   /* ==============================
      Quiz Button
