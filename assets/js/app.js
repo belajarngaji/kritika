@@ -72,7 +72,7 @@ async function init() {
   const btnGenerate = document.getElementById('btnGenerate');
 
   /* ===================================================
-     ▼ 3) Tombol Navigasi (Kembali & Lanjut)
+     ▼ Tombol Navigasi (Kembali & Lanjut)
   =================================================== */
   const btnKembali = document.getElementById('btnKembali');
   const btnLanjut  = document.getElementById('btnLanjut');
@@ -87,7 +87,6 @@ async function init() {
       alert('Fitur "Lanjut" belum diimplementasikan.');
     });
   }
-  /* =================================================== */
 
   const urlParams = new URLSearchParams(window.location.search);
   const slug = urlParams.get('slug');
@@ -124,13 +123,12 @@ async function init() {
   }
 
   /* ===================================================
-     ▼ 2) Update Judul Materi Secara Dinamis
+     Update Judul Materi Secara Dinamis
   =================================================== */
   const judulBabEl = document.getElementById('judul-bab');
   if (judulBabEl) {
     judulBabEl.textContent = materi.title;
   }
-  /* =================================================== */
 
   materiContainer.innerHTML = materi.content;
 
@@ -138,56 +136,56 @@ async function init() {
   const user_id = user ? user.id : null;
 
   /* ==============================
-   1) Bookmark Button (perbaikan final)
-============================== */
-if (user_id) {
-  const bookmarkBtn = document.getElementById('bookmarkBtn');
-  if (bookmarkBtn) {
-    try {
-      // cek apakah sudah ada bookmark
-      const { data: existing, error: checkErr } = await supabase
-        .from('kritika_bookmark')
-        .select('id')
-        .eq('user_id', user_id)
-        .eq('material_slug', slug)
-        .maybeSingle();
+     Bookmark Button (perbaikan final)
+  =============================== */
+  if (user_id) {
+    const bookmarkBtn = document.getElementById('bookmarkBtn');
+    if (bookmarkBtn) {
+      try {
+        // cek apakah sudah ada bookmark
+        const { data: existing, error: checkErr } = await supabase
+          .from('kritika_bookmark')
+          .select('id')
+          .eq('user_id', user_id)
+          .eq('material_slug', slug)
+          .maybeSingle();
 
-      if (checkErr) console.error('Bookmark check error:', checkErr);
+        if (checkErr) console.error('Bookmark check error:', checkErr);
 
-      let isBookmarked = !!existing;
-      bookmarkBtn.classList.toggle('active', isBookmarked);
+        let isBookmarked = !!existing;
+        bookmarkBtn.classList.toggle('active', isBookmarked);
 
-      bookmarkBtn.addEventListener('click', async () => {
-        bookmarkBtn.disabled = true; // cegah double click
-        try {
-          if (isBookmarked) {
-            const { error: delErr } = await supabase
-              .from('kritika_bookmark')
-              .delete()
-              .eq('user_id', user_id)
-              .eq('material_slug', slug);
-            if (delErr) throw delErr;
-            isBookmarked = false;
-          } else {
-            const { error: insErr } = await supabase
-              .from('kritika_bookmark')
-              .insert([{ user_id, material_slug: slug }]);
-            if (insErr) throw insErr;
-            isBookmarked = true;
+        bookmarkBtn.addEventListener('click', async () => {
+          bookmarkBtn.disabled = true; // cegah double click
+          try {
+            if (isBookmarked) {
+              const { error: delErr } = await supabase
+                .from('kritika_bookmark')
+                .delete()
+                .eq('user_id', user_id)
+                .eq('material_slug', slug);
+              if (delErr) throw delErr;
+              isBookmarked = false;
+            } else {
+              const { error: insErr } = await supabase
+                .from('kritika_bookmark')
+                .insert([{ user_id, material_slug: slug }]);
+              if (insErr) throw insErr;
+              isBookmarked = true;
+            }
+            bookmarkBtn.classList.toggle('active', isBookmarked);
+          } catch (e) {
+            console.error('Bookmark toggle error:', e);
+            alert('Gagal memperbarui bookmark. Coba lagi.');
+          } finally {
+            bookmarkBtn.disabled = false;
           }
-          bookmarkBtn.classList.toggle('active', isBookmarked);
-        } catch (e) {
-          console.error('Bookmark toggle error:', e);
-          alert('Gagal memperbarui bookmark. Coba lagi.');
-        } finally {
-          bookmarkBtn.disabled = false;
-        }
-      });
-    } catch (e) {
-      console.error('Bookmark init error:', e);
+        });
+      } catch (e) {
+        console.error('Bookmark init error:', e);
+      }
     }
   }
-}
 
   /* ==============================
      Quiz Button
@@ -234,7 +232,6 @@ if (user_id) {
       aiOutput.appendChild(div);
 
       let timer;
-      let timeLeft = 30;
       let startTime = Date.now();
 
       const fb = div.querySelector('.feedback');
@@ -295,6 +292,8 @@ if (user_id) {
         });
       });
 
+      // timer hitung mundur (optional, 30 detik)
+      let timeLeft = 30;
       timer = setInterval(() => {
         timeLeft--;
         if (timeLeft <= 0) {
