@@ -1,79 +1,89 @@
-import { supabase } from './supabase-client.js'; // Menggunakan client terpusat
+import { supabase } from './supabase-client.js'; // client Supabase utama
 
-// Fungsi ini akan berjalan setelah seluruh halaman dimuat
-async function initBookmarks() {
-    const bookmarkBtn = document.getElementById('headerBookmarkBtn');
-    const bookmarkModal = document.getElementById('bookmarkModal');
-    const bookmarkList = document.getElementById('bookmarkList');
-
-    // Jika elemen-elemen penting tidak ditemukan, hentikan fungsi
-    if (!bookmarkBtn || !bookmarkModal || !bookmarkList) {
-        console.warn("Elemen bookmark tidak ditemukan, fungsionalitas bookmark tidak aktif.");
-        return;
-    }
-
-    // Logika untuk menampilkan/menyembunyikan modal
-    bookmarkBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Mencegah klik menyebar ke elemen lain
-        bookmarkModal.style.display = bookmarkModal.style.display === 'none' ? 'block' : 'none';
-    });
-
-    // Sembunyikan modal jika klik di luar
-    document.addEventListener('click', (e) => {
-        if (!bookmarkModal.contains(e.target) && !bookmarkBtn.contains(e.target)) {
-            bookmarkModal.style.display = 'none';
-        }
-    });
-
-    // Ambil data pengguna yang sedang login
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        bookmarkBtn.style.display = 'none'; // Sembunyikan tombol jika tidak ada user
-        return;
-    }
-
-    // Muat daftar bookmark dari database
-    await loadBookmarks(user.id, bookmarkList);
-}
-
-/**
- * Mengambil dan menampilkan daftar bookmark untuk pengguna
- * @param {string} userId - ID pengguna yang sedang login
- * @param {HTMLElement} listElement - Elemen <ul> untuk menampilkan daftar
- */
-async function loadBookmarks(userId, listElement) {
-    const { data: bookmarks, error } = await supabase
-        .from('kritika_bookmark')
-        .select('material_slug, title')
-        .eq('user_id', userId);
-
-    if (error) {
-        console.error("Gagal memuat bookmark:", error);
-        return;
-    }
-
-    listElement.innerHTML = ''; // Kosongkan daftar
-
-    if (bookmarks.length === 0) {
-        listElement.innerHTML = '<li>Belum ada bookmark.</li>';
-        return;
-    }
-
-    bookmarks.forEach(bookmark => {
-        const li = document.createElement('li');
-        li.textContent = bookmark.title || bookmark.material_slug;
-        li.style.cursor = 'pointer';
-        li.style.padding = '4px 0';
-        li.style.borderBottom = '1px solid #eee';
-
-        // PERBAIKAN UTAMA: URL sekarang selalu mengarah ke halaman template dinamis
-        li.addEventListener('click', () => {
-            window.location.href = `/kritika/learning/?slug=${bookmark.material_slug}`;
-        });
-
-        listElement.appendChild(li);
-    });
-}
-
-// Jalankan fungsi inisialisasi
 document.addEventListener('DOMContentLoaded', initBookmarks);
+
+async function initBookmarks() {
+  const bookmarkBtn   = document.getElementById('headerBookmarkBtn');
+  const bookmarkModal = document.getElementById('bookmarkModal');
+  const bookmarkList  = document.getElementById('bookmarkList');
+
+  // Jika elemen penting tidak ditemukan, hentikan
+  if (!bookmarkBtn || !bookmarkModal || !bookmarkList) {
+    console.warn('Elemen bookmark tidak ditemukan.');
+    return;
+  }
+
+  // Toggle modal ketika tombol ditekan
+  bookmarkBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    bookmarkModal.style.display =
+      bookmarkModal.style.display === 'block' ? 'none' : 'block';
+  });
+
+  // Tutup modal jika klik di luar
+  document.addEventListener('click', (e) => {
+    if (!bookmarkModal.contains(e.target) && !bookmarkBtn.contains(e.target)) {
+      bookmarkModal.style.display = 'none';
+    }
+  });
+
+  // Pastikan user login
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError) {
+    console.error('Auth error:', authError);
+    return;
+  }
+  if (!user) {
+    bookmarkBtn.style.display = 'none'; // sembunyikan jika tidak login
+    return;
+  }
+
+  // Muat daftar bookmark
+  await loadBookmarks(user.id, bookmarkList);
+}
+
+async function loadBookmarks(userId, listElement) {
+  // 1. Ambil semua slug bookmark milik user
+  const { data: bookmarkRows, error: e1 } = await supabase
+    .from('kritika_bookmark')
+    .select('material_slug')
+    .eq('user_id', userId);
+
+  if (e1) {
+    console.error('Gagal memuat slug bookmark:', e1);
+    return;
+  }
+
+  if (!bookmarkRows || bookmarkRows.length === 0) {
+    listElement.innerHTML = '<li>Belum ada bookmark.</li>';
+    return;
+  }
+
+  // 2. Ambil category dari tabel materials berdasarkan slug
+  const slugs = bookmarkRows.map(b => b.material_slug);
+  const { data: materials, error: e2 } = await supabase
+    .from('materials')
+    .select('slug, category')
+    .in('slug', slugs);
+
+  if (e2) {
+    console.error('Gagal memuat kategori materi:', e2);
+    return;
+  }
+
+  // 3. Tampilkan hanya category di modal
+  listElement.innerHTML = '';
+  materials.forEach(m => {
+    const li = document.createElement('li');
+    li.textContent = m.category;               // hanya kategori
+    li.style.cursor = 'pointer';
+    li.style.padding = '4px 0';
+    li.style.borderBottom = '1px solid #eee';
+
+    li.addEventListener('click', () => {
+      window.location.href = `/kritika/learning/?slug=${m.slug}`;
+    });
+
+    listElement.appendChild(li);
+  });
+}
