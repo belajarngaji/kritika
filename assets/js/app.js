@@ -89,7 +89,7 @@ async function init() {
 
   if (btnKembali) {
     btnKembali.addEventListener('click', () => {
-      window.location.href = '/kritika/material/sintaksis/';
+      window.location.href = '/kritika/material/';
     });
   }
   if (btnLanjut) {
