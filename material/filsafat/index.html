@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Materi | Kritika</title>
+
+  <!-- Font modern -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
+
+  <style>
+    /* Global */
+    body { font-family: 'Inter', sans-serif; margin: 0; background: #fafafa; }
+
+    /* Header */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      height: 60px;
+      background-color: #222;
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+    .profile-title { flex-grow: 1; font-size: 1.8rem; }
+    .btn-bookmark, .btn-back {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+    .btn-bookmark i, .btn-back i { font-size: 1.8rem; color: white; }
+    .btn-bookmark.active i { color: gold; }
+    .btn-back:hover i, .btn-bookmark:hover i { color: #ccc; }
+
+    /* Main content */
+    main.content { padding: 70px 16px 40px; }
+
+    /* Bookmark modal */
+    #bookmarkModal {
+      display: none;
+      position: fixed;
+      top: 60px;
+      right: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 12px;
+      width: 250px;
+      max-height: 400px;
+      overflow: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1001;
+    }
+
+    /* Grid daftar bab */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .bab-card {
+      display: block;
+      background: #fff;
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-decoration: none;
+      color: #222;
+      transition: 0.2s ease;
+    }
+    .bab-card:hover { background: #f0f0f0; transform: translateY(-2px); }
+    .bab-card h3 { margin: 0 0 8px; font-size: 1.1rem; font-weight: 600; color: #333; }
+    .bab-card p { margin: 0; font-size: 0.9rem; color: #555; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="profile-header">
+    <h1 class="profile-title">Kritika</h1>
+    <button id="headerBookmarkBtn" class="btn-bookmark">
+  <i class="fi fi-rr-bookmark"></i>
+</button>
+    <button type="button" class="btn-back" onclick="window.location.href='/kritika/material/'">
+      <i class="fi fi-sr-angle-circle-left"></i>
+    </button>
+  </header>
+
+  <!-- Bookmark modal -->
+  <div id="bookmarkModal">
+    <h3>Bookmarks</h3>
+    <ul id="bookmarkList" style="list-style:none; padding:0; margin:0;"></ul>
+  </div>
+
+  <!-- Main content -->
+  <main class="content">
+  <section class="section-header">
+    <h2>Materi Filsafat dalam Praktik</h2>
+    <p>Pilih Bab untuk mulai mempelajari isi Materi.</p>
+  </section>
+
+  <section class="card-grid" id="babList" data-category="Filsafat"></section>
+
+</main>
+  <!-- Script bookmark -->
+  <script type="module" src="../../assets/js/bookmark.js"></script>
+
+  <!-- Script load daftar bab -->
+  <script type="module" src="../../assets/js/material-list.js"></script>
+
+</body>
+</html>
